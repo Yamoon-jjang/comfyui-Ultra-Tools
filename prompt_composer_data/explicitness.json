@@ -1,0 +1,10 @@
+{
+  "default": "",
+  "safe": "adult presentation",
+  "suggestive": "suggestive adult tone",
+  "sensual": "adult sensuality",
+  "bold sensual": "bold adult sensual mood",
+  "nsfw": "adult erotic tone",
+  "explicit nsfw": "explicit adult erotic presentation",
+  "romantic non-explicit": "romantic adult intimacy"
+}

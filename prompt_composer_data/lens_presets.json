@@ -1,0 +1,88 @@
+{
+  "auto": [],
+  "18mm ultra-wide dramatic": [
+    "18mm ultra-wide lens",
+    "expansive perspective",
+    "dramatic spatial depth"
+  ],
+  "24mm wide cinematic": [
+    "24mm wide-angle lens",
+    "wide compositional framing",
+    "deep spatial perspective"
+  ],
+  "28mm documentary wide": [
+    "28mm lens",
+    "documentary wide framing",
+    "natural spatial context"
+  ],
+  "35mm environmental": [
+    "35mm lens",
+    "environmental framing",
+    "natural perspective"
+  ],
+  "40mm cinematic natural": [
+    "40mm lens",
+    "natural balanced perspective",
+    "balanced medium framing"
+  ],
+  "50mm intimate natural": [
+    "50mm lens",
+    "medium shot",
+    "natural perspective"
+  ],
+  "58mm vintage character": [
+    "58mm lens",
+    "vintage optical character",
+    "gentle falloff"
+  ],
+  "85mm portrait shallow DOF": [
+    "85mm lens",
+    "close framing",
+    "soft focus depth"
+  ],
+  "100mm macro detail": [
+    "100mm macro lens",
+    "close detail framing",
+    "compressed depth"
+  ],
+  "135mm compressed portrait": [
+    "135mm telephoto lens",
+    "tight compressed framing",
+    "soft background separation"
+  ],
+  "long lens compression": [
+    "telephoto look",
+    "compressed perspective",
+    "distant observational framing"
+  ],
+  "anamorphic widescreen": [
+    "anamorphic widescreen character",
+    "widescreen aspect framing",
+    "horizontal highlight streak tendency"
+  ],
+  "wide architectural": [
+    "wide-angle composition",
+    "symmetrical framing",
+    "strong architectural lines"
+  ],
+  "overhead top-down": [
+    "top-down overhead view",
+    "graphic spatial layout",
+    "flattened perspective"
+  ],
+  "low angle dramatic": [
+    "low-angle shot",
+    "dramatic upward perspective",
+    "strong visual presence"
+  ],
+  "dutch angle tension": [
+    "dutch angle",
+    "tilted composition",
+    "psychological tension"
+  ],
+  "handheld documentary": [
+    "handheld observational feel",
+    "candid framing",
+    "immediate documentary energy"
+  ]
+}

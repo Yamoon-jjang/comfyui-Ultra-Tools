@@ -1,0 +1,80 @@
+{
+  "Z-Image Natural": {
+    "family": "natural",
+    "model_key": "zimage",
+    "quality": "clear subject, coherent image, well-defined scene, consistent details",
+    "negative": "Avoid making the style replace the subject. Avoid underage cues, school styling, explicit sexual action, bad anatomy, and random decorative noise."
+  },
+  "Krea2 Natural": {
+    "family": "natural",
+    "model_key": "krea2",
+    "quality": "detailed subject, defined pose, refined realistic composition, spatial depth, consistent details",
+    "negative": "low quality, bad anatomy, childish appearance, teen, underage, schoolgirl, school uniform, explicit sexual act, pornographic staging, random abstract color noise, unreadable subject"
+  },
+  "Qwen Natural": {
+    "family": "natural",
+    "model_key": "qwen",
+    "quality": "coherent image, visually refined, consistent details",
+    "negative": "Avoid underage appearance, school uniform implications, explicit sexual action, pornographic staging, unreadable faces, and abstract color noise replacing the subject."
+  },
+  "Flux Natural": {
+    "family": "natural",
+    "model_key": "flux",
+    "quality": "coherent image, visually refined, strong scene cohesion, consistent details",
+    "negative": "Avoid underage appearance, school uniform implications, explicit sexual action, pornographic staging, unreadable faces, and abstract color noise replacing the subject."
+  },
+  "Anima Mixed": {
+    "family": "mixed",
+    "model_key": "anima",
+    "quality": "masterpiece, best quality, score_7, safe, highres, absurdres",
+    "negative": "low quality, worst quality, bad anatomy, deformed hands, childish appearance, teen, underage, schoolgirl, school uniform, explicit sexual act, pornographic staging, photorealistic skin texture, realistic pores, style overpowering the subject"
+  },
+  "SDXL Tag": {
+    "family": "tag",
+    "model_key": "sdxl",
+    "quality": "masterpiece, best quality, highres, detailed",
+    "negative": "low quality, worst quality, bad anatomy, deformed hands, childish, teen, underage, schoolgirl, school uniform, explicit sexual act, pornographic, messy composition"
+  },
+  "ILXL / Illustrious Tag": {
+    "family": "tag",
+    "model_key": "ilxl",
+    "quality": "masterpiece, best quality, amazing quality, very aesthetic, newest, absurdres, highres, safe",
+    "negative": "low quality, worst quality, bad anatomy, extra fingers, bad hands, childish, teen, underage, schoolgirl, school uniform, explicit sexual act, pornographic, messy composition"
+  },
+  "Pony Tag": {
+    "family": "tag",
+    "model_key": "pony",
+    "quality": "score_9, score_8_up, score_7_up, score_6_up, score_5_up, score_4_up, source_anime, rating_safe",
+    "negative": "score_4, score_5, score_6, low quality, worst quality, bad anatomy, extra fingers, childish, teen, underage, schoolgirl, school uniform, explicit sexual act, pornographic"
+  },
+  "SD 1.5 Tag": {
+    "family": "tag",
+    "model_key": "sd",
+    "quality": "masterpiece, best quality, highres, detailed",
+    "negative": "low quality, worst quality, bad anatomy, bad hands, childish, teen, underage, schoolgirl, school uniform, explicit sexual act, pornographic, messy composition"
+  },
+  "SDXL / Anima Natural": {
+    "family": "mixed",
+    "model_key": "anima",
+    "quality": "masterpiece, best quality, score_7, safe, highres, absurdres",
+    "negative": "low quality, worst quality, bad anatomy, deformed hands, childish appearance, teen, underage, schoolgirl, school uniform, explicit sexual act, pornographic staging, photorealistic skin texture, realistic pores, style overpowering the subject"
+  },
+  "Pony / Illustrious Tag": {
+    "family": "tag",
+    "model_key": "ilxl",
+    "quality": "masterpiece, best quality, amazing quality, very aesthetic, newest, absurdres, highres, safe",
+    "negative": "low quality, worst quality, bad anatomy, extra fingers, bad hands, childish, teen, underage, schoolgirl, school uniform, explicit sexual act, pornographic, messy composition"
+  },
+  "Anime Tag General": {
+    "family": "tag",
+    "model_key": "ilxl",
+    "quality": "masterpiece, best quality, amazing quality, very aesthetic, newest, absurdres, highres, safe",
+    "negative": "low quality, worst quality, bad anatomy, childish, teen, underage, schoolgirl, school uniform, explicit sexual act, pornographic, messy composition"
+  },
+  "Flux / Qwen Instruction": {
+    "family": "natural",
+    "model_key": "qwen",
+    "quality": "coherent image, visually refined, consistent details",
+    "negative": "Avoid underage appearance, school uniform implications, explicit sexual action, pornographic staging, unreadable faces, and abstract color noise replacing the subject."
+  }
+}

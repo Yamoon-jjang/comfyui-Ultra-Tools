@@ -1,0 +1,3 @@
+# No additional pip packages are required by Ultra Tools.
+# It uses libraries normally included with ComfyUI (torch/kornia/numpy/Pillow/aiohttp)
+# plus Python standard-library modules.

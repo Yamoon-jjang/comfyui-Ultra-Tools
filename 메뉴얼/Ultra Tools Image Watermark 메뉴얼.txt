@@ -1,0 +1,151 @@
+﻿Ultra Tools Image Watermark 사용 메뉴얼
+======================================
+
+1. 노드 소개
+------------
+Ultra Tools Image Watermark는 로고, 서명, 아이콘, 심볼 이미지를 워터마크로 합성하는 노드입니다.
+
+노드 이름: Ultra Tools Image Watermark
+카테고리: Ultra Tools
+내부 노드 키: UltraImageWatermark
+
+주요 기능
+- ComfyUI input 폴더의 워터마크 파일 직접 선택
+- 노드의 "워터마크 파일 업로드/선택" 버튼을 통한 로컬 파일 업로드
+- 기존 IMAGE/MASK 연결 방식 지원
+- percentage / pixels 크기 모드
+- 색상 반전 / 단색 틴트
+- 외곽선 / 그림자 / 경계 부드러움
+- normal, multiply, screen, overlay, soft light 블렌드
+- 단일 배치 및 full/diagonal 타일 반복
+- angle aligned / screen aligned 타일 축
+- 최종 워터마크 적용 영역 MASK 출력
+
+2. 기본 연결
+-----------
+[생성 이미지] IMAGE
+    ↓
+Ultra Tools Image Watermark / image
+    ↓ IMAGE
+Save Image
+
+워터마크 원본은 두 방법 중 하나를 사용합니다.
+
+A. 노드 내부 watermark 파일 선택
+- ComfyUI input 폴더와 하위 폴더의 이미지 파일을 선택합니다.
+- 새 로컬 파일은 "워터마크 파일 업로드/선택" 버튼으로 업로드한 뒤 자동 선택할 수 있습니다.
+- 투명 PNG/WebP는 alpha를 자동으로 사용합니다.
+
+B. 기존 Load Image 연결
+Load Image IMAGE → watermark_image
+Load Image MASK  → mask
+- watermark_image 연결이 있으면 내부 watermark 파일 선택보다 우선합니다.
+- 투명 PNG/WebP를 Load Image로 사용할 때는 MASK까지 연결하는 것이 가장 명확합니다.
+
+둘 다 없으면 원본 IMAGE를 그대로 통과시키고 빈 MASK를 반환합니다.
+
+3. 워터마크 이미지 크기
+---------------------
+Size Mode = percentage
+- 대상 이미지의 짧은 변을 기준으로 실제 보이는 워터마크 영역의 긴 변을 비율로 맞춥니다.
+- 투명 여백은 크기 계산에서 제외합니다.
+
+Size Mode = pixels
+- 실제 보이는 워터마크 영역의 긴 변을 지정 픽셀 크기에 맞춥니다.
+
+따라서 큰 투명 캔버스 안에 작은 로고가 있어도 투명 여백 때문에 로고가 지나치게 작아지는 문제를 줄입니다.
+
+4. 투명 마스크
+-------------
+Mask Mode 기본값은 "load image mask (invert)"입니다.
+ComfyUI Load Image가 투명 PNG/WebP의 alpha를 MASK로 내보내는 일반적인 방식에 맞춘 값입니다.
+일반적인 white=visible 마스크를 직접 연결할 때는 "normal mask (white visible)"을 사용합니다.
+
+이 노드는 흰 배경 JPG나 체크무늬가 실제 픽셀로 박힌 가짜 투명 이미지를 자동 배경 제거하지 않습니다.
+
+5. 색상 변형
+-----------
+Invert Colors
+- RGB를 반전하고 alpha는 유지합니다.
+
+Color Tint
+- RGB 전체를 지정 색으로 바꾸고 alpha는 유지합니다.
+- Tint가 켜져 있으면 색상 반전보다 Tint가 우선합니다.
+
+색상 프리셋 또는 custom hex를 사용할 수 있습니다.
+
+6. 외곽선과 그림자
+----------------
+Stroke Width / Color
+- alpha 영역 주변에 외곽선을 만듭니다.
+- 0이면 사용하지 않습니다.
+
+Shadow Enabled
+- 색상, 불투명도, X/Y 오프셋, Blur를 설정할 수 있습니다.
+- 복잡한 배경 위에서 로고를 분리해 보이게 할 때 유용합니다.
+
+7. 타일 반복
+-----------
+Tile Mode
+- off: 한 번만 배치
+- full: 일반 격자 반복
+- diagonal: 행마다 반 칸씩 어긋나는 반복
+
+Tile Axis Mode
+- angle aligned: 타일 배치선 전체를 Rotation 각도에 맞춰 회전하는 방식. 대각선 반복에 자연스럽고 기존 기본 방식입니다.
+- screen aligned: 화면 기준 수평/수직 격자는 유지하고 개별 워터마크만 회전합니다. 큰 회전 임시 캔버스를 만들지 않아 일부 상황에서 부담이 적습니다.
+
+Tile Spacing
+- 양수: 간격 증가
+- 0: 보이는 영역 기준으로 붙여 배치
+- 음수: 겹치게 배치
+
+타일 모드에서는 Position/Margin/X/Y 위치 조정은 사용하지 않습니다.
+
+8. 배치와 합성
+-------------
+Opacity
+- 워터마크와 그림자를 포함한 전체 불투명도입니다.
+
+Blend Mode
+- normal / multiply / screen / overlay / soft light
+- 정확한 형태 확인은 normal에서 먼저 하고 다른 모드는 분위기 조정용으로 사용하는 것이 좋습니다.
+
+Position
+- 단일 배치(Tile Mode=off)에서 위치를 선택합니다.
+
+Margin / Margin X / Margin Y
+- 가장자리 여백과 미세 위치를 조정합니다.
+
+Edge Softness
+- 투명 경계 또는 불투명 이미지의 바깥 경계를 부드럽게 합니다.
+- 배경 제거 기능은 아닙니다.
+
+Rotation
+- 단일 워터마크 또는 타일 방향을 회전합니다.
+
+9. 출력 MASK
+-----------
+IMAGE와 함께 최종 워터마크 적용 영역의 MASK를 반환합니다.
+후속 노드에서 워터마크 영역만 별도 처리하거나 확인하는 용도로 사용할 수 있습니다.
+입력 mask와 출력 MASK는 역할이 다릅니다.
+
+10. 안전 차단
+------------
+angle aligned 타일은 큰 임시 캔버스를 만들기 때문에 다음 극단 조합은 메모리 폭증을 막기 위해 실행 전에 차단될 수 있습니다.
+- 매우 큰 입력 이미지
+- 매우 큰 워터마크 크기
+- 강한 외곽선/그림자
+- 극단적으로 촘촘한 타일 간격
+- 큰 회전이 결합된 경우
+
+오류가 나면 워터마크 크기/외곽선/그림자를 줄이거나 Tile Spacing을 늘리거나 screen aligned로 바꾸십시오.
+노드는 위험 조합에서 결과를 몰래 축소하지 않고 명확히 중단하는 방식을 사용합니다.
+
+11. 텍스트 워터마크와 함께 쓸 때
+------------------------------
+일반 권장 순서:
+원본 → Ultra Tools Image Watermark → Ultra Tools Text Watermark → Save Image
+
+반복 로고를 배경처럼 먼저 넣고 제작자명/출처 텍스트를 마지막에 올리기 좋습니다.
+최종 브랜드 로고를 가장 위에 두고 싶으면 두 노드의 순서를 반대로 연결할 수 있습니다.

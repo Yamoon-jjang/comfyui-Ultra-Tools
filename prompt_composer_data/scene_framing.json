@@ -1,0 +1,73 @@
+{
+  "auto": [],
+  "headshot (face-focused)": [
+    "headshot",
+    "face-focused framing"
+  ],
+  "close-up": [
+    "close-up",
+    "tight portrait framing"
+  ],
+  "upper body": [
+    "upper body shot",
+    "upper body framing"
+  ],
+  "waist-up": [
+    "waist-up shot",
+    "mid portrait framing"
+  ],
+  "three-quarter body": [
+    "three-quarter body shot",
+    "knee-up framing"
+  ],
+  "full body (head to toe)": [
+    "full-body framing",
+    "full-length composition",
+    "entire figure visible",
+    "feet visible in frame"
+  ],
+  "full shot (full body + extra space)": [
+    "full-body framing with extra space",
+    "full-length composition",
+    "entire figure fully visible",
+    "space above the head and below the feet",
+    "feet visible in frame"
+  ],
+  "wide shot": [
+    "wide framing",
+    "subject smaller within the frame",
+    "full figure visible",
+    "space around the entire body"
+  ],
+  "high-angle portrait": [
+    "high-angle portrait",
+    "slightly elevated viewpoint",
+    "gentle downward framing"
+  ],
+  "overhead portrait": [
+    "overhead portrait view",
+    "downward portrait framing",
+    "top-down portrait perspective"
+  ],
+  "over-the-shoulder": [
+    "over-the-shoulder framing",
+    "partial back view",
+    "shoulder-led composition"
+  ],
+  "profile portrait": [
+    "profile portrait",
+    "side-profile framing"
+  ],
+  "back view": [
+    "back-facing framing",
+    "rear-view composition"
+  ],
+  "environmental portrait": [
+    "environmental portrait",
+    "subject integrated with surroundings"
+  ],
+  "seated full body": [
+    "seated full body shot",
+    "full figure seated framing"
+  ]
+}

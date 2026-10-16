@@ -1,0 +1,1368 @@
+{
+  "UltraTextWatermark": {
+    "display_name": "Ultra Tools Text Watermark",
+    "description": "이미지에 텍스트 워터마크를 삽입합니다.",
+    "inputs": {
+      "image": {
+        "name": "이미지"
+      },
+      "── 🔤 Fonts & Text ──": {
+        "name": "── 🔤 문구와 폰트 ──"
+      },
+      "First_Text": {
+        "name": "텍스트 1"
+      },
+      "First_Font": {
+        "name": "폰트 1"
+      },
+      "First_Font_Size": {
+        "name": "폰트 크기 1"
+      },
+      "First_Font_Color": {
+        "name": "폰트 색 1"
+      },
+      "First_Align": {
+        "name": "정렬 1"
+      },
+      "First_Style": {
+        "name": "글자 스타일 1"
+      },
+      "First_Line_Spacing": {
+        "name": "텍스트 1 내부 줄 간격"
+      },
+      "First_Outline_Enabled": {
+        "name": "외곽선 1 사용"
+      },
+      "First_Outline_Width": {
+        "name": "외곽선 1 두께"
+      },
+      "First_Outline_Color": {
+        "name": "외곽선 1 색"
+      },
+      "Second_Text": {
+        "name": "텍스트 2"
+      },
+      "Second_Font": {
+        "name": "폰트 2"
+      },
+      "Second_Font_Size": {
+        "name": "폰트 크기 2"
+      },
+      "Second_Font_Color": {
+        "name": "폰트 색 2"
+      },
+      "Second_Align": {
+        "name": "정렬 2"
+      },
+      "Second_Style": {
+        "name": "글자 스타일 2"
+      },
+      "Second_Line_Spacing": {
+        "name": "텍스트 2 내부 줄 간격"
+      },
+      "Second_Outline_Enabled": {
+        "name": "외곽선 2 사용"
+      },
+      "Second_Outline_Width": {
+        "name": "외곽선 2 두께"
+      },
+      "Second_Outline_Color": {
+        "name": "외곽선 2 색"
+      },
+      "── 🧩 Spacing ──": {
+        "name": "── 🧩 간격 ──"
+      },
+      "Layout_Direction": {
+        "name": "배치 방향"
+      },
+      "Height_Align_Mode": {
+        "name": "세로 정렬 (가로 배치 시)"
+      },
+      "Block_Spacing": {
+        "name": "텍스트 1·2 사이 간격"
+      },
+      "── ✨ Glow ──": {
+        "name": "── ✨ 글로우 ──"
+      },
+      "First_Glow_Enabled": {
+        "name": "글로우 1 사용"
+      },
+      "Second_Glow_Enabled": {
+        "name": "글로우 2 사용"
+      },
+      "Glow_Color": {
+        "name": "글로우 색"
+      },
+      "Glow_Thickness": {
+        "name": "글로우 범위"
+      },
+      "Glow_Blur": {
+        "name": "글로우 부드러움"
+      },
+      "Glow_Opacity": {
+        "name": "글로우 불투명도"
+      },
+      "── 🎛️ Adjust ──": {
+        "name": "── 🎛️ 조정 ──"
+      },
+      "Watermark_Opacity": {
+        "name": "워터마크 불투명도"
+      },
+      "Align": {
+        "name": "워터마크 위치"
+      },
+      "Align_Offset": {
+        "name": "위치 여백"
+      },
+      "Align_Offset_X": {
+        "name": "가로 위치 조정"
+      },
+      "Align_Offset_Y": {
+        "name": "세로 위치 조정"
+      },
+      "Rotation": {
+        "name": "회전"
+      }
+    },
+    "outputs": {
+      "IMAGE": {
+        "name": "이미지"
+      }
+    }
+  },
+  "UltraImageWatermark": {
+    "display_name": "Ultra Tools Image Watermark",
+    "description": "로고/서명/아이콘 이미지를 워터마크로 삽입합니다. 워터마크 파일 드롭다운은 ComfyUI input 폴더에 이미 있는 파일 목록을 보여주며, 새 파일은 노드의 “워터마크 파일 업로드/선택” 버튼으로 OS 파일 선택창을 열어 업로드한 뒤 바로 사용할 수 있습니다. 기존처럼 IMAGE/MASK 연결도 사용할 수 있고, 투명 PNG/WebP의 alpha는 자동으로 마스크 처리됩니다.",
+    "inputs": {
+      "image": {
+        "name": "이미지"
+      },
+      "watermark": {
+        "name": "워터마크 파일",
+        "description": "ComfyUI input 폴더에 이미 들어 있는 워터마크 PNG/JPG/WebP 목록입니다. 이 칸 자체는 OS 파일 탐색기를 열지 않습니다. 새 파일은 노드에 추가된 “워터마크 파일 업로드/선택” 버튼으로 선택/업로드하면 이 값이 자동으로 갱신됩니다. watermark_image 연결이 있으면 연결 입력이 우선됩니다."
+      },
+      "watermark_image": {
+        "name": "워터마크 이미지",
+        "description": "기존 방식 호환용 IMAGE 입력입니다. 연결하면 위 watermark 파일 선택보다 우선 사용됩니다."
+      },
+      "── 🖼️ Watermark Image ──": {
+        "name": "── 🖼️ 워터마크 이미지 ──"
+      },
+      "Size_Mode": {
+        "name": "크기 모드"
+      },
+      "Scale_Percent": {
+        "name": "크기 비율 (%)",
+        "description": "percentage 모드에서 사용합니다. 원본 이미지의 짧은 변을 기준으로, 워터마크의 보이는 영역 중 긴 변을 이 비율에 맞춥니다."
+      },
+      "Pixel_Width": {
+        "name": "픽셀 크기 (긴 변)",
+        "description": "pixels 모드에서 사용합니다. 워터마크의 보이는 영역 중 긴 변을 이 픽셀값에 맞춥니다. 투명 여백은 크기 계산에서 제외됩니다."
+      },
+      "Invert_Colors": {
+        "name": "색상 반전",
+        "description": "워터마크의 RGB를 반전합니다. 색상 틴트가 켜져 있으면 무시됩니다."
+      },
+      "Color_Tint": {
+        "name": "색상 틴트 사용",
+        "description": "워터마크의 모든 색상을 틴트 색상으로 교체합니다."
+      },
+      "Tint_Color_Preset": {
+        "name": "틴트 색상 선택",
+        "description": "프리셋 색상을 선택합니다. custom hex를 선택하면 아래 틴트 Hex 값을 사용합니다."
+      },
+      "Tint_Color": {
+        "name": "틴트 Hex",
+        "description": "#RRGGBB 형식입니다. 틴트 색상 선택이 custom hex일 때 사용됩니다."
+      },
+      "Mask_Mode": {
+        "name": "마스크 해석 방식",
+        "description": "Load Image MASK는 기존 투명 PNG/WebP용 기본값으로 반전해서 알파로 사용합니다. 일반 마스크는 white visible을 선택하면 흰색 영역이 보이고 검정 영역이 투명해집니다."
+      },
+      "── ✏️ Stroke ──": {
+        "name": "── ✏️ 외곽선 ──"
+      },
+      "Stroke_Width": {
+        "name": "외곽선 두께",
+        "description": "워터마크 주변 외곽선 두께입니다. 0이면 없음입니다."
+      },
+      "Stroke_Color_Preset": {
+        "name": "외곽선 색상 선택",
+        "description": "프리셋 색상을 선택합니다. custom hex를 선택하면 아래 외곽선 Hex 값을 사용합니다."
+      },
+      "Stroke_Color": {
+        "name": "외곽선 Hex",
+        "description": "#RRGGBB 형식입니다. 외곽선 색상 선택이 custom hex일 때 사용됩니다."
+      },
+      "── 🌑 Shadow ──": {
+        "name": "── 🌑 그림자 ──"
+      },
+      "Shadow_Enabled": {
+        "name": "그림자 사용"
+      },
+      "Shadow_Color_Preset": {
+        "name": "그림자 색상 선택",
+        "description": "프리셋 색상을 선택합니다. custom hex를 선택하면 아래 그림자 Hex 값을 사용합니다."
+      },
+      "Shadow_Color": {
+        "name": "그림자 Hex",
+        "description": "#RRGGBB 형식입니다. 그림자 색상 선택이 custom hex일 때 사용됩니다."
+      },
+      "Shadow_Opacity": {
+        "name": "그림자 불투명도"
+      },
+      "Shadow_Offset_X": {
+        "name": "그림자 가로 오프셋"
+      },
+      "Shadow_Offset_Y": {
+        "name": "그림자 세로 오프셋"
+      },
+      "Shadow_Blur": {
+        "name": "그림자 흐림"
+      },
+      "── 🔲 Tile ──": {
+        "name": "── 🔲 타일 (반복) ──"
+      },
+      "Tile_Mode": {
+        "name": "타일 모드",
+        "description": "off는 반복 없음, full은 격자 반복, diagonal은 행마다 반 칸씩 어긋나는 벽돌식 반복입니다."
+      },
+      "Tile_Axis_Mode": {
+        "name": "타일 축 기준",
+        "description": "회전 각도 기준은 기존 방식처럼 타일 배치선 전체가 회전합니다. 수평·수직 기준은 화면 격자는 유지하고 각 워터마크 이미지만 회전합니다. 회전 각도 기준에서 매우 큰 워터마크/강한 외곽선·그림자/극단 간격 조합은 ComfyUI 멈춤 방지를 위해 실행 전에 차단될 수 있습니다."
+      },
+      "Tile_Spacing": {
+        "name": "타일 간격",
+        "description": "0은 보이는 영역 기준으로 공백 없이 배치, 양수는 벌어짐, 음수는 겹침입니다. screen aligned에서 회전값이 있으면 형태상 빈 공간 또는 겹침이 생길 수 있으며, 사용자가 간격으로 조정합니다."
+      },
+      "── 🎛️ Adjust ──": {
+        "name": "── 🎛️ 조정 ──"
+      },
+      "Opacity": {
+        "name": "워터마크 불투명도"
+      },
+      "Blend_Mode": {
+        "name": "블렌드 모드",
+        "description": "normal 일반, multiply 어둡게, screen 밝게, overlay 대비, soft light 부드러운 조명입니다. 그림자도 함께 블렌드되어 모드에 따라 그림자 느낌이 달라질 수 있으며, 반투명 입력의 색 번짐을 줄이는 보정이 포함되어 있습니다."
+      },
+      "Position": {
+        "name": "워터마크 위치",
+        "description": "단일 모드에서만 사용됩니다. 타일 모드에서는 무시됩니다."
+      },
+      "Margin": {
+        "name": "위치 여백"
+      },
+      "Margin_X": {
+        "name": "가로 위치 조정"
+      },
+      "Margin_Y": {
+        "name": "세로 위치 조정"
+      },
+      "Edge_Softness": {
+        "name": "경계 부드러움",
+        "description": "0은 없음, 1~2 약한 보정, 3~5 부드러운 페더입니다."
+      },
+      "Rotation": {
+        "name": "회전",
+        "description": "단일 모드에서는 워터마크를 회전합니다. 타일 모드에서는 타일 축 기준에 따라 배치선 전체를 회전하거나, 화면 격자는 유지한 채 각 워터마크 이미지만 회전합니다."
+      },
+      "mask": {
+        "name": "마스크",
+        "description": "기존 방식 호환용 MASK 입력입니다. Load Image의 MASK를 연결할 때는 기본 마스크 해석 방식인 load image mask (invert)를 사용하면 투명 PNG/WebP alpha와 맞습니다."
+      },
+      "upload_watermark_file": {
+        "name": "워터마크 파일 업로드/선택",
+        "description": "브라우저 파일 선택창을 열어 로컬 이미지를 ComfyUI input 폴더에 업로드하고 watermark 값을 자동으로 선택합니다."
+      }
+    },
+    "outputs": {
+      "IMAGE": {
+        "name": "이미지"
+      },
+      "MASK": {
+        "name": "워터마크 마스크",
+        "description": "워터마크가 적용된 영역의 알파 마스크입니다."
+      }
+    }
+  },
+  "UltraPromptStyler": {
+    "display_name": "Ultra Tools Prompt Styler",
+    "description": "외부 프롬프트 본문은 유지하면서, 선택한 모델 형식에 맞춰 분위기·스타일·구도·카메라 느낌을 문구로 보강해 최종 Positive / Negative 프롬프트를 만드는 프롬프트 스타일 노드입니다. 필요하면 성인 톤, 의상, 추가 문구도 함께 정리할 수 있습니다.",
+    "inputs": {
+      "model_profile": {
+        "name": "모델 형식",
+        "description": "사용할 모델 계열의 프롬프트 형식입니다. Z-Image/Qwen/Flux는 자연어, Anima는 태그와 짧은 문장을 함께 쓰는 혼합형, SDXL/ILXL/Pony/SD는 태그형 중심으로 출력합니다."
+      },
+      "mood_family": {
+        "name": "분위기",
+        "description": "프롬프트에 더할 감정과 분위기 방향입니다. 따뜻함, 서정성, 긴장감, 몽환감처럼 장면의 느낌을 조절합니다."
+      },
+      "adult_tone": {
+        "name": "성인 표현 톤",
+        "description": "기본 표현부터 NSFW까지 성인 톤의 강도를 조절합니다. 기본값은 성인/NSFW 관련 문구를 따로 추가하지 않습니다."
+      },
+      "adult_wardrobe": {
+        "name": "성인 의상",
+        "description": "성인 톤에서 사용할 의상이나 노출 방향을 고릅니다. 자동 / 미지정은 의상 힌트를 추가하지 않습니다."
+      },
+      "style_dna": {
+        "name": "스타일 방향",
+        "description": "색감, 조명, 재료감, 그림체, 화면 질감처럼 실제 출력 문구에 들어갈 시각 표현 방향입니다. “분위기에 맞춰 자동”은 선택한 분위기에 어울리는 스타일을 자동으로 고릅니다."
+      },
+      "style_strength": {
+        "name": "스타일 반영 방식",
+        "description": "스타일을 적용할지 말지를 고르는 옵션이 아니라, 원본 프롬프트를 얼마나 보존할지와 선택한 스타일을 얼마나 앞세울지를 정합니다. 원본 보존은 스타일을 가볍게 덧입히고, 균형 적용은 두 요소를 균형 있게 반영하며, 스타일 우선은 선택한 스타일이 더 분명하게 드러나도록 문구를 구성합니다."
+      },
+      "style_conflict_cleanup": {
+        "name": "스타일 방해 문구 정리",
+        "description": "Z-Image/Qwen/Flux 같은 자연어 모델에서만 동작하는 선택형 기능입니다. 공통 삭제가 아니라 선택한 스타일별 conflict profile에 따라, 그 스타일을 직접 방해하는 외부 프롬프트 문구만 완화합니다. 예: 치비는 현실 성인 신체비율 문구, 빈티지 필름은 현대 디지털/HDR 문구, 수채화·스케치 계열은 사진 렌즈/피부 질감 문구를 중심으로 정리합니다. 기본값 끔은 원본을 그대로 둡니다. 태그형 모델에는 적용하지 않습니다."
+      },
+      "scene_framing": {
+        "name": "구도 / 화면 범위",
+        "description": "얼굴 중심, 상반신, 전신, 넓은 배경 포함처럼 피사체가 화면 안에 어느 정도 보일지 정합니다."
+      },
+      "lens_preset": {
+        "name": "카메라 / 렌즈 느낌",
+        "description": "카메라 시점과 렌즈 느낌을 정합니다. 예: 넓은 화면, 자연스러운 인물, 배경 흐림, 아래에서 올려다봄. 필요 없으면 자동을 사용하세요."
+      },
+      "external_prompt_mode": {
+        "name": "원본 프롬프트와 합치기",
+        "description": "외부 Positive 프롬프트가 있을 때 스타일 문구를 어디에 붙일지 정합니다. 기본값은 원본 본문을 먼저 보존하고 뒤에 스타일 문구를 추가합니다."
+      },
+      "seed": {
+        "name": "시드",
+        "description": "고정 시드입니다. 0도 고정값으로 재현되며, 무작위 실행은 ComfyUI의 seed control/randomize 기능을 사용합니다."
+      },
+      "custom_text": {
+        "name": "추가 문구",
+        "description": "마지막에 더할 자유 영문 문구입니다. 장소, 의상, 소품, 배경 같은 구체 요소나 보조 스타일 힌트를 직접 적을 수 있습니다. 예) modern city skyline, luxury living room, black dress, night street"
+      },
+      "external_positive_in": {
+        "name": "외부 Positive 프롬프트",
+        "description": "텍스트박스나 다른 노드에서 들어오는 원본 positive 본문입니다. 이 본문은 최대한 보존됩니다."
+      },
+      "external_negative_in": {
+        "name": "외부 Negative 프롬프트",
+        "description": "다른 노드에서 들어오는 negative 프롬프트입니다. 노드 내부의 정리 로직과 합쳐져 최종 negative로 출력됩니다."
+      }
+    },
+    "outputs": {
+      "positive_prompt": {
+        "name": "Positive 프롬프트",
+        "description": "다른 텍스트/컨디셔닝 노드에 연결할 최종 positive 프롬프트입니다."
+      },
+      "negative_prompt": {
+        "name": "Negative 프롬프트",
+        "description": "다른 텍스트/컨디셔닝 노드에 연결할 최종 negative 프롬프트입니다."
+      }
+    }
+  },
+  "UltraPromptComposer": {
+    "inputs": {
+      "external_positive_in": {
+        "name": "외부 Positive 프롬프트",
+        "description": "텍스트박스나 다른 노드에서 들어오는 원본 positive 본문입니다. 선택한 설정과 결합되어 최종 positive 프롬프트에 반영됩니다."
+      },
+      "external_negative_in": {
+        "name": "외부 Negative 프롬프트",
+        "description": "다른 노드에서 들어오는 negative 프롬프트입니다. 모델 설정과 내부 정리 규칙을 거쳐 최종 negative 프롬프트에 반영됩니다."
+      },
+      "model_profile": {
+        "name": "모델 형식",
+        "options": {
+          "Z-Image Natural": "Z-Image 자연어",
+          "Krea2 Natural": "Krea2 자연어",
+          "Qwen Natural": "Qwen 자연어",
+          "Flux Natural": "Flux 자연어",
+          "Anima Mixed": "Anima 태그+문장",
+          "SDXL Tag": "SDXL 태그형",
+          "ILXL / Illustrious Tag": "ILXL / Illustrious 태그형",
+          "Pony Tag": "Pony 태그형",
+          "SD 1.5 Tag": "SD 1.5 태그형"
+        }
+      },
+      "mood_family": {
+        "name": "분위기",
+        "options": {
+          "Default / None": "기본",
+          "🎲 Random All": "🎲 랜덤 전체",
+          "🎲 Random Transformative Style": "🎲 랜덤 변환 스타일",
+          "🎲 Random Traditional Media Style": "🎲 랜덤 전통 매체 화풍",
+          "Erotic / Sensual": "관능적인 분위기",
+          "Lyrical / Poetic": "서정적인 분위기",
+          "Classical / Golden Age": "클래식 영화 분위기",
+          "Noir / Neo-noir": "어두운 영화 분위기",
+          "Dreamlike / Surreal": "몽환적인 분위기",
+          "Gothic Romance": "고딕 로맨스 분위기",
+          "Melodrama": "감정적인 드라마 분위기",
+          "Fashion Editorial": "고급 화보 분위기",
+          "Arthouse Realism": "차분한 예술영화 분위기",
+          "Pop Neon": "선명한 네온 분위기",
+          "Baroque / Operatic": "화려하고 웅장한 분위기",
+          "Minimalist Psychological": "절제된 심리극 분위기",
+          "Dark Fantasy Romance": "어두운 판타지 로맨스",
+          "Black & White Film": "흑백 영화 분위기",
+          "Golden Hour Warmth": "따뜻한 노을빛 분위기",
+          "Vintage / Retro": "빈티지 감성",
+          "Cyberpunk / Sci-fi": "미래적인 네온 분위기",
+          "Watercolor / Painterly": "수채화처럼 부드러운 분위기",
+          "Bright / High-key": "밝고 깨끗한 분위기",
+          "Cinematic Widescreen": "넓고 장대한 분위기",
+          "Romantic / Soft Focus": "부드러운 로맨틱 분위기",
+          "Horror / Unsettling": "불안하고 어두운 분위기"
+        }
+      },
+      "style_dna": {
+        "name": "스타일 방향",
+        "options": {
+          "Auto by Mood": "분위기에 맞춰 자동",
+          "Neutral / Minimal Carryover": "중립 / 거의 추가 안 함",
+          "Neon Melancholy / Rain Glass": "빗속 네온 감성",
+          "Classical Studio Glamour": "클래식 스튜디오 화보",
+          "Baroque Operatic Atmosphere": "화려하고 웅장한 무대감",
+          "Noir Chiaroscuro": "어두운 영화 명암",
+          "Symmetric Psychological Coldness": "차갑고 대칭적인 화면",
+          "Mediterranean Sunlight": "따뜻한 지중해 햇빛",
+          "Gothic Candle Velvet": "고딕 촛불과 벨벳",
+          "Dream Pastel Diffusion": "몽환적인 파스텔 빛",
+          "Volumetric Dust Light": "공기 중 먼지 빛",
+          "Long Exposure Light Trails": "긴 노출 빛 궤적",
+          "Fashion Editorial Studio Cinema": "스튜디오 화보 영화감",
+          "Dark Fantasy Shadow Mass": "어두운 판타지 그림자",
+          "Apocalyptic Wasteland": "폐허 세계 분위기",
+          "Black & White Classic": "클래식 흑백",
+          "Golden Hour Glow": "따뜻한 노을빛",
+          "Vintage Film Look": "색바랜 필름 사진",
+          "Cyberpunk Neon": "사이버펑크 네온",
+          "Soft Romantic Glow": "부드러운 로맨틱 빛",
+          "High-key Clean Light": "밝고 깨끗한 조명",
+          "Watercolor / Painterly": "수채화 회화 느낌",
+          "Oil Painting": "유화 느낌",
+          "Charcoal Drawing": "목탄 드로잉",
+          "Graphite Pencil Sketch": "연필 스케치",
+          "Pen and Ink Sketch": "펜화 스케치",
+          "Ink Wash / Sumi-e": "수묵화",
+          "Colored Pencil Illustration": "색연필 일러스트",
+          "Pastel Chalk Drawing": "파스텔 드로잉",
+          "Gouache Storybook Illustration": "불투명 물감 동화풍",
+          "Hand-Painted Storybook Animation": "손그림 동화 애니풍",
+          "Miniature Diorama": "미니어처 디오라마",
+          "Pixel Art": "픽셀 아트",
+          "3D Collectible Figure": "3D 피규어 느낌",
+          "Chibi Style": "치비 스타일"
+        }
+      },
+      "style_strength": {
+        "name": "스타일 반영 방식",
+        "options": {
+          "subtle": "원본 보존",
+          "balanced": "균형 적용",
+          "strong": "스타일 우선"
+        }
+      },
+      "style_conflict_cleanup": {
+        "name": "충돌 정리(자연어)",
+        "options": {
+          "off": "끔",
+          "soft": "부드럽게 완화",
+          "strong": "강하게 완화"
+        }
+      },
+      "scene_framing": {
+        "name": "구도 / 화면 범위",
+        "options": {
+          "auto": "선택 안함",
+          "headshot (face-focused)": "얼굴 중심",
+          "close-up": "가까운 인물",
+          "upper body": "상반신",
+          "waist-up": "허리 위",
+          "three-quarter body": "무릎 위 정도",
+          "full body (head to toe)": "전신",
+          "full shot (full body + extra space)": "전신 + 주변 여백",
+          "wide shot": "넓은 배경 포함",
+          "high-angle portrait": "위쪽 시점 인물",
+          "overhead portrait": "위에서 내려다본 인물",
+          "over-the-shoulder": "어깨 너머 시점",
+          "profile portrait": "옆모습",
+          "back view": "뒷모습",
+          "environmental portrait": "배경이 보이는 인물",
+          "seated full body": "앉은 전신"
+        }
+      },
+      "lens_preset": {
+        "name": "카메라 / 렌즈 느낌",
+        "options": {
+          "auto": "선택 안함",
+          "18mm ultra-wide dramatic": "18mm 초광각 / 공간 강조",
+          "24mm wide cinematic": "24mm 넓은 영화 화면",
+          "28mm documentary wide": "28mm 넓은 현장감",
+          "35mm environmental": "35mm 배경이 보이는 인물",
+          "40mm cinematic natural": "40mm 자연스러운 화면",
+          "50mm intimate natural": "50mm 자연스러운 인물",
+          "58mm vintage character": "58mm 빈티지 인물",
+          "85mm portrait shallow DOF": "85mm 인물 / 배경 흐림",
+          "100mm macro detail": "100mm 가까운 디테일",
+          "135mm compressed portrait": "135mm 망원 인물",
+          "long lens compression": "망원 압축감",
+          "anamorphic widescreen": "와이드 영화 화면",
+          "wide architectural": "넓은 건축 공간",
+          "overhead top-down": "위에서 내려다봄",
+          "low angle dramatic": "아래에서 올려다봄",
+          "dutch angle tension": "기울어진 긴장감",
+          "handheld documentary": "핸드헬드 현장감"
+        }
+      },
+      "adult_tone": {
+        "name": "성인 표현 톤",
+        "options": {
+          "default": "기본",
+          "safe": "안전한 표현",
+          "suggestive": "살짝 암시적",
+          "sensual": "부드러운 관능",
+          "bold sensual": "강한 관능",
+          "nsfw": "성인 NSFW",
+          "explicit nsfw": "강한 성인 NSFW",
+          "romantic non-explicit": "노골적이지 않은 로맨스"
+        }
+      },
+      "adult_wardrobe": {
+        "name": "성인 의상",
+        "options": {
+          "auto": "선택 안함",
+          "nude": "누드",
+          "topless": "상의 탈의",
+          "lingerie": "란제리",
+          "bikini": "비키니",
+          "one-piece swimsuit": "원피스 수영복",
+          "sheer nightgown": "시스루 나이트가운",
+          "silk slip dress": "실크 슬립 드레스",
+          "corset": "코르셋",
+          "bodysuit": "바디수트",
+          "latex outfit": "라텍스 의상",
+          "leather outfit": "가죽 의상",
+          "evening dress": "이브닝 드레스",
+          "tailored suit": "테일러드 수트",
+          "bathrobe": "목욕 가운",
+          "lace lingerie set": "레이스 란제리 세트",
+          "sheer robe": "시스루 로브",
+          "satin robe": "새틴 로브",
+          "silk camisole": "실크 캐미솔",
+          "bralette": "브라렛",
+          "lace bodysuit": "레이스 바디수트",
+          "sheer bodysuit": "시스루 바디수트",
+          "garter belt": "가터 벨트",
+          "thigh-high stockings": "허벅지 스타킹",
+          "pantyhose": "팬티스타킹",
+          "open shirt": "오픈 셔츠",
+          "oversized shirt": "오버사이즈 셔츠",
+          "mini dress": "미니 드레스",
+          "off-shoulder dress": "오프숄더 드레스",
+          "halter dress": "홀터넥 드레스",
+          "fishnet outfit": "그물망 의상",
+          "vinyl outfit": "글로시 비닐 의상",
+          "mesh top": "메시 탑",
+          "lace slip": "레이스 슬립",
+          "satin lingerie": "새틴 란제리",
+          "sheer blouse": "시스루 블라우스",
+          "transparent robe": "투명 로브",
+          "high-slit dress": "하이슬릿 드레스",
+          "backless dress": "백리스 드레스",
+          "deep v dress": "딥 브이 드레스",
+          "bodycon dress": "바디콘 드레스",
+          "wet shirt": "젖은 셔츠",
+          "silk pajamas": "실크 파자마",
+          "oversized sweater": "오버사이즈 스웨터",
+          "stockings and garter": "스타킹 + 가터",
+          "strappy lingerie": "스트랩 란제리",
+          "lace bralette set": "레이스 브라렛 세트",
+          "satin corset set": "새틴 코르셋 세트",
+          "see-through cover-up": "시스루 커버업",
+          "black lace lingerie": "블랙 레이스 란제리",
+          "white button shirt": "화이트 버튼 셔츠",
+          "black bodysuit": "블랙 바디수트",
+          "red evening dress": "레드 이브닝 드레스",
+          "satin slip dress": "새틴 슬립 드레스",
+          "swimsuit cover-up": "수영복 커버업",
+          "robe and lingerie": "로브 + 란제리"
+        }
+      },
+      "prompt_source_mode": {
+        "name": "프롬프트 연결",
+        "options": {
+          "Auto": "자동 전환",
+          "External Prompt Composer": "연결 후 스타일 적용",
+          "Standalone Scene Builder": "단독으로 만들기",
+          "Style Only": "스타일만 출력"
+        }
+      },
+      "builder_detail_mode": {
+        "name": "단독 메뉴 표시 범위",
+        "options": {
+          "simple": "기본 메뉴",
+          "advanced": "상세 메뉴",
+          "professional": "전체 메뉴"
+        }
+      },
+      "external_prompt_mode": {
+        "name": "스타일 합치기 방식",
+        "options": {
+          "Append style after external prompt": "원본 뒤에 추가",
+          "Prepend style before external prompt": "스타일 앞에 배치",
+          "Output style only": "스타일만 출력"
+        }
+      },
+      "subject_profile": {
+        "name": "주요 대상",
+        "options": {
+          "auto": "선택 안함",
+          "adult woman": "성인 여성 1명",
+          "adult man": "성인 남성 1명",
+          "adult couple": "성인 커플 2명",
+          "two adult women": "성인 여성 2명",
+          "two adult men": "성인 남성 2명",
+          "small adult group": "소규모 성인 그룹",
+          "background only": "배경만 만들기",
+          "product / object": "제품 / 사물"
+        }
+      },
+      "subject_age": {
+        "name": "나이대",
+        "options": {
+          "auto": "선택 안함",
+          "20s": "20대",
+          "30s": "30대",
+          "40s": "40대",
+          "50s": "50대",
+          "60s+": "60대 이상"
+        }
+      },
+      "subject_appearance": {
+        "name": "외모 인상",
+        "options": {
+          "auto": "선택 안함",
+          "natural-looking": "자연스러운",
+          "cute": "귀여운",
+          "beautiful": "아름다운",
+          "elegant": "우아한",
+          "glamorous": "화려한",
+          "ordinary-looking": "평범한",
+          "simple-looking": "수수한",
+          "less conventionally attractive": "덜 예쁜",
+          "distinctive-looking": "개성적인"
+        }
+      },
+      "subject_ethnicity": {
+        "name": "외형 / 지역 느낌",
+        "options": {
+          "auto": "선택 안함",
+          "Korean": "한국인",
+          "East Asian": "동아시아",
+          "Southeast Asian": "동남아시아",
+          "South Asian": "남아시아",
+          "Western": "서양인",
+          "Black": "흑인",
+          "Latino": "라틴계",
+          "Middle Eastern": "중동계",
+          "mixed-heritage": "혼혈"
+        }
+      },
+      "subject_hair": {
+        "name": "헤어 스타일",
+        "options": {
+          "auto": "선택 안함",
+          "short hair": "짧은 머리",
+          "long dark hair": "긴 검은 머리",
+          "long hair": "긴 머리",
+          "wavy hair": "웨이브 머리",
+          "bob cut": "단발",
+          "ponytail": "포니테일",
+          "updo": "업스타일",
+          "straight long hair": "긴 생머리",
+          "shoulder-length hair": "어깨 길이 머리",
+          "medium-length hair": "중간 길이 머리",
+          "layered hair": "레이어드 헤어",
+          "side-parted hair": "가르마 탄 머리",
+          "bangs": "앞머리",
+          "braided hair": "땋은 머리",
+          "twin braids": "양갈래 땋은 머리",
+          "messy bun": "내추럴 번",
+          "half-up hairstyle": "반묶음",
+          "short bob": "짧은 단발",
+          "pixie cut": "픽시컷",
+          "curly hair": "곱슬머리",
+          "wet hair": "젖은 머리",
+          "wind-swept hair": "바람에 날리는 머리",
+          "tied-back hair": "묶은 머리"
+        }
+      },
+      "subject_outfit": {
+        "name": "의상",
+        "options": {
+          "auto": "선택 안함",
+          "casual jeans and t-shirt": "캐주얼 티셔츠와 청바지",
+          "white blouse and dark skirt": "흰 블라우스와 어두운 스커트",
+          "knit sweater and skirt": "니트 스웨터와 스커트",
+          "summer dress": "여름 원피스",
+          "elegant long dress": "우아한 롱드레스",
+          "business suit": "비즈니스 수트",
+          "office blouse and slacks": "오피스 블라우스와 슬랙스",
+          "hoodie and jeans": "후디와 청바지",
+          "denim jacket outfit": "데님 재킷 코디",
+          "trench coat outfit": "트렌치코트 코디",
+          "winter coat and scarf": "겨울 코트와 머플러",
+          "sportswear": "스포츠웨어",
+          "swimwear / beachwear": "수영복 / 비치웨어",
+          "traditional hanbok": "전통 한복",
+          "simple black dress": "심플 블랙 드레스",
+          "blouse and jeans": "블라우스와 청바지",
+          "cardigan and skirt": "카디건과 스커트",
+          "oversized knit sweater": "오버핏 니트 스웨터",
+          "blazer and jeans": "블레이저와 청바지",
+          "leather jacket outfit": "가죽 재킷 코디",
+          "long coat outfit": "롱코트 코디",
+          "cropped jacket outfit": "크롭 재킷 코디",
+          "pleated skirt outfit": "플리츠 스커트 코디",
+          "denim shorts and blouse": "데님 쇼츠와 블라우스",
+          "linen shirt and trousers": "린넨 셔츠와 팬츠",
+          "floral dress": "플로럴 원피스",
+          "satin blouse and skirt": "새틴 블라우스와 스커트",
+          "evening gown": "이브닝 가운",
+          "cocktail dress": "칵테일 드레스",
+          "business casual outfit": "비즈니스 캐주얼",
+          "streetwear outfit": "스트리트웨어",
+          "casual athleisure": "캐주얼 애슬레저",
+          "yoga outfit": "요가복",
+          "raincoat outfit": "레인코트 코디",
+          "apron dress": "앞치마 원피스",
+          "modern hanbok": "모던 한복",
+          "pajamas / loungewear": "파자마 / 라운지웨어"
+        }
+      },
+      "subject_expression": {
+        "name": "표정 / 분위기",
+        "options": {
+          "auto": "선택 안함",
+          "natural expression": "자연스러운 표정",
+          "gentle smile": "부드러운 미소",
+          "broad smile": "함박웃음",
+          "bright happy smile": "밝게 웃는 얼굴",
+          "laughing face": "웃음 터진 얼굴",
+          "soft closed-mouth smile": "입을 다문 은은한 미소",
+          "shy smile": "수줍은 미소",
+          "playful wink": "장난스러운 윙크",
+          "confident smile": "자신감 있는 미소",
+          "serious expression": "진지한 표정",
+          "dreamy expression": "몽환적인 표정",
+          "thoughtful expression": "생각에 잠긴 표정",
+          "melancholic expression": "쓸쓸한 표정",
+          "sad expression": "슬픈 표정",
+          "tearful eyes": "눈물이 맺힌 눈",
+          "crying face": "우는 얼굴",
+          "lonely expression": "외로운 표정",
+          "worried expression": "걱정스러운 표정",
+          "anxious expression": "불안한 표정",
+          "surprised expression": "놀란 표정",
+          "angry expression": "화난 표정",
+          "annoyed expression": "짜증난 표정",
+          "pouting face": "삐진 얼굴",
+          "sulky expression": "토라진 표정",
+          "coy expression": "새침한 표정",
+          "sassy expression": "도도한 표정",
+          "smug expression": "능청스러운 표정",
+          "embarrassed blush": "부끄러운 홍조",
+          "tired expression": "피곤한 표정",
+          "calm blank expression": "담담한 무표정",
+          "determined expression": "결심한 표정",
+          "seductive expression": "도발적인 표정"
+        }
+      },
+      "subject_pose": {
+        "name": "기본 자세",
+        "options": {
+          "auto": "선택 안함",
+          "standing": "서 있는",
+          "sitting": "앉아 있는",
+          "leaning": "기대어 있는",
+          "walking": "걷는",
+          "looking back": "뒤돌아보는",
+          "reclining": "기대어 누운",
+          "lying down": "누워 있는",
+          "standing with arms crossed": "팔짱 끼고 서 있음",
+          "standing with hands on hips": "허리에 손을 얹고 서 있음",
+          "standing with one hand in pocket": "한 손을 주머니에 넣고 서 있음",
+          "hand near face": "손을 얼굴 근처에 둔",
+          "hand on cheek": "손을 볼에 댄",
+          "sitting cross-legged": "양반다리로 앉음",
+          "seated sideways": "옆으로 앉음",
+          "crouching": "쪼그려 앉음",
+          "kneeling": "무릎 꿇은",
+          "running": "달리는",
+          "dancing": "춤추는",
+          "jumping lightly": "가볍게 점프",
+          "stretching": "스트레칭",
+          "reaching upward": "위로 손을 뻗음",
+          "turning sideways": "몸을 옆으로 튼",
+          "side profile pose": "측면 프로필 포즈"
+        }
+      },
+      "subject_action": {
+        "name": "행동 / 상황",
+        "options": {
+          "auto": "선택 안함",
+          "standing still": "가만히 서 있는",
+          "sitting at a table": "테이블에 앉음",
+          "walking naturally": "자연스럽게 걷기",
+          "looking out the window": "창밖을 보는",
+          "looking at the camera": "카메라 응시",
+          "reading a book": "책 읽는",
+          "using a phone": "휴대폰 보는",
+          "working on a laptop": "노트북 작업",
+          "drinking from a cup": "음료 마시는",
+          "holding a flower bouquet": "꽃다발을 든",
+          "carrying a handbag": "핸드백을 든",
+          "taking a selfie": "셀피 촬영",
+          "listening to music": "음악 듣는",
+          "looking in a mirror": "거울 보는",
+          "resting on a bed": "침대에 누운",
+          "standing in water": "물가에 서 있는",
+          "waiting at a station": "역에서 기다림",
+          "shopping on a street": "거리에서 쇼핑",
+          "opening curtains": "커튼을 여는",
+          "cooking in kitchen": "주방에서 요리",
+          "writing in a notebook": "노트에 글쓰기",
+          "sketching in a notebook": "노트에 스케치",
+          "applying makeup": "메이크업하는",
+          "brushing hair": "머리를 빗는",
+          "watering plants": "식물에 물 주기",
+          "arranging flowers": "꽃을 정리하는",
+          "browsing bookshelves": "책장을 둘러보는",
+          "browsing a shop display": "상점 진열대를 둘러보는",
+          "taking a photo": "사진을 찍는",
+          "holding an umbrella": "우산을 든",
+          "carrying a suitcase": "여행가방을 든",
+          "playing guitar": "기타 연주",
+          "dancing": "춤추는",
+          "jogging": "조깅",
+          "riding a bicycle": "자전거 타기",
+          "stretching on a mat": "매트 위 스트레칭",
+          "fixing hair": "머리를 정돈하는",
+          "adjusting glasses": "안경을 고쳐 쓰는",
+          "tying shoelaces": "신발끈 묶기",
+          "looking down thoughtfully": "생각하며 아래를 보는",
+          "smiling at someone": "누군가에게 미소 짓는",
+          "talking with another person": "다른 사람과 대화",
+          "waiting under rain": "비 속에서 기다림",
+          "sitting by the window": "창가에 앉아 있음"
+        }
+      },
+      "location_type": {
+        "name": "장소",
+        "options": {
+          "auto": "선택 안함",
+          "cozy living room": "아늑한 거실",
+          "modern apartment": "모던 아파트",
+          "bedroom": "침실",
+          "bathroom": "욕실",
+          "hotel room": "호텔방",
+          "cafe": "카페",
+          "restaurant": "레스토랑",
+          "office": "오피스",
+          "library": "도서관",
+          "bookstore": "서점",
+          "kitchen": "주방",
+          "art gallery": "아트 갤러리",
+          "bar / lounge": "바 / 라운지",
+          "balcony": "발코니",
+          "rooftop": "옥상",
+          "city street": "도시 거리",
+          "shopping street": "쇼핑 거리",
+          "alley": "골목",
+          "train station": "기차역",
+          "subway platform": "지하철 플랫폼",
+          "park": "공원",
+          "garden": "정원",
+          "forest": "숲",
+          "beach": "해변",
+          "poolside": "수영장",
+          "studio backdrop": "스튜디오 배경",
+          "private studio": "프라이빗 스튜디오",
+          "hanok room": "한옥 실내",
+          "traditional Korean courtyard": "한옥 마당",
+          "greenhouse": "온실",
+          "museum": "박물관",
+          "theater stage": "극장 무대",
+          "dressing room": "드레싱룸",
+          "makeup room": "메이크업룸",
+          "photo studio": "촬영 스튜디오",
+          "hotel lobby": "호텔 로비",
+          "corridor hallway": "복도",
+          "elevator lobby": "엘리베이터 로비",
+          "convenience store": "편의점",
+          "supermarket": "슈퍼마켓",
+          "bakery": "베이커리",
+          "flower shop": "꽃집",
+          "salon": "살롱",
+          "gym": "헬스장",
+          "yoga studio": "요가 스튜디오",
+          "airport terminal": "공항 터미널",
+          "riverside walkway": "강변 산책로",
+          "bridge": "다리 위",
+          "lake shore": "호숫가",
+          "mountain trail": "산길",
+          "campsite": "캠프장",
+          "parking garage": "주차장",
+          "night market": "야시장",
+          "indoor pool": "실내 수영장",
+          "laundromat": "셀프 빨래방"
+        }
+      },
+      "location_detail": {
+        "name": "장소 분위기",
+        "options": {
+          "auto": "선택 안함",
+          "minimal modern": "미니멀 / 모던",
+          "luxury": "럭셔리",
+          "vintage classic": "빈티지 클래식",
+          "dark intimate": "어둡고 친밀한",
+          "bright spacious": "밝고 넓은",
+          "natural organic": "자연스러운",
+          "cozy warm": "따뜻하고 아늑한",
+          "cinematic": "시네마틱",
+          "soft romantic": "부드러운 로맨틱",
+          "moody low-key": "무디한 로우키",
+          "rainy urban": "비 오는 도시감",
+          "rustic worn": "낡고 러스틱한",
+          "cluttered lived-in": "생활감 있는",
+          "clean minimal": "깔끔한 미니멀",
+          "premium hotel": "프리미엄 호텔감",
+          "traditional Korean": "전통 한국적",
+          "industrial": "인더스트리얼",
+          "futuristic neon": "미래적 네온",
+          "soft pastel": "소프트 파스텔",
+          "high-contrast dramatic": "강한 대비의 드라마틱"
+        }
+      },
+      "time_of_day": {
+        "name": "시간대",
+        "options": {
+          "auto": "선택 안함",
+          "dawn": "새벽",
+          "morning": "아침",
+          "daytime": "낮",
+          "afternoon": "오후",
+          "late afternoon": "늦은 오후",
+          "evening": "저녁",
+          "sunset": "석양",
+          "night": "밤",
+          "late night": "늦은 밤"
+        }
+      },
+      "weather_light": {
+        "name": "날씨 / 조명",
+        "options": {
+          "auto": "선택 안함",
+          "clear": "맑음",
+          "cloudy": "흐림",
+          "rainy": "비",
+          "snowy": "눈",
+          "foggy": "안개",
+          "indoor lighting only": "실내 조명만",
+          "soft indoor lighting": "부드러운 실내 조명",
+          "golden hour sunlight": "골든아워 햇빛",
+          "sunset backlight": "석양 역광",
+          "moonlight": "달빛",
+          "neon lights": "네온 조명",
+          "window light": "창문빛",
+          "strong sunlight": "강한 햇빛",
+          "overcast soft light": "흐린 날 확산광",
+          "backlit silhouette": "역광 실루엣",
+          "low-key lighting": "로우키 조명",
+          "rim light": "림라이트",
+          "candlelight": "촛불",
+          "fluorescent indoor light": "형광등 실내광",
+          "streetlights": "가로등",
+          "rainy neon reflections": "비 오는 네온 반사"
+        }
+      },
+      "scene_props": {
+        "name": "장면 소품",
+        "options": {
+          "auto": "선택 안함",
+          "none": "없음",
+          "plants": "식물",
+          "book / magazine": "책 / 잡지",
+          "cup / drink": "컵 / 음료",
+          "smartphone": "스마트폰",
+          "lamp": "조명",
+          "mirror": "거울",
+          "umbrella": "우산",
+          "studio lighting": "스튜디오 조명",
+          "luxury interior details": "럭셔리 인테리어",
+          "cosmetic product": "화장품 제품",
+          "laptop": "노트북",
+          "flower bouquet": "꽃다발",
+          "handbag": "핸드백",
+          "shopping bag": "쇼핑백",
+          "camera": "카메라",
+          "suitcase": "여행가방",
+          "headphones": "헤드폰",
+          "tableware": "식기 / 테이블웨어",
+          "window": "창문",
+          "curtains": "커튼",
+          "sofa": "소파",
+          "chair": "의자",
+          "desk": "책상",
+          "bed": "침대",
+          "bookshelf": "책장",
+          "picture frames": "액자",
+          "potted plants": "화분",
+          "vase": "꽃병",
+          "flowers": "꽃",
+          "notebook and pen": "노트와 펜",
+          "art supplies": "미술 도구",
+          "makeup tools": "메이크업 도구",
+          "perfume bottle": "향수병",
+          "blanket / fabric": "담요 / 천",
+          "pillows": "베개",
+          "street signs": "거리 표지판",
+          "neon signs": "네온 간판",
+          "bench": "벤치",
+          "bicycle": "자전거",
+          "food / dessert": "음식 / 디저트",
+          "display shelves": "진열대",
+          "shopping cart": "쇼핑 카트",
+          "luggage": "짐가방",
+          "train doors": "전철 문",
+          "guitar": "기타",
+          "microphone": "마이크"
+        }
+      },
+      "auto_extra_detail": {
+        "name": "장면 디테일 보강",
+        "options": {
+          "auto": "보강 안함",
+          "light auto fill": "안전 보강",
+          "balanced auto fill": "균형 보강",
+          "rich auto fill": "풍부한 배경 보강"
+        }
+      },
+      "adult_menu_level": {
+        "name": "성인 메뉴 표시",
+        "options": {
+          "essential": "기본 메뉴",
+          "professional": "모든 단독 메뉴"
+        }
+      },
+      "adult_exposure_level": {
+        "name": "성인 노출 수준",
+        "options": {
+          "auto": "선택 안함",
+          "clothed sensual": "옷을 입은 관능",
+          "revealing outfit": "노출 있는 의상",
+          "lingerie / underwear": "란제리 / 속옷",
+          "swimwear": "수영복",
+          "implied nude / covered": "암시적 누드 / 가림",
+          "sheet-covered nude": "시트로 가린 누드",
+          "nude": "누드",
+          "topless": "상의 탈의",
+          "wet look swimwear": "젖은 느낌 수영복",
+          "bodycon fashion": "바디콘 패션"
+        }
+      },
+      "adult_scene_privacy": {
+        "name": "성인 장소",
+        "options": {
+          "auto": "선택 안함",
+          "private indoor": "사적인 실내",
+          "bedroom / hotel room": "침실 / 호텔방",
+          "boudoir bedroom": "부두아르 침실",
+          "luxury hotel suite": "럭셔리 호텔 스위트",
+          "private lounge": "프라이빗 라운지",
+          "studio": "스튜디오",
+          "dressing room": "드레싱룸",
+          "bathroom": "욕실",
+          "spa / bath": "스파 / 목욕",
+          "poolside / beach": "수영장 / 해변"
+        }
+      },
+      "adult_scene_mood": {
+        "name": "성인 분위기",
+        "options": {
+          "auto": "선택 안함",
+          "soft boudoir": "소프트 부두아르",
+          "romantic warm intimacy": "따뜻한 로맨틱 친밀감",
+          "fashion editorial sensual": "패션 화보식 관능",
+          "luxury hotel evening": "럭셔리 호텔의 저녁",
+          "private mirror moment": "사적인 거울 장면",
+          "noir intimate": "누아르 친밀감",
+          "spa calm": "스파처럼 차분한",
+          "poolside glamour": "풀사이드 글래머",
+          "beach sunset sensual": "해변 석양 관능",
+          "studio glamour": "스튜디오 글래머",
+          "cozy morning softness": "부드러운 아침 분위기",
+          "after-bath softness": "목욕 후 부드러움",
+          "midnight hotel intimacy": "한밤의 호텔 친밀감",
+          "soft lingerie editorial": "소프트 란제리 화보",
+          "warm sheet-covered mood": "따뜻한 시트 커버 분위기",
+          "fine-art nude calm": "파인아트 누드 차분함",
+          "private dressing-room mood": "사적인 드레싱룸 분위기",
+          "mirror-lit sensuality": "거울빛 관능",
+          "rainy-window intimacy": "비 오는 창가 친밀감",
+          "candlelit romantic privacy": "촛불 로맨틱 프라이버시",
+          "glossy fashion sensuality": "글로시 패션 관능",
+          "quiet teasing mood": "조용히 장난스러운 분위기"
+        }
+      },
+      "adult_pose_style": {
+        "name": "성인 포즈",
+        "options": {
+          "auto": "선택 안함",
+          "relaxed sensual pose": "편안한 관능 포즈",
+          "reclining sensual pose": "기대어 누운 관능 포즈",
+          "seated sensual pose": "앉은 관능 포즈",
+          "standing confident pose": "당당하게 서 있는 포즈",
+          "looking over shoulder": "어깨 너머로 돌아봄",
+          "intimate portrait pose": "친밀한 인물 포즈",
+          "sitting on bed edge": "침대 가장자리에 앉음",
+          "lying on side": "옆으로 누움",
+          "wrapped in sheets": "시트에 감싸인 포즈",
+          "standing by mirror": "거울 옆에 서 있음",
+          "leaning against wall": "벽에 기대어 있음",
+          "adjusting robe": "로브를 정돈함",
+          "poolside lounging": "풀사이드에 기대어 쉼",
+          "back turned silhouette": "뒤돌아선 실루엣",
+          "seated on floor": "바닥에 앉은 포즈",
+          "kneeling portrait pose": "무릎 꿇은 인물 포즈",
+          "sitting by window": "창가에 앉은 포즈",
+          "lying on stomach": "엎드린 포즈",
+          "stretching on bed": "침대 위 스트레칭",
+          "hands in hair": "머리에 손을 얹은",
+          "covering with sheet": "시트로 가린",
+          "holding robe closed": "로브를 여민",
+          "side-profile silhouette": "측면 실루엣",
+          "seated mirror pose": "거울 옆에 앉은 포즈",
+          "one leg bent pose": "한쪽 다리를 굽힌 포즈",
+          "soft arched pose": "부드러운 아치형 포즈",
+          "hands near collarbone": "쇄골 근처에 손",
+          "looking down softly": "부드럽게 아래를 봄",
+          "turning away with glance": "돌아서며 시선만 돌림"
+        }
+      },
+      "adult_lighting": {
+        "name": "성인 조명",
+        "options": {
+          "auto": "선택 안함",
+          "warm bedside light": "따뜻한 침대 조명",
+          "low-key shadow": "로우키 그림자",
+          "soft window backlight": "부드러운 창가 역광",
+          "candlelit glow": "촛불 느낌",
+          "studio rim light": "스튜디오 림라이트",
+          "neon lounge light": "네온 라운지 조명",
+          "steamy bathroom light": "김 서린 욕실 조명",
+          "sunset backlight": "석양 역광",
+          "warm window glow": "따뜻한 창문빛",
+          "moonlit room": "달빛 방",
+          "rainy window light": "비 오는 창문빛",
+          "bathroom mirror light": "욕실 거울 조명",
+          "soft vanity lights": "부드러운 화장대 조명",
+          "hotel lamp glow": "호텔 램프 조명",
+          "silhouette backlight": "실루엣 역광",
+          "high-key studio glamour": "하이키 스튜디오 글래머",
+          "softbox glow": "소프트박스 광",
+          "colored gel rim light": "컬러 젤 림라이트"
+        }
+      },
+      "adult_scene_props": {
+        "name": "성인 소품",
+        "options": {
+          "auto": "선택 안함",
+          "satin sheets": "새틴 시트",
+          "sheer curtains": "시스루 커튼",
+          "bedside lamp": "침대 옆 조명",
+          "large mirror": "큰 거울",
+          "velvet chair": "벨벳 의자",
+          "silk fabric": "실크 천",
+          "candles": "촛불",
+          "bath steam": "욕실 수증기",
+          "pool reflection": "수영장 반사광",
+          "studio softbox": "스튜디오 소프트박스",
+          "curtains and pillows": "커튼과 베개",
+          "robe": "로브",
+          "towel": "수건",
+          "vanity table": "화장대",
+          "makeup mirror": "메이크업 거울",
+          "perfume bottle": "향수병",
+          "glass shower": "유리 샤워부스",
+          "bathtub edge": "욕조 가장자리",
+          "lace curtains": "레이스 커튼",
+          "soft rug": "부드러운 러그",
+          "dressing screen": "드레싱 스크린",
+          "window curtains": "창가 커튼",
+          "silk pillow": "실크 베개",
+          "jewelry tray": "주얼리 트레이",
+          "floor cushion": "바닥 쿠션"
+        }
+      },
+      "adult_body_focus": {
+        "name": "강조 포인트",
+        "options": {
+          "auto": "선택 안함",
+          "face and expression": "얼굴과 표정",
+          "upper body elegance": "상반신 우아함",
+          "full body silhouette": "전신 실루엣",
+          "legs-focused fashion framing": "다리 중심 패션 구도",
+          "back and shoulder silhouette": "등과 어깨 실루엣",
+          "hands and fabric detail": "손과 천 디테일",
+          "non-graphic body line": "비노골적 바디 라인",
+          "face with hands": "얼굴과 손",
+          "neckline and shoulders": "목선과 어깨",
+          "waist silhouette": "허리 실루엣",
+          "fabric-covered form": "천으로 가린 형태",
+          "profile body line": "측면 바디 라인",
+          "hair and shoulder line": "머리와 어깨선",
+          "mirror reflection focus": "거울 반사 강조"
+        }
+      },
+      "adult_framing_bias": {
+        "name": "구도 보정",
+        "options": {
+          "auto": "선택 안함",
+          "portrait safe": "안전한 인물 구도",
+          "close portrait": "가까운 인물",
+          "upper body": "상반신",
+          "waist-up": "허리 위",
+          "full body": "전신",
+          "tasteful silhouette": "품위 있는 실루엣",
+          "editorial full body": "화보식 전신",
+          "fabric detail close-up": "천 디테일 클로즈업",
+          "body-focused non-graphic": "몸 중심 / 비노골적"
+        }
+      },
+      "seed": {
+        "name": "시드"
+      },
+      "custom_text": {
+        "name": "추가 문구"
+      }
+    },
+    "display_name": "Ultra Tools Prompt Composer",
+    "description": "이미지 생성용 Positive / Negative 프롬프트를 모델 형식과 선택 옵션에 맞게 구성합니다.",
+    "outputs": {
+      "positive_prompt": {
+        "name": "Positive 프롬프트",
+        "description": "다른 텍스트/컨디셔닝 노드에 연결할 최종 positive 프롬프트입니다."
+      },
+      "negative_prompt": {
+        "name": "Negative 프롬프트",
+        "description": "다른 텍스트/컨디셔닝 노드에 연결할 최종 negative 프롬프트입니다."
+      }
+    }
+  },
+  "UltraToolsImageLoad": {
+    "display_name": "Ultra Tools Image Load",
+    "description": "ComfyUI Core 이미지 로드와 동일하게 이미지를 불러오며, 파일명 목록과 별도로 썸네일/리스트 이미지 브라우저를 제공합니다.",
+    "inputs": {
+      "image": {
+        "name": "이미지"
+      }
+    },
+    "outputs": {
+      "IMAGE": {
+        "name": "이미지"
+      },
+      "MASK": {
+        "name": "마스크"
+      }
+    }
+  },
+  "UltraImagePiD": {
+    "display_name": "Ultra Tools Image + PiD",
+    "description": "STRING 프롬프트로 Krea 2, Z-Image, Anima, Qwen Image를 생성하고 필요하면 통합 PiD 업스케일을 적용합니다. PiD Context Window는 내부 자동 적용되며 가로형은 dim 3, 세로형과 정사각형은 dim 2를 사용합니다.",
+    "inputs": {
+      "positive_prompt": {
+        "name": "positive_prompt",
+        "description": "Prompt Generator.output 같은 STRING을 연결합니다. 빈 문자열도 허용되며 그대로 인코딩됩니다."
+      },
+      "model_family": {
+        "name": "모델 계열"
+      },
+      "diffusion_model": {
+        "name": "확산 모델"
+      },
+      "text_encoder": {
+        "name": "텍스트 인코더"
+      },
+      "vae_name": {
+        "name": "VAE"
+      },
+      "width": {
+        "name": "가로"
+      },
+      "height": {
+        "name": "세로"
+      },
+      "batch_size": {
+        "name": "배치 크기",
+        "description": "PiD를 ON으로 사용하면 배치마다 4배 target을 생성하므로 VRAM 사용량이 크게 늘어납니다. PiD 사용 시에는 배치 1을 권장합니다."
+      },
+      "seed": {
+        "name": "시드"
+      },
+      "steps": {
+        "name": "스텝"
+      },
+      "cfg": {
+        "name": "CFG"
+      },
+      "sampler_name": {
+        "name": "샘플러"
+      },
+      "scheduler": {
+        "name": "스케줄러"
+      },
+      "denoise": {
+        "name": "디노이즈"
+      },
+      "negative_mode": {
+        "name": "네거티브 방식"
+      },
+      "negative_prompt": {
+        "name": "네거티브 프롬프트"
+      },
+      "pid_upscale": {
+        "name": "PiD 업스케일",
+        "description": "PiD 업스케일을 켜거나 끕니다. OFF에서는 PiD 전용 모델과 Context Window 경로를 실행하지 않습니다."
+      },
+      "pid_model": {
+        "name": "PiD 모델"
+      },
+      "pid_sampler": {
+        "name": "PiD 샘플러"
+      },
+      "pid_scheduler": {
+        "name": "PiD 스케줄러"
+      },
+      "pid_steps": {
+        "name": "PiD 스텝"
+      },
+      "pid_degrade_sigma": {
+        "name": "PiD degrade sigma"
+      },
+      "pid_output_scale": {
+        "name": "PiD 최종 배율"
+      },
+      "sage_attention": {
+        "name": "SageAttention",
+        "description": "메인 이미지 생성 MODEL에만 KJ Patch Sage Attention KJ를 내부 적용합니다. OFF에서는 KJNodes나 SageAttention을 조회하거나 실행하지 않습니다. ON은 auto / allow_compile=False로 동작합니다."
+      }
+    },
+    "outputs": {
+      "Original Image": {
+        "name": "원본 이미지"
+      },
+      "PiD Image": {
+        "name": "PiD 이미지"
+      }
+    }
+  }
+}

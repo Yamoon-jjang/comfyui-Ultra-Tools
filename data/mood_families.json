@@ -1,0 +1,311 @@
+{
+  "Default / None": {
+    "anchor": "",
+    "emotion": [],
+    "avoid": []
+  },
+  "Erotic / Sensual": {
+    "anchor": "restrained adult sensual tension and private magnetism",
+    "emotion": [
+      "quiet desire",
+      "adult intimacy",
+      "elegant restraint",
+      "private magnetic pull",
+      "smoldering restraint",
+      "velvet attraction"
+    ],
+    "avoid": [
+      "explicit sexual act",
+      "pornographic staging",
+      "juvenile styling"
+    ]
+  },
+  "Lyrical / Poetic": {
+    "anchor": "lyrical melancholy, quiet tenderness, and poetic stillness",
+    "emotion": [
+      "quiet longing",
+      "poetic stillness",
+      "delicate tenderness",
+      "soft emotional distance"
+    ],
+    "avoid": [
+      "overly dramatic posing",
+      "abstract color noise"
+    ]
+  },
+  "Classical / Golden Age": {
+    "anchor": "timeless graceful poise and classical romantic dignity",
+    "emotion": [
+      "timeless elegance",
+      "refined poise",
+      "classical romance",
+      "graceful stillness"
+    ],
+    "avoid": [
+      "modern casual clutter",
+      "random streetwear"
+    ]
+  },
+  "Noir / Neo-noir": {
+    "anchor": "nocturnal suspicion, private unease, and shadowed desire",
+    "emotion": [
+      "shadowed desire",
+      "silent suspicion",
+      "private unease",
+      "dangerous intimacy"
+    ],
+    "avoid": [
+      "flat daylight",
+      "comedy tone"
+    ]
+  },
+  "Dreamlike / Surreal": {
+    "anchor": "dreamlike emotional suspension and soft unreality",
+    "emotion": [
+      "soft unreality",
+      "subconscious intimacy",
+      "floating calm",
+      "ambiguous emotion"
+    ],
+    "avoid": [
+      "random abstract pattern replacing the subject",
+      "unreadable subject"
+    ]
+  },
+  "Gothic Romance": {
+    "anchor": "gothic longing and haunted romantic elegance",
+    "emotion": [
+      "haunted elegance",
+      "low amber longing",
+      "velvet tension",
+      "romantic unease"
+    ],
+    "avoid": [
+      "cartoon horror",
+      "cheap monster props"
+    ]
+  },
+  "Melodrama": {
+    "anchor": "lush emotional melodrama and suspended yearning",
+    "emotion": [
+      "heightened emotion",
+      "suspended yearning",
+      "romantic conflict",
+      "fragile intensity"
+    ],
+    "avoid": [
+      "neutral documentary tone"
+    ]
+  },
+  "Fashion Editorial": {
+    "anchor": "confident luxury poise and sculpted editorial presence",
+    "emotion": [
+      "controlled sensuality",
+      "luxury calm",
+      "confident elegance",
+      "sculpted presence"
+    ],
+    "avoid": [
+      "messy amateur snapshot",
+      "cheap costume look"
+    ]
+  },
+  "Arthouse Realism": {
+    "anchor": "ordinary private realism and hushed intimacy",
+    "emotion": [
+      "ordinary private moment",
+      "hushed intimacy",
+      "unposed emotional realism",
+      "natural vulnerability"
+    ],
+    "avoid": [
+      "over-polished fantasy",
+      "exaggerated glamour"
+    ]
+  },
+  "Pop Neon": {
+    "anchor": "electric nightlife allure and glossy modern excitement",
+    "emotion": [
+      "electric attraction",
+      "modern nightlife energy",
+      "glossy allure",
+      "color-driven tension"
+    ],
+    "avoid": [
+      "muddy lighting",
+      "desaturated dullness"
+    ]
+  },
+  "Baroque / Operatic": {
+    "anchor": "operatic emotional grandeur and candlelit ceremony",
+    "emotion": [
+      "theatrical intensity",
+      "operatic elegance",
+      "ceremonial drama",
+      "grand emotional weight"
+    ],
+    "avoid": [
+      "minimal empty background",
+      "literal picture frame",
+      "decorative outer frame",
+      "ornate border",
+      "gilded border",
+      "framed portrait on wall",
+      "museum frame",
+      "letterbox border",
+      "image border"
+    ]
+  },
+  "Minimalist Psychological": {
+    "anchor": "restrained psychological distance and quiet inner pressure",
+    "emotion": [
+      "controlled distance",
+      "cold stillness",
+      "quiet inner pressure",
+      "restrained vulnerability"
+    ],
+    "avoid": [
+      "busy decoration",
+      "chaotic color palette"
+    ]
+  },
+  "Dark Fantasy Romance": {
+    "anchor": "dark fantasy longing, ominous elegance, and shadow pursuit",
+    "emotion": [
+      "shadowy attraction",
+      "ominous elegance",
+      "mythic longing",
+      "chased by darkness atmosphere",
+      "haunted desire",
+      "velvet gloom"
+    ],
+    "avoid": [
+      "literal skull props",
+      "generic Halloween costume"
+    ]
+  },
+  "Black & White Film": {
+    "anchor": "timeless monochrome restraint and austere classic gravity",
+    "emotion": [
+      "austere drama",
+      "timeless contrast",
+      "monochrome gravity",
+      "tonal seriousness"
+    ],
+    "avoid": [
+      "cartoonish brightness",
+      "casual colorful cheer"
+    ]
+  },
+  "Golden Hour Warmth": {
+    "anchor": "warm nostalgic tenderness and radiant calm",
+    "emotion": [
+      "warm intimacy",
+      "radiant calm",
+      "nostalgic tenderness",
+      "peaceful affection"
+    ],
+    "avoid": [
+      "cold emotional distance",
+      "clinical harshness"
+    ]
+  },
+  "Vintage / Retro": {
+    "anchor": "nostalgic memory warmth and lived-in retro charm",
+    "emotion": [
+      "nostalgic warmth",
+      "faded memory",
+      "retro charm",
+      "gentle remembrance"
+    ],
+    "avoid": [
+      "clinical modern coldness",
+      "digital sterility"
+    ]
+  },
+  "Cyberpunk / Sci-fi": {
+    "anchor": "futuristic alienation, electric unease, and synthetic tension",
+    "emotion": [
+      "futuristic tension",
+      "digital edge",
+      "electric unease",
+      "neon isolation"
+    ],
+    "avoid": [
+      "pastoral calm",
+      "old-fashioned nostalgia"
+    ]
+  },
+  "Watercolor / Painterly": {
+    "anchor": "painted serenity, lyrical softness, and handmade calm",
+    "emotion": [
+      "painted serenity",
+      "lyrical softness",
+      "gentle impression",
+      "handmade calm",
+      "airy tranquility",
+      "soft handcrafted warmth"
+    ],
+    "avoid": [
+      "aggressive harshness",
+      "clinical sharpness"
+    ]
+  },
+  "Bright / High-key": {
+    "anchor": "cheerful airy optimism and clean uplift",
+    "emotion": [
+      "cheerful lightness",
+      "clean radiance",
+      "fresh uplift",
+      "airy calm"
+    ],
+    "avoid": [
+      "oppressive darkness",
+      "heavy gloom"
+    ]
+  },
+  "Cinematic Widescreen": {
+    "anchor": "grand narrative scale, spacious drama, and sweeping momentum",
+    "emotion": [
+      "epic scale",
+      "dramatic scope",
+      "sweeping momentum",
+      "large emotional breadth"
+    ],
+    "avoid": [
+      "trivial snapshot feeling",
+      "small casual mood"
+    ]
+  },
+  "Romantic / Soft Focus": {
+    "anchor": "tender romantic closeness and dreamy intimacy",
+    "emotion": [
+      "tender romance",
+      "dreamy intimacy",
+      "gentle warmth",
+      "soft closeness",
+      "soft yearning",
+      "candle-warm affection"
+    ],
+    "avoid": [
+      "cold clinical distance",
+      "harsh emotional tone"
+    ]
+  },
+  "Horror / Unsettling": {
+    "anchor": "creeping horror dread, eerie silence, and suffocating unease",
+    "emotion": [
+      "creeping dread",
+      "eerie silence",
+      "psychological horror",
+      "suffocating unease",
+      "uncanny stillness",
+      "cold anticipatory fear"
+    ],
+    "avoid": [
+      "cheerful mood",
+      "bright colors",
+      "comedy tone"
+    ]
+  }
+}

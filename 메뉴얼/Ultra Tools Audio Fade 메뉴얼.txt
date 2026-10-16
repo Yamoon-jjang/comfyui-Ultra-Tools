@@ -1,0 +1,84 @@
+﻿Ultra Tools Audio Fade 메뉴얼
+=============================
+
+1. 노드 소개
+------------
+Ultra Tools Audio Fade는 ComfyUI AUDIO의 시작과 끝에 비파괴 Fade를 적용하는 보조 노드입니다.
+MiniMax H3처럼 생성 오디오 시작 순간에 짧은 팝/찌직음이 들릴 때 AUDIO 선 중간에 연결해서 사용할 수 있습니다.
+
+이 노드는 오디오 길이, sample rate, 영상/오디오 싱크를 변경하지 않습니다.
+입력 waveform을 직접 덮어쓰지 않고 복제한 새 waveform에만 gain 곡선을 적용합니다.
+
+2. 노드 찾기
+------------
+ComfyUI 노드 검색에서 다음 이름으로 찾습니다.
+
+Ultra Tools Audio Fade
+
+카테고리:
+Ultra Tools
+
+3. 기본 연결
+------------
+예:
+
+MiniMax H3 AUDIO -> Ultra Tools Audio Fade -> Create Video AUDIO
+
+일반 AUDIO를 출력하는 다른 노드에도 같은 방식으로 연결할 수 있습니다.
+
+4. 입력과 출력
+--------------
+- audio: ComfyUI AUDIO 입력
+- fade_in_seconds: 시작 Fade In 길이. 기본값 0.15초, 범위 0.00~10.00초, 0.01초 단위
+- fade_out_seconds: 끝 Fade Out 길이. 기본값 0.00초, 범위 0.00~10.00초, 0.01초 단위
+- curve: Fade gain 곡선
+- audio 출력: Fade가 적용된 새 AUDIO
+
+5. curve 종류
+-------------
+- smooth: 기본값. 시작과 끝이 부드러운 half-cosine 계열 곡선입니다.
+- linear: 0에서 1까지 선형으로 변화합니다.
+- equal_power: 초반부터 비교적 자연스럽게 음량이 올라오는 곡선입니다.
+- exponential: Fade In 초반을 더 강하게 억제하고 뒤쪽에서 빠르게 정상 음량으로 접근합니다. 시작 잡음이 강할 때 시험할 수 있습니다.
+
+6. MiniMax H3 시작 잡음에 사용할 때
+----------------------------------
+기본값은 fade_in_seconds = 0.15 입니다.
+0.15초로도 잡음이 남으면 0.18~0.20초 정도까지 조금씩 올려 보십시오.
+너무 길게 설정하면 정상적인 첫 음성이나 효과음까지 약해질 수 있으므로 필요한 만큼만 늘리는 것이 좋습니다.
+
+6-1. 매우 짧은 오디오에서 양쪽 Fade를 함께 사용할 때
+------------------------------------------------
+Fade In + Fade Out 합이 클립 길이를 넘는 경우 노드는 두 Fade를 비례 축소하여 서로 겹치지 않게 만듭니다.
+
+예:
+- 1.00초 오디오
+- Fade In 0.80초
+- Fade Out 0.80초
+
+요청 비율이 1:1이므로 실제 적용 길이는 약 0.50초 + 0.50초가 됩니다.
+오디오 총 길이와 sample rate는 바뀌지 않습니다.
+
+7. 안전 동작
+------------
+- 오디오 길이를 자르거나 늘리지 않습니다.
+- sample rate를 변경하지 않습니다.
+- 영상/오디오 싱크를 이동하지 않습니다.
+- 입력 AUDIO waveform을 직접 수정하지 않습니다.
+- Fade 시간이 실제 오디오보다 길면 실제 오디오 길이까지만 적용합니다.
+- Fade In과 Fade Out의 합이 오디오 길이보다 길면 두 구간이 겹치지 않도록 요청한 In/Out 비율을 유지한 채 자동 축소합니다. 따라서 중앙부가 두 gain 곡선에 동시에 곱해져 과감쇠되는 현상을 방지합니다.
+- 정수가 들어온 비표준 waveform도 gain 계산 중 양자화되지 않도록 float32로 안전 변환합니다.
+
+8. 설치
+-------
+Ultra Tools 통합 패키지의 노드입니다.
+압축을 푼 폴더가 다음과 같이 위치하도록 설치합니다.
+
+ComfyUI/custom_nodes/comfyui-Ultra-Tools/
+
+통합 전의 개별 패키지를 사용했다면 다음 기존 폴더는 삭제한 뒤 통합 패키지만 설치하는 것을 권장합니다.
+- comfyui-Ultra-textbox
+- comfyui-Ultra-Translator
+- comfyui-Ultra-model-viewer
+- comfyui-Ultra-wildcard_browser
+설치 후 ComfyUI를 완전히 재시작하고 브라우저를 새로고침합니다.

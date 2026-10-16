@@ -1,0 +1,104 @@
+﻿Ultra Tools Text Watermark 사용 메뉴얼
+=====================================
+
+1. 노드 소개
+------------
+Ultra Tools Text Watermark는 이미지 위에 텍스트 1과 텍스트 2를 조합한 문단형 워터마크를 삽입합니다.
+
+노드 이름: Ultra Tools Text Watermark
+카테고리: Ultra Tools
+내부 노드 키: UltraTextWatermark
+
+지원 기능
+- 텍스트 1 / 텍스트 2 독립 문구
+- 각 텍스트별 폰트, 크기, 색상, 정렬, 스타일
+- 각 텍스트별 외곽선
+- 텍스트별 글로우 사용 여부 + 공통 글로우 설정
+- 세로/가로 배치, 두 텍스트 블록 간격
+- 전체 불투명도, 위치, X/Y 미세 조정, 회전
+- 멀티라인 텍스트와 줄 간격
+
+2. 폰트 준비
+-----------
+이 노드는 우선 패키지의 fonts 폴더에 있는 사용자 폰트 파일을 읽습니다.
+지원 확장자: .ttf, .otf, .ttc, .otc
+
+경로:
+ComfyUI/custom_nodes/comfyui-Ultra-Tools/fonts/
+
+fonts 폴더에 지원 폰트가 있으면 그 목록을 우선 사용합니다.
+fonts 폴더가 비어 있으면 Windows/macOS/Linux에 설치된 시스템 폰트를 자동으로 찾아 대체 목록으로 사용합니다.
+특정 워터마크용 폰트를 고정해서 쓰고 싶다면 해당 폰트를 Ultra Tools의 fonts 폴더에 직접 넣는 방식을 권장합니다.
+로컬 폰트와 시스템 폰트가 모두 하나도 발견되지 않는 경우에만 <NO_FONTS_FOUND>가 표시되고 실행 시 오류가 납니다.
+
+3. 기본 연결
+-----------
+[생성 이미지] IMAGE
+    ↓
+Ultra Tools Text Watermark / image
+    ↓ IMAGE
+Save Image
+
+4. Fonts & Text
+--------------
+Text 1과 Text 2는 서로 다른 폰트와 크기/색/정렬/스타일을 사용할 수 있습니다.
+각 텍스트는 여러 줄을 지원합니다.
+
+First/Second Line Spacing
+- 각 텍스트 블록 내부의 줄 간격입니다.
+
+First/Second Outline Enabled / Width / Color
+- 각 텍스트의 외곽선을 독립적으로 제어합니다.
+- 배경과 글자 명도가 비슷할 때 얇은 외곽선이 가독성에 도움이 됩니다.
+
+5. Spacing
+---------
+Layout Direction
+- vertical: 텍스트 1과 텍스트 2를 위/아래로 배치
+- horizontal: 두 텍스트를 좌/우로 배치
+
+Height Align Mode
+- 가로 배치 시 두 텍스트 블록의 세로 기준 정렬에 사용합니다.
+
+Block Spacing
+- 텍스트 1 블록과 텍스트 2 블록 사이의 간격입니다.
+- 각 텍스트 내부의 줄 간격과는 별개입니다.
+
+6. Glow
+------
+First Glow Enabled / Second Glow Enabled로 어느 텍스트에 글로우를 적용할지 선택합니다.
+Glow Color / Thickness / Blur / Opacity는 공통 효과값입니다.
+선택된 텍스트 마스크를 합친 뒤 글로우를 한 번 생성하여 과도한 중첩을 줄입니다.
+Glow Thickness가 0이면 글로우 효과는 실질적으로 생성되지 않습니다.
+
+7. Adjust
+--------
+Watermark Opacity
+- 텍스트 워터마크 전체 불투명도입니다.
+
+Align
+- top/center/bottom 및 left/center/right 계열의 기본 위치를 정합니다.
+
+Align Offset
+- 가장자리 기본 여백입니다.
+
+Align Offset X / Y
+- 기본 위치에서 가로/세로로 미세 조정합니다.
+
+Rotation
+- 텍스트 워터마크 블록 전체를 회전합니다.
+
+8. 이미지 워터마크와 함께 쓸 때
+-----------------------------
+일반적인 권장 순서:
+원본 이미지 → Ultra Tools Image Watermark → Ultra Tools Text Watermark → Save Image
+
+이 순서는 로고/반복 패턴을 먼저 합성하고 제작자명이나 출처 텍스트를 마지막에 선명하게 남기기 좋습니다.
+로고를 가장 위에 두고 싶다면 순서를 반대로 연결해도 됩니다.
+
+9. 주의사항
+-----------
+- 이 노드는 배경 제거 기능이 아닙니다.
+- 매우 큰 글자 크기/강한 글로우/큰 이미지 조합은 중간 RGBA 레이어를 크게 만들 수 있습니다.
+- 폰트 파일 자체의 특성에 따라 Bold/Italic 가상 스타일의 품질 차이가 있을 수 있습니다.
+- 워크플로우에서 선택했던 폰트가 fonts 폴더에서 제거되면 해당 폰트를 다시 넣거나 다른 폰트를 선택해야 합니다.

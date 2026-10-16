@@ -1,0 +1,640 @@
+﻿※ 분위기(무드) 항목에는 "🎲 Random All"가 추가되어 있습니다. 이 옵션은 일반 분위기와 특수 스타일 그룹까지 포함한 상위 랜덤입니다. 스타일을 "Auto by Mood"로 두면, 랜덤으로 뽑힌 일반 분위기 또는 특수 그룹에 맞춰 스타일도 자동으로 함께 선택됩니다.
+
+※ 분위기(무드) 항목에는 아래 특수 랜덤 그룹도 있습니다.
+- "🎲 Random Transformative Style": Chibi Style, 3D Collectible Figure, Pixel Art, Miniature Diorama 중 하나를 랜덤 선택합니다.
+- "🎲 Random Traditional Media Style": Ink Wash / Sumi-e, Watercolor / Painterly, Colored Pencil Illustration, Pen and Ink Sketch, Charcoal Drawing, Graphite Pencil Sketch, Pastel Chalk Drawing, Oil Painting, Gouache Storybook Illustration 중 하나를 랜덤 선택합니다.
+
+중요한 동작 방식:
+1) 분위기를 "🎲 Random All"로 두면 먼저 일반 분위기와 특수 스타일 그룹 후보 중 하나가 랜덤 선택됩니다.
+2) 여기서 일반 분위기가 걸리면 기존처럼 그 분위기에 맞는 스타일이 자동 선택됩니다.
+3) 여기서 "🎲 Random Transformative Style" 또는 "🎲 Random Traditional Media Style"이 걸리면, 그 그룹 내부에서 스타일이 한 번 더 랜덤 선택됩니다.
+4) 즉 "랜덤 전체 → 일반 분위기" 또는 "랜덤 전체 → 특수 스타일 그룹 당첨 → 그룹 내부에서 또 랜덤" 또는 "랜덤 전체 → 내부 기타 스타일 당첨" 구조가 가능합니다.
+5) 두 특수 그룹은 일반 분위기처럼 별도의 무드 앵커를 강하게 붙이는 용도가 아니라, 스타일 방향을 랜덤 선택하는 특수 라우터입니다. 따라서 이 경우 실제 무드 앵커는 기본(None)으로 처리되고 최종 스타일만 그룹 내부 랜덤으로 정해집니다.
+6) 또한 일부 스타일은 분위기 목록에 직접 보이지 않아도, "🎲 Random All"에서만 내부 기타 스타일로 랜덤 선택될 수 있습니다. 현재 내부 기타 스타일에는 Apocalyptic Wasteland, Hand-Painted Storybook Animation, Long Exposure Light Trails, Mediterranean Sunlight, Volumetric Dust Light가 포함됩니다.
+
+Ultra Tools Prompt Styler 메뉴얼
+================================
+
+
+[중요 안내] Anima 계열에서 스타일이 안 먹는 것처럼 보일 때
+------------------------------------------------------------
+이 노드는 이미지 처리 노드가 아니라 프롬프트 문구를 생성·삽입·정리하는 스타일러입니다. 따라서 최종 이미지에서 스타일이 얼마나 반영되는지는 모델, LoRA, CFG, 샘플러, 해상도, 워크플로우 구성의 영향을 크게 받습니다.
+
+특히 Anima 계열 모델은 공식 모델을 사용하더라도 품질 LoRA, 속도 LoRA, 터보/가속 LoRA, 특정 화풍 고정 LoRA를 함께 사용하면 선택한 스타일 문구가 거의 반영되지 않을 수 있습니다. 이 경우 치비처럼 모델이 강하게 학습한 일부 태그는 먹지만, 픽셀아트, 미니어처 디오라마, 3D 피규어, 파스텔, 연필, 수채화, 유화 같은 변환형 스타일은 일반 애니 일러스트처럼 나올 수 있습니다.
+
+이 현상은 보통 커스텀 노드가 프롬프트를 잘못 만든 것이 아니라, LoRA가 모델의 출력 스타일 공간을 특정 방향으로 강하게 고정해서 발생합니다. 스타일 적용을 테스트할 때는 먼저 품질/속도/화풍 LoRA를 모두 끄고 공식 모델 단독 또는 최소 구성으로 확인하세요. 그 뒤 필요한 LoRA를 하나씩 켜면서 어느 LoRA가 스타일 반영을 막는지 확인하는 것이 좋습니다.
+
+권장 테스트 순서:
+1) 공식 Anima 모델 단독으로 테스트합니다.
+2) 같은 프롬프트와 같은 시드에서 스타일 방향만 바꿔봅니다.
+3) 스타일이 정상 반영되면 품질 LoRA, 속도 LoRA, 화풍 LoRA를 하나씩 다시 켭니다.
+4) 특정 LoRA를 켠 순간 스타일이 약해지면, 그 LoRA가 스타일 반영을 방해하는 것입니다.
+
+프롬프트 안의 `masterpiece`, `best quality`, `score_7`, `safe` 같은 품질 태그 자체는 일반적으로 사용할 수 있지만, LoRA가 함께 들어간 상태에서는 품질/속도 LoRA 쪽 영향이 스타일 문구보다 강해질 수 있습니다. 스타일이 안 먹는다고 바로 노드 오류로 판단하기 전에 먼저 LoRA 구성을 확인하세요.
+
+1. 노드 개요
+-----------
+comfyui-Ultra-Tools는 이미지 처리/생성 노드가 아니라, 텍스트 프롬프트 문구를 생성·삽입·정규화·병합하는 ComfyUI 커스텀 노드입니다.
+
+주요 목적은 다음과 같습니다.
+
+- 외부 텍스트 프롬프트를 최대한 보존하면서 모델별 형식에 맞는 Positive / Negative 프롬프트를 출력합니다.
+- 분위기, 스타일 방향, 구도, 렌즈, 성인 톤, 성인 의상, 추가 문구를 하나의 프롬프트로 정리합니다.
+- Z-Image, Qwen, Flux 같은 자연어 모델과 Anima, SDXL, ILXL, Pony, SD 1.5 같은 태그형 모델의 프롬프트 형식을 다르게 처리합니다.
+- SD attention, weighted tag, 쉼표, 깨진 괄호, decimal comma 같은 프롬프트 문법을 최대한 보존합니다.
+- 수채화, 목탄, 연필, 펜화, 수묵, 파스텔, 불투명 물감, 손그림 동화풍, 셀 애니메이션 같은 비사진 스타일에 사진/렌즈/실사 문구가 자동으로 섞이지 않게 합니다.
+
+노드 출력은 두 개입니다.
+
+- Positive 프롬프트
+- Negative 프롬프트
+
+이 출력은 ComfyUI의 CLIP Text Encode, Conditioning 또는 다른 텍스트/컨디셔닝 입력으로 연결해서 사용합니다.
+
+
+2. 설치 방법
+------------
+1) 압축 파일을 풉니다.
+2) 폴더 이름이 다음과 같은지 확인합니다.
+
+   comfyui-Ultra-Tools
+
+3) 이 폴더를 ComfyUI의 custom_nodes 폴더 안에 넣습니다.
+
+   예:
+   ComfyUI/custom_nodes/comfyui-Ultra-Tools
+
+4) ComfyUI를 재시작합니다.
+5) 노드 검색에서 다음 이름을 찾습니다.
+
+   Ultra Tools Prompt Styler
+
+6) 노드 카테고리는 다음 위치에 표시됩니다.
+
+   Ultra Tools
+
+
+3. 기본 연결 방법
+-----------------
+가장 일반적인 연결은 다음과 같습니다.
+
+외부 텍스트 노드 / 프롬프트 입력 노드
+        ↓
+external_positive_in
+Ultra Tools Prompt Styler
+        ↓ positive_prompt
+CLIP Text Encode 또는 모델용 프롬프트 입력
+
+negative 프롬프트가 있다면 다음처럼 연결합니다.
+
+외부 negative 텍스트 노드
+        ↓
+external_negative_in
+Ultra Tools Prompt Styler
+        ↓ negative_prompt
+Negative CLIP Text Encode 또는 모델용 negative 입력
+
+external_positive_in과 external_negative_in은 일반 위젯이 아니라 forceInput 포트입니다. 다른 텍스트 노드에서 들어오는 입력값을 받기 위한 포트입니다.
+
+
+4. 메뉴 순서와 의미
+------------------
+현재 노드의 주요 메뉴 흐름은 다음과 같습니다.
+
+1) 모델
+2) 분위기
+3) 스타일 방향
+4) 스타일 반영 방식
+5) 구도 / 화면 범위
+6) 카메라 / 렌즈 느낌
+7) 성인 표현 톤
+8) 성인 의상
+9) 원본 프롬프트와 합치기
+10) 시드
+11) 추가 문구
+
+이 순서는 프롬프트 설계 흐름에 맞춰 구성되어 있습니다.
+
+- 모델 형식: 출력 문법을 결정합니다.
+- 분위기: 프롬프트가 묘사하는 장면의 감정과 전체 톤을 정합니다.
+- 스타일 방향: 색감, 조명, 재료감, 그림체, 화면 질감 같은 표현 방식을 정합니다.
+- 스타일 반영 방식: 원본 프롬프트를 얼마나 보존할지와 선택한 스타일을 얼마나 앞세울지 정합니다.
+- 구도 / 화면 범위: 인물이 화면에 어느 정도 들어오는지 지정합니다.
+- 카메라 / 렌즈 느낌: 넓은 화면, 배경 흐림, 아래에서 올려다봄 같은 카메라 느낌을 지정합니다.
+- 성인 표현 톤: 성인 표현 강도를 지정합니다.
+- 성인 의상: 성인 톤 아래에서 의상/노출 방향을 지정합니다.
+- 원본 프롬프트와 합치기: 원본 프롬프트와 스타일 문구를 어디에서 합칠지 정합니다.
+- 시드: 노드 내부 랜덤 선택의 재현성에 관여합니다.
+- 추가 문구: 사용자가 직접 넣는 보조 영어 문구입니다.
+
+
+5. 모델 메뉴
+------------
+모델 메뉴는 최종 positive 프롬프트의 형식을 결정합니다.
+
+Z-Image Natural
+- 자연어 중심 모델용입니다.
+- 외부 프롬프트 본문 뒤에 스타일 문장을 붙이되, positive 안에 원본 주체/자세/의상/장면/소품을 유지하라는 문구를 함께 넣습니다.
+- 한글 간판이나 사인처럼 텍스트가 깨지기 쉬운 모델 특성을 고려해, 원본 프롬프트가 직접 요구하지 않는 추가 문자/로고/간판을 만들지 말라는 문구도 positive 안에 넣습니다.
+
+Qwen Natural
+- Qwen 계열 자연어 모델용입니다.
+- Preserve / Change only 구조로 정리해, 무엇을 유지하고 무엇만 스타일로 바꿀지 더 분명하게 출력합니다.
+
+Flux Natural
+- Flux 계열 자연어 모델용입니다.
+- 라벨식 문구보다 자연스러운 한 문단형 스타일 지시를 선호하도록 조정했습니다.
+- 비사진 스타일에서는 cinematic 같은 자동 품질 문구가 제거되어 수채화/펜/목탄 계열을 방해하지 않게 됩니다.
+
+Anima Mixed
+- 태그형 리드 + 짧은 자연어 보조 문장 구조입니다.
+- Anima 계열처럼 태그와 자연어를 함께 쓰는 모델에 적합합니다.
+- 앞부분은 태그형이고, 뒤에는 “Keep the original subject...” 같은 짧은 보조 문장이 붙을 수 있습니다.
+
+SDXL Tag
+- SDXL 계열 태그형 프롬프트입니다.
+- quality/rating/style 태그 중심으로 출력합니다.
+
+ILXL / Illustrious Tag
+- Illustrious / ILXL 계열 태그형 모델용입니다.
+- safe/sensitive/nsfw 계열 태그를 모델 규칙에 맞게 정리합니다.
+
+Pony Tag
+- Pony 계열 태그형 모델용입니다.
+- rating_safe, rating_questionable, rating_explicit, source_anime 등 Pony 계열 규칙을 반영합니다.
+- 외부 프롬프트에 rating_safe와 rating_explicit, source_real과 source_anime이 동시에 들어오지 않도록 충돌을 정리합니다.
+
+SD 1.5 Tag
+- SD 1.5 계열 태그형 모델용입니다.
+
+Universal Natural Language
+- 특정 모델에 종속되지 않는 범용 자연어 출력입니다.
+
+
+6. 분위기 메뉴
+------------
+분위기는 프롬프트가 묘사하는 장면의 감정, 심리, 분위기, 서사 톤을 담당합니다.
+분위기는 원칙적으로 “어떤 시각 기법을 지시할 것인가”보다 “어떤 감정과 분위기를 문구로 보강할 것인가”에 가깝습니다.
+
+예:
+- 서정적 / 시적
+- 고딕풍 로맨스
+- 몽환적인 분위기
+- 호러 / 불안한 분위기
+- 장대한 서사감
+- 따뜻한 노을빛 분위기
+
+주의할 점:
+일부 분위기는 이름 자체가 시각 스타일과 가까울 수 있습니다. 예를 들어 “수채화적 서정감”은 분위기 메뉴에 있지만, 모델에 따라 수채화풍 표현 지시로 해석될 수 있습니다. 완전한 분리는 모델 특성상 항상 보장되지 않습니다.
+
+분위기와 스타일을 완전히 다르게 쓰고 싶다면:
+- 분위기: 원하는 감정/분위기 선택
+- 스타일 방향: 원하는 시각 표현 선택
+
+분위기만 약하게 주고 싶다면:
+- 분위기 선택
+- 스타일 방향은 “중립 / 최소 개입” 선택
+
+특수 랜덤 그룹
+- "🎲 Random All": 일반 분위기와 특수 스타일 그룹 후보 중 하나를 랜덤 선택합니다.
+- "🎲 Random Transformative Style": 변환형 스타일 그룹(치비 / 3D 피규어 / 픽셀아트 / 미니어처) 중 하나를 랜덤 선택합니다.
+- "🎲 Random Traditional Media Style": 전통 매체 화풍 그룹(수묵화 / 수채화 / 색연필 / 펜화 / 목탄 / 연필 / 파스텔 / 유화 / 구아슈) 중 하나를 랜덤 선택합니다.
+
+스타일 방향이 "Auto by Mood"일 때의 규칙
+- 일반 분위기 선택 → 그 분위기에 매치된 스타일 자동 선택
+- 특수 랜덤 그룹 선택 → 그 그룹 내부 스타일 중 하나를 다시 랜덤 선택
+- 따라서 "🎲 Random All"와 "Auto by Mood"를 함께 쓰면, 일반 분위기는 1단 랜덤, 특수 그룹이 걸리면 2단 랜덤, 내부 기타 스타일이 걸리면 직접 스타일 1회 랜덤으로 동작할 수 있습니다.
+
+
+7. 스타일 방향 메뉴
+------------------
+스타일 방향은 프롬프트가 지시하는 시각 표현 방식입니다.
+재료감, 질감, 선, 색감, 조명, 렌더링 방식 등이 여기에 해당합니다.
+
+대표 스타일 방향:
+- 수채화 회화 느낌
+- 목탄 드로잉
+- 연필 스케치
+- 펜화 스케치
+- 먹그림 / 수묵화
+- 색연필 일러스트
+- 파스텔 초크 드로잉
+- 불투명 물감 동화풍
+- 손그림 동화 애니풍
+- 깔끔한 셀 애니풍
+- 사이버펑크 네온
+- 따뜻한 노을빛
+- 빈티지 필름 느낌
+- 클래식 흑백
+- 어두운 판타지 그림자
+- 화려하고 웅장한 무대감
+
+Auto by Mood / 분위기에 맞춰 자동
+- 분위기에 맞는 스타일을 자동 선택합니다.
+- 예: 수채화적 서정감 → 수채화 회화 느낌
+- 예: 호러 / 불안한 분위기 → 어두운 판타지 그림자
+- 예: 분위기 = "🎲 Random Transformative Style" → 치비 / 3D 피규어 / 픽셀아트 / 미니어처 중 하나를 다시 랜덤 선택
+- 예: 분위기 = "🎲 Random Traditional Media Style" → 수묵화 / 수채화 / 색연필 / 펜화 / 목탄 / 연필 / 파스텔 / 유화 / 구아슈 중 하나를 다시 랜덤 선택
+- 예: 분위기 = "🎲 Random All" → 내부 기타 스타일이 걸리면 Apocalyptic Wasteland / Hand-Painted Storybook Animation / Long Exposure Light Trails / Mediterranean Sunlight / Volumetric Dust Light 중 하나가 직접 선택될 수 있음
+
+Neutral / Minimal Carryover / 중립 / 최소 개입
+- 외부 프롬프트를 최대한 건드리지 않습니다.
+- 스타일을 거의 추가하지 않고 싶을 때 사용합니다.
+
+비사진 스타일 보호
+수채화, 목탄, 연필, 펜화, 수묵, 불투명 물감, 파스텔, 손그림 동화풍, 셀 애니메이션 같은 스타일에는 자동으로 cinematic, lens, camera, photorealistic 같은 방해 문구가 삽입되지 않도록 처리되어 있습니다.
+
+다만 기본값에서는 사용자가 직접 custom_text나 외부 프롬프트에 그런 문구를 넣으면, 노드는 그것을 사용자의 의도 입력으로 보고 최대한 보존합니다.
+즉, 노드가 자동으로 넣는 문구는 보호할 수 있지만, 기본 설정에서는 사용자가 외부 프롬프트에 직접 넣은 표현까지 임의로 삭제하지는 않습니다.
+
+스타일 방해 문구 정리 옵션
+
+이 옵션은 프롬프트를 의미 분석해서 마음대로 고치는 기능이 아닙니다. 선택한 스타일마다 별도의 conflict profile을 사용합니다. 예를 들어 수채화·스케치 계열은 사진 렌즈/DSLR/피부 모공 같은 문구를 완화하고, 치비 스타일은 현실적인 성인 신체비율·긴 다리·자연 해부학 문구를 SD 비율에 맞게 완화합니다. 빈티지 필름은 photorealistic 자체가 아니라 clean modern digital look, HDR, smartphone look 같은 현대 디지털 느낌을 중심으로 완화합니다. 3D 피규어와 미니어처도 photorealistic 단독 문구는 보존하고, real human skin texture, live-action person, life-size realism처럼 해당 스타일과 직접 충돌하는 문구만 처리합니다.
+
+- 기본값: 끔
+- 부드럽게 완화: Z-Image / Qwen / Flux 같은 자연어 모델에서, 선택한 스타일의 conflict profile에 등록된 대표 충돌 문구만 중립 표현으로 바꿉니다.
+- 강하게 완화: 스타일 테스트용입니다. soft보다 넓은 스타일별 충돌 문구를 처리하지만, 모든 스타일에 같은 삭제 규칙을 적용하지는 않습니다.
+- 태그형 모델, Anima 혼합형, Output style only, custom_text에는 적용하지 않습니다. 추가 문구는 사용자가 직접 넣은 강한 보조 지시로 보고 그대로 둡니다.
+- 사용자가 카메라 / 렌즈 느낌을 직접 선택한 경우에는 외부 프롬프트의 렌즈 의도도 최대한 보존합니다.
+
+스타일별 예시:
+- 수채화·스케치 계열: camera lens realism / hard photographic sharpness / detailed skin pores 같은 사진·피부 질감 문구를 완화합니다.
+- 치비 스타일: 원본에 보이는 주체 수를 유지하면서 원본 주체 자체를 SD/치비 비율로 바꾸도록 안내합니다. positive 지시문에는 별도 오브젝트 명사 나열을 피하고, 추가 주체 없이 원본 주체 자체를 치비화하는 방향을 우선합니다.
+- 빈티지 필름 느낌: clean modern digital look / HDR / smartphone look 같은 현대 디지털 느낌을 완화합니다.
+- 3D 피규어 / 미니어처: real human skin texture / live-action person / life-size realism처럼 해당 스타일과 직접 충돌하는 문구만 처리합니다.
+
+일부 스타일에서의 변환 예:
+- natural facial detail → clear facial readability
+- full-body character image → full-body composition
+- shallow depth of field → soft subject separation
+- realistic image structure → coherent visual structure  ※ 모든 스타일 공통이 아니라, 수채화·스케치·픽셀·치비 등 실제 충돌 가능성이 큰 profile에서만 처리됩니다.
+
+이 기능은 프롬프트 의미를 AI처럼 완전히 해석하는 기능이 아니라, 실제로 자주 쓰이는 대표 문구만 제한적으로 완화하는 안전 보조 기능입니다. 철자와 표현이 크게 다르거나 우회적인 문장은 건드리지 않습니다.
+
+외부 프롬프트에서 스타일을 약하게 만들 수 있는 흔한 문구
+원본 프롬프트에 아래 문구가 들어 있으면 어떤 스타일에서는 선택한 스타일이 약해질 수 있습니다. 다만 이 문구들이 항상 금지어라는 뜻은 아닙니다. 사진풍, 빈티지 필름, 3D 피규어, 미니어처처럼 실사/사진/재질 느낌이 의도일 수 있는 스타일에서는 도움이 될 수 있습니다.
+특히 Z-Image, Qwen, Flux처럼 자연어 프롬프트를 길게 읽는 모델에서는 앞쪽 원본 문장이 강하면 뒤쪽 스타일 지시가 묻힐 수 있습니다.
+
+1) 실사 / 현실감 고정 문구
+- photorealistic
+- ultra realistic
+- hyper realistic
+- realistic image structure
+- realistic anatomy
+- lifelike skin
+- real photo
+- RAW photo
+- DSLR photo
+- natural facial detail
+- detailed skin pores
+
+이런 표현은 스타일에 따라 도움이 될 수도 있고 방해가 될 수도 있습니다. 예를 들어 수채화·펜화·파스텔·셀 애니메이션에서는 사진 렌즈/피부 질감 문구가 스타일을 약하게 만들 수 있지만, 빈티지 필름·3D 피규어·미니어처에서는 photorealistic 같은 넓은 단어가 의도일 수 있으므로 공통 삭제하지 않습니다.
+스타일 변화를 분명하게 테스트하고 싶다면 외부 프롬프트를 장면 정보 위주로 단순하게 쓰고, 필요한 경우 “스타일 방해 문구 정리”를 soft부터 켜서 확인하는 것을 권장합니다.
+
+2) 카메라 / 렌즈 / 영화 촬영 고정 문구
+- cinematic photo
+- film still
+- shot on camera
+- 35mm lens
+- 50mm lens
+- 85mm lens
+- depth of field
+- bokeh
+- sharp focus
+- studio photography
+- professional photography
+
+이런 표현은 영화/사진/매거진 스타일에는 어울릴 수 있지만, 회화풍이나 일러스트풍을 적용할 때는 화면을 다시 사진 쪽으로 끌어당길 수 있습니다.
+비사진 스타일에서는 카메라/렌즈 표현을 노드의 “카메라 / 렌즈 느낌” 옵션에 맡기거나 auto로 두는 편이 안전합니다.
+
+3) 스타일이 드러날 공간을 줄이는 문구
+- clean, simple setting
+- plain background
+- empty room
+- minimal background
+- simple studio backdrop
+
+이 표현들은 직접적인 충돌 문구는 아니지만, 배경 질감, 조명, 소품, 창밖 풍경, 벽/바닥 재질처럼 스타일이 드러나는 면적을 줄입니다.
+스타일 테스트용 예제에서는 너무 빈 배경보다 커튼, 창가, 의자, 식물, 벽 질감, 바닥 반사, 창밖 풍경 같은 중립적인 디테일을 조금 넣는 편이 스타일 차이가 잘 보입니다.
+
+4) 캐릭터/렌더링 방향을 고정하는 문구
+- full-body character image
+- character render
+- game character render
+- 3D render
+- anime character
+- illustration style
+
+이런 문구는 선택한 스타일과 같은 방향일 때는 도움이 되지만, 다른 스타일을 선택하면 서로 충돌할 수 있습니다.
+예를 들어 외부 프롬프트에 “3D render”가 있는데 스타일 방향에서 “수채화 회화 느낌”을 선택하면, 모델이 두 지시 사이에서 애매하게 섞거나 한쪽을 무시할 수 있습니다.
+스타일은 노드가 담당하게 하고, 외부 프롬프트는 인물 수, 포즈, 시선, 의상, 배경, 구도처럼 장면 정보 위주로 작성하는 것을 권장합니다.
+
+권장 작성 방식
+외부 프롬프트에는 “무엇을 그릴지”와 “어떻게 배치할지”를 쓰고, “어떤 화풍/사진풍으로 보일지”는 노드의 스타일 방향에 맡기는 것이 가장 안정적입니다.
+
+좋은 외부 프롬프트 예:
+Two Korean women in their 20s stand naturally, looking toward the viewer with calm, gentle expressions. Pulled back for a full-length composition, both figures fully visible from head to toe, with clear surrounding negative space and no cropping of the head, hands, legs, or feet. Keep the camera far enough back for a true full shot, with deliberate breathing room above their heads and below their feet. Beautifully composed, spacious, and visually refined.
+
+스타일 테스트용으로 더 잘 보이는 예:
+Two Korean women in their 20s stand naturally near a large window in a calm indoor setting, looking toward the viewer with soft, gentle expressions. Show them in a true wide full-body shot, both figures fully visible from head to toe, with generous space above their heads and below their feet. The room includes soft curtains, a wooden chair, a small table, a potted plant, subtle wall texture, and a quiet exterior view through the window. The composition feels elegant, open, balanced, and visually refined.
+
+요약하면, 외부 프롬프트는 “장면 설계도”로 쓰고 스타일 노드는 “표현 방식”으로 쓰는 것이 좋습니다.
+외부 프롬프트에 photorealistic, realistic image structure, DSLR, cinematic, 85mm lens 같은 표현을 직접 넣으면, 어떤 스타일에서는 도움이 되지만 어떤 스타일에서는 선택한 스타일보다 그 문구가 더 강하게 작동할 수 있습니다. 따라서 정리는 공통 삭제가 아니라 선택한 스타일별 conflict profile에 따라 제한적으로 이루어집니다.
+
+
+8. 스타일 반영 방식
+----------------
+이 옵션은 NSFW 강도가 아닙니다.
+선택한 스타일은 항상 적용하되, 원본 프롬프트를 더 많이 보존할지, 균형 있게 섞을지, 스타일을 더 앞세울지를 정합니다. 태그형 모델에서는 태그 가중치와 단서 양도 함께 조절됩니다.
+
+원본 보존
+- 스타일은 적용하되, 원본 프롬프트의 인물/배경/소품/장면을 최대한 유지합니다.
+- 가벼운 스타일 보강이 필요할 때 좋습니다.
+
+균형 적용
+- 원본 유지와 스타일 반영을 가장 무난하게 섞습니다.
+
+스타일 우선
+- 기본값입니다.
+- 선택한 스타일이 더 분명하게 드러나도록 문구를 구성합니다.
+- 수채화, 목탄, 펜, 사이버펑크, 치비, 피규어처럼 스타일 변화가 확실히 보이길 원할 때 좋습니다.
+
+성인 / NSFW 수위는 이 옵션이 아니라 “성인 표현 톤”에서 조절합니다.
+
+
+9. 구도 / 화면 범위
+------------
+구도 / 화면 범위은 피사체가 화면 안에 어느 정도 들어오는지를 정합니다.
+
+예:
+- 헤드샷
+- 클로즈업
+- 상반신
+- 허리 위
+- 3/4 바디
+- 전신
+- 풀샷
+- 와이드샷
+- 앉은 전신
+
+이 옵션은 렌즈가 아니라 샷 범위에 가깝습니다.
+예를 들어 “전신”은 피사체가 머리부터 발끝까지 보이도록 유도하는 옵션입니다.
+
+비사진 스타일에서도 구도 / 화면 범위은 유지될 수 있습니다. 다만 자동 렌즈/카메라 문구가 스타일을 방해하지 않도록 별도로 억제됩니다.
+
+
+10. 카메라 / 렌즈 느낌
+-----------------
+카메라 / 렌즈 느낌은 넓은 화면, 망원 압축감, 와이드 영화 화면, 아래에서 올려다보는 시점처럼 카메라적 성격을 직접 지정할 때 사용합니다.
+
+중요:
+- auto 상태에서는 분위기/스타일을 방해할 수 있는 자동 렌즈 문구가 최대한 억제됩니다.
+- 사용자가 직접 렌즈를 선택하면 그 선택은 의도 입력으로 보고 반영합니다.
+
+수채화, 펜, 목탄 같은 비사진 스타일을 원할 때는 보통 auto가 안전합니다.
+실사, 영화, 화보, 어두운 영화 분위기, 빈티지 필름 느낌에서 카메라 느낌을 명확히 주고 싶다면 직접 선택할 수 있습니다.
+
+
+11. 성인 표현 톤
+-----------------
+성인 표현의 강도를 정합니다.
+
+기본
+- 성인/NSFW 관련 추가 톤을 거의 넣지 않습니다.
+
+세이프
+- 세이프한 성인 분위기입니다.
+
+암시적 / 센슈얼 / 대담한 센슈얼
+- 노출이나 직접적인 행위보다 분위기와 감각을 강화합니다.
+
+NSFW / 강한 NSFW
+- 성인용 모델/워크플로우에서 사용하기 위한 강한 성인 톤입니다.
+- 이 경우 미성년 관련 단어가 들어오면 안전하게 성인 표현으로 정규화합니다.
+
+로맨틱 비노골적
+- 성적 표현보다 로맨틱하고 친밀한 분위기를 강조합니다.
+
+안전 처리:
+- minor details, minor scratches처럼 “사소한” 의미의 minor는 보존합니다.
+- minor girl, minor boy, underage girl, underage boy처럼 미성년자 의미가 분명한 경우는 성인 표현으로 치환합니다.
+- a adult 같은 관사 오류가 생기지 않도록 an adult로 보정합니다.
+
+
+12. 성인 의상
+---------------
+성인 톤 아래에서 의상이나 노출 방향을 정합니다.
+
+예:
+- 누드
+- 상의 탈의
+- 란제리
+- 비키니
+- 코르셋
+- 라텍스 의상
+- 가죽 의상
+- 이브닝 드레스
+- 테일러드 수트
+- 배스로브
+
+의상에 따라 성인 톤이 자동으로 최소 수위 이상으로 올라갈 수 있습니다.
+예를 들어 nude나 topless를 선택하면 safe보다 강한 adult tone이 필요하므로 내부적으로 보정됩니다.
+
+
+13. 원본 프롬프트와 합치기
+----------------------
+외부 프롬프트가 있을 때 스타일 문구와 어떻게 합칠지 정합니다.
+
+외부 프롬프트 뒤에 스타일 추가
+- 기본 권장 모드입니다.
+- 사용자가 입력한 본문을 먼저 유지하고, 뒤에 분위기/스타일 지시를 붙입니다.
+- 외부 프롬프트의 주체를 최대한 보존하고 싶을 때 좋습니다.
+
+외부 프롬프트 앞에 스타일 추가
+- 스타일을 먼저 제시합니다.
+- 스타일의 영향력을 더 앞에 두고 싶을 때 사용합니다.
+- 태그형 모델에서는 외부 rating/source 충돌이 정리됩니다.
+
+스타일만 출력
+- 외부 본문을 제외하고, 노드가 조립한 스타일 문구만 출력합니다.
+- 다른 프롬프트 빌더와 조합하거나 스타일 블록만 따로 복사할 때 사용합니다.
+
+
+14. 추가 문구
+------------
+사용자가 직접 추가하는 영어 지시문입니다.
+
+예:
+- modern city skyline
+- luxury living room
+- beach at sunset
+- black-and-white ink mood
+- paper grain texture
+- flat cel color blocks
+
+주의:
+추가 문구에 cinematic, camera, photorealistic 등을 직접 넣으면 노드는 사용자의 의도라고 보고 보존합니다. 비사진 스타일에서 그런 문구를 피하고 싶다면 직접 입력하지 않는 것이 좋습니다.
+
+SD attention과 weighted tag는 최대한 보존됩니다.
+예:
+- (watercolor wash:1.3)
+- [paper grain:0.8]
+- ((inked outline))
+
+깨진 괄호나 쉼표도 최대한 안전하게 처리합니다.
+
+
+15. Negative 프롬프트 처리
+--------------------------
+노드는 모델별 기본 negative와 사용자의 external_negative_in을 병합합니다.
+
+처리 특징:
+- 중복 negative를 줄입니다.
+- 사용자가 Positive에서 lamp, lamps, ceiling lights, light bulb, candle, neon sign 같은 실제 광원을 요청하면, visible lighting equipment 관련 negative가 과도하게 충돌하지 않도록 조정합니다.
+- school uniform / schoolgirl 계열은 사용자가 명시적으로 요청했고 미성년 충돌 단서가 없을 때만 관련 negative 충돌을 완화합니다.
+- 성인/NSFW 톤에서 미성년 관련 negative와 positive가 충돌하지 않게 처리합니다.
+- Anima 계열에서 NSFW / 강한 NSFW를 명시적으로 선택하면 rating/adult positive와 직접 충돌하는 성인 표현 억제 negative만 완화하고, underage / teen / childish 같은 연령 보호 negative는 유지합니다.
+
+
+16. Pony / ILXL / Anima rating 처리
+-----------------------------------
+Pony, ILXL, Anima 계열은 rating/source 태그가 중요합니다.
+
+Pony 예:
+- safe 계열: rating_safe
+- suggestive/sensual 계열: rating_questionable
+- nsfw/explicit 계열: rating_explicit
+- source_anime 기본 유지
+
+외부 프롬프트에 rating_safe, rating_explicit, source_real 같은 충돌 태그가 들어와도 최종 출력에서 충돌하지 않도록 정리합니다.
+
+예:
+외부 입력:
+rating_safe, source_real, 1girl
+
+Pony + explicit nsfw 결과:
+source_anime, rating_explicit, 1girl
+
+APPEND 모드와 PREPEND 모드 모두 같은 방식으로 정리됩니다.
+
+
+17. 자연어 모델 quality 처리
+----------------------------
+Z-Image, Qwen, Flux, Universal Natural Language 같은 자연어 모델도 각 모델용 quality 지시문을 사용합니다.
+
+예:
+- coherent
+- visually refined
+- strong scene cohesion
+
+단, 비사진 스타일에서는 cinematic 같은 문구가 스타일을 망칠 수 있으므로 필터링됩니다.
+
+예:
+Flux + Watercolor:
+- coherent, visually refined, strong scene cohesion은 유지
+- cinematic은 제거
+
+사진/영화 계열 스타일에서는 cinematic, filmic 같은 단어가 필요한 경우 유지될 수 있습니다.
+
+
+18. 분위기와 스타일의 차이
+------------------------
+분위기와 스타일 방향은 다릅니다.
+
+분위기:
+- 감정
+- 심리
+- 분위기
+- 서사적 톤
+
+스타일 방향:
+- 수채화, 목탄, 펜, 연필 같은 재료감
+- 네온, 노을빛, 흑백, 웅장한 무대감 같은 시각 처리
+- 색감, 질감, 선, 브러시, 종이, 애니메이션 렌더링
+
+다만 수채화, 웅장한 무대감, 넓은 영화 화면, 흑백처럼 분위기와 스타일 경계가 애매한 항목은 모델에 따라 양쪽 성격이 겹칠 수 있습니다.
+
+예:
+분위기의 “수채화적 서정감”은 원래 부드러운 분위기를 의미하지만, 모델이 수채화풍 스타일 지시로 해석할 수 있습니다.
+스타일 방향의 “수채화 회화 느낌”은 명확히 프롬프트 문구에 수채화풍 표현 지시를 추가합니다.
+
+
+19. 추천 사용 예
+----------------
+수채화풍 프롬프트:
+- 모델: Z-Image Natural 또는 Flux Natural
+- 분위기: 수채화적 서정감 또는 서정적 / 시적
+- 스타일 방향: 수채화 회화 느낌
+- 스타일 반영 방식: 스타일 우선
+- 카메라 / 렌즈 느낌: auto
+
+펜 드로잉:
+- 분위기: 미니멀 심리극 또는 서정적 / 시적
+- 스타일 방향: 펜화 스케치
+- 스타일 반영 방식: 균형 적용 또는 스타일 우선
+- 카메라 / 렌즈 느낌: auto
+
+손그림 동화 애니풍:
+- 분위기: 몽환적인 분위기, 따뜻한 노을빛 분위기, 부드러운 로맨틱 분위기 중 선택
+- 스타일 방향: 손그림 동화 애니풍
+- 스타일 반영 방식: 균형 적용 또는 스타일 우선
+
+Pony 태그형:
+- 모델: Pony Tag
+- 분위기/스타일: 원하는 항목 선택
+- 성인 표현 톤: 모델 목적에 맞게 선택
+- 외부 프롬프트에 rating/source 태그가 있어도 노드가 충돌 정리
+
+Flux 자연어:
+- 모델: Flux Natural
+- 외부 프롬프트 본문을 짧고 명확히 입력
+- 분위기/스타일을 선택
+- 비사진 스타일에서는 auto 렌즈 유지 권장
+
+
+20. 캐시와 시드
+---------------
+이 노드는 IS_CHANGED에서 주요 입력 전체를 반영합니다.
+따라서 seed가 0이어도 분위기, 스타일, 성인 톤, 추가 문구, 외부 프롬프트가 바뀌면 ComfyUI가 변경을 감지할 수 있습니다.
+
+시드 자체는 스타일 단서 선택의 재현성에 영향을 줍니다.
+같은 설정과 같은 시드라면 같은 계열의 스타일 단서가 재현됩니다.
+
+
+21. 문제 해결
+-------------
+스타일이 너무 약함:
+- 스타일 반영 방식을 스타일 우선으로 올립니다.
+- 스타일 방향을 Auto by Mood가 아니라 직접 선택합니다.
+- 원본 프롬프트와 합치기를 “외부 프롬프트 앞에 스타일 추가”로 바꿔봅니다.
+- 외부 프롬프트에 선택한 스타일과 직접 충돌하는 문구가 있는지 확인합니다. 예: 치비 스타일에서는 realistic adult body proportions / natural anatomy, 빈티지 필름에서는 clean modern digital look / HDR / smartphone look, 수채화·스케치 계열에서는 DSLR / camera lens realism / hard photographic sharpness 등이 방해가 될 수 있습니다.
+- Z-Image/Qwen/Flux 자연어 모델에서 스타일이 약하다면 “스타일 방해 문구 정리”를 먼저 부드럽게 완화로 켜봅니다. 이 기능은 모든 스타일에 같은 삭제 규칙을 적용하지 않고, 선택한 스타일별 conflict profile에 맞는 문구만 완화합니다.
+- 그래도 약하면 강하게 완화를 테스트합니다. 다만 강하게 완화는 사진/렌즈 의도를 더 많이 줄일 수 있으므로 최종 작업에서는 결과를 보고 선택합니다.
+- 스타일 테스트용 프롬프트라면 위 표현을 빼고, 인물 수 / 포즈 / 시선 / 구도 / 배경 요소 위주로 작성합니다.
+- clean, simple setting처럼 너무 빈 배경만 쓰면 스타일 차이가 잘 안 보일 수 있으므로, 창가, 커튼, 의자, 식물, 벽 질감 같은 중립적인 배경 디테일을 조금 추가해봅니다.
+
+수채화/펜/목탄이 사진처럼 나옴:
+- 카메라 / 렌즈 느낌를 auto로 둡니다.
+- custom_text나 외부 positive에 선택한 스타일과 충돌하는 문구를 직접 넣지 않는 것이 가장 안전합니다. 단, photorealistic 같은 넓은 단어는 어떤 스타일에서는 의도일 수 있으므로 무조건 금지어가 아닙니다.
+- 자연어 모델에서는 “스타일 방해 문구 정리”를 부드럽게 완화로 켜면, 선택한 스타일별로 필요한 문구만 완화합니다. 치비·빈티지 필름·3D 피규어·미니어처 등에서는 photorealistic 단독 문구를 공통 삭제하지 않습니다.
+- 스타일 방향을 직접 선택합니다.
+
+Pony에서 rating이 꼬임:
+- 외부 프롬프트에 rating_safe와 rating_explicit을 동시에 넣지 않는 것이 가장 좋습니다.
+- 노드가 충돌을 정리하지만, 외부 프롬프트도 깨끗할수록 안정적입니다.
+
+기존 워크플로우에서 값이 이상함:
+- 노드의 한국어/영어 라벨 역변환과 구버전 위젯 migration이 들어 있습니다.
+- 그래도 이상하면 노드를 새로 추가해 같은 설정을 다시 선택해보는 것이 좋습니다.
+
+
+
+
+[변환형 스타일의 자동 스타일 우선 배치]
+치비, 미니어처, 픽셀 아트, 3D 피규어, 손그림 동화 애니풍처럼 원본 주체나 장면의 표현 방식을 크게 바꾸는 스타일은 외부 프롬프트 뒤에 스타일 문구가 붙으면 모델이 원본 실사 설명을 먼저 따라갈 수 있습니다. 그래서 자연어 모델에서는 Append 모드를 선택해도 이런 변환형 스타일은 내부적으로 스타일 지시를 먼저 배치합니다. 태그형 모델에는 이 자동 전환을 적용하지 않습니다.
+
+[Auto by Mood 보정]
+Cinematic Widescreen 무드는 Auto by Mood에서 Cinematic Widescreen Scope로 연결됩니다. Melodrama는 Baroque Operatic Atmosphere로, Horror / Unsettling은 Symmetric Psychological Coldness로 연결됩니다.
+
+[CFG 1 / 터보 워크플로우에서의 negative 프롬프트]
+최근 CFG 1 / turbo 계열 워크플로우에서는 negative 프롬프트 영향이 매우 약하거나 무시될 수 있습니다. 따라서 이 노드는 스타일 적용을 negative 프롬프트의 avoid 문구에 의존하지 않고 positive 프롬프트 쪽의 스타일 지시문과 스타일 단서로 처리합니다. generated negative는 모델 프로필의 기본 안전/품질 문구와 사용자가 직접 입력한 외부 negative를 합치는 용도로만 보조적으로 사용됩니다.

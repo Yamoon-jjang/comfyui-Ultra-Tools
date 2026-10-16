@@ -1,0 +1,48 @@
+﻿Ultra Tools Model Viewer (All) 메뉴얼
+=====================================
+
+1. 노드 소개
+------------
+Ultra Tools Model Viewer (All)은 ComfyUI가 사용하는 모델 저장 위치를 카테고리별로 스캔하여 모델 개수와 용량, 큰 파일 목록을 확인하는 정보용 노드입니다.
+모델을 로드하거나 생성 파이프라인의 데이터를 변경하는 노드가 아니며 출력 소켓이 없는 UI/정보용 OUTPUT_NODE입니다.
+
+2. 노드 찾기
+------------
+노드 이름: Ultra Tools Model Viewer (All)
+카테고리: Ultra Tools
+
+3. 주요 항목
+------------
+- category: 스캔할 모델 종류를 선택합니다. All Models, UNET, Checkpoints, Text_Encoders, CLIP, VAE, LORA, LLM, Upscale, ControlNet 등 현재 소스에 정의된 여러 카테고리를 지원합니다.
+- show_top: 화면에 표시할 상위 모델 수를 5~100 사이에서 선택합니다.
+- info: 읽기 전용 결과 영역입니다. 모델 수, 총 용량과 파일별 크기를 표시합니다.
+- Refresh: 현재 선택한 category를 다시 스캔합니다.
+
+4. 기본 사용법
+--------------
+1) Ultra Tools Model Viewer (All)을 추가합니다.
+2) category에서 확인하려는 모델 종류를 선택합니다.
+3) show_top에서 표시할 개수를 선택합니다.
+4) info 영역에서 결과를 확인합니다.
+5) 디스크의 모델 구성이 바뀌었으면 Refresh를 눌러 다시 읽습니다.
+
+5. All Models
+-------------
+All Models를 선택하면 지원되는 모델 폴더들을 종합하여 확인합니다.
+모델 파일 확장자는 현재 소스 기준으로 safetensors, ckpt, pt, pth, bin, gguf, nunchaku, onnx, sft, pt2, engine 등을 인식합니다.
+
+6. 주의 사항
+------------
+- 실제 파일 시스템을 읽으므로 모델 수가 매우 많거나 저장장치가 느리면 갱신 시간이 달라질 수 있습니다.
+- 이 노드에서 파일을 삭제하거나 이동하지 않습니다.
+- 정보 표시 노드이므로 다른 생성 노드에 연결할 출력은 없습니다.
+- 네트워크/외장 드라이브의 상태는 운영체제와 저장장치 상태의 영향을 받습니다.
+
+7. Ultra Tools Model Viewer와의 차이
+-----------------------------------
+Ultra Tools Model Viewer (All): 모델 저장소 자체를 카테고리별로 스캔합니다.
+Ultra Tools Model Viewer: 현재 열려 있는 워크플로우에서 실제로 참조되는 모델을 찾아 표시합니다.
+
+8. 설치
+-------
+ComfyUI/custom_nodes/comfyui-Ultra-Tools/ 위치에 통합 패키지를 설치한 뒤 ComfyUI를 완전히 재시작하고 브라우저를 새로고침합니다.

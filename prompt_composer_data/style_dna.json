@@ -1,0 +1,997 @@
+{
+  "Auto by Mood": {},
+  "Neutral / Minimal Carryover": {
+    "anchor": "natural visual continuity",
+    "lighting": [
+      "controlled natural lighting",
+      "clean readable light"
+    ],
+    "color": [
+      "balanced color",
+      "natural color balance"
+    ],
+    "composition": [
+      "clean readable composition",
+      "natural framing"
+    ],
+    "texture": [
+      "subtle natural texture"
+    ]
+  },
+  "Neon Melancholy / Rain Glass": {
+    "anchor": "melancholic rainy-night neon city mood through wet glass",
+    "lighting": [
+      "neon spill through rain-soaked glass",
+      "magenta and cyan neon glow",
+      "blurred urban lights behind raindrops",
+      "moody wet-night reflections",
+      "dim ambient shadows with colored neon bloom"
+    ],
+    "color": [
+      "amber",
+      "deep red",
+      "muted cyan",
+      "green neon trace",
+      "magenta-violet night accents"
+    ],
+    "composition": [
+      "framing through wet glass",
+      "urban intimacy",
+      "isolated close framing",
+      "rainy-night city reflection layering",
+      "emotionally moody window-side composition"
+    ],
+    "texture": [
+      "rain-soaked neon reflections",
+      "humid haze",
+      "wet-window bokeh",
+      "soft motion blur",
+      "diffused signage reflections through droplets"
+    ]
+  },
+  "Classical Studio Glamour": {
+    "anchor": "classic old-Hollywood studio glamour portrait",
+    "lighting": [
+      "controlled studio beauty lighting",
+      "butterfly lighting",
+      "broad soft key illumination",
+      "soft shadow lift",
+      "subtle edge highlight",
+      "velvety shadow falloff"
+    ],
+    "color": [
+      "ivory",
+      "warm gold",
+      "deep brown",
+      "soft champagne"
+    ],
+    "composition": [
+      "timeless glamour portrait composition",
+      "elegant beauty-editorial posture",
+      "balanced portrait composition",
+      "graceful negative space"
+    ],
+    "texture": [
+      "satin fabric",
+      "polished wood",
+      "soft tonal grain",
+      "polished studio finish"
+    ]
+  },
+  "Baroque Operatic Atmosphere": {
+    "anchor": "baroque operatic atmosphere",
+    "lighting": [
+      "dramatic chiaroscuro",
+      "warm theatrical glow",
+      "deep velvet shadow",
+      "candlelit stage glow"
+    ],
+    "color": [
+      "antique gold tones",
+      "burgundy velvet",
+      "ivory highlights",
+      "deep umber shadows"
+    ],
+    "composition": [
+      "grand theatrical staging",
+      "opulent classical depth",
+      "ceremonial pose rhythm",
+      "opera-house atmosphere"
+    ],
+    "texture": [
+      "velvet tonal richness",
+      "painted tonal depth",
+      "rich classical texture",
+      "old master style finish"
+    ]
+  },
+  "Noir Chiaroscuro": {
+    "anchor": "sharp noir chiaroscuro",
+    "lighting": [
+      "hard side light",
+      "venetian blind shadows",
+      "deep black background",
+      "silver edge highlights",
+      "single-source spotlight"
+    ],
+    "color": [
+      "black",
+      "silver",
+      "smoky gray",
+      "muted burgundy"
+    ],
+    "composition": [
+      "diagonal shadow bands",
+      "doorway framing",
+      "compressed interior space",
+      "shadow-framed isolation"
+    ],
+    "texture": [
+      "smoky air",
+      "wet pavement reflections",
+      "grainy darkness",
+      "cigarette haze"
+    ]
+  },
+  "Symmetric Psychological Coldness": {
+    "anchor": "cold symmetrical psychological cinema",
+    "lighting": [
+      "controlled overhead illumination",
+      "cold indirect illumination",
+      "precise shadow geometry"
+    ],
+    "color": [
+      "cold white",
+      "steel blue",
+      "muted beige",
+      "desaturated red accent"
+    ],
+    "composition": [
+      "strict symmetry",
+      "architectural framing",
+      "static distance",
+      "centered subject"
+    ],
+    "texture": [
+      "polished reflective finish",
+      "clean minimal geometry",
+      "sterile interior silence"
+    ]
+  },
+  "Mediterranean Sunlight": {
+    "anchor": "warm mediterranean sensual sunlight",
+    "lighting": [
+      "sun-warmed side illumination",
+      "reflected sea light",
+      "late afternoon glow"
+    ],
+    "color": [
+      "terracotta",
+      "sunlit cream",
+      "sea blue",
+      "olive green"
+    ],
+    "composition": [
+      "open veranda framing",
+      "wind in fabric",
+      "relaxed diagonal pose"
+    ],
+    "texture": [
+      "linen-soft texture",
+      "sun-warmed stone texture",
+      "sunlit dust"
+    ]
+  },
+  "Gothic Candle Velvet": {
+    "anchor": "low amber gothic velvet romance",
+    "lighting": [
+      "low amber gothic darkness",
+      "low amber glow",
+      "heavy background shadows"
+    ],
+    "color": [
+      "deep burgundy",
+      "black velvet",
+      "aged gold",
+      "dark wine red"
+    ],
+    "composition": [
+      "arched doorway framing",
+      "old mansion depth",
+      "romantic negative space"
+    ],
+    "texture": [
+      "velvet",
+      "lace",
+      "aged wood",
+      "dust in warm low light"
+    ]
+  },
+  "Dream Pastel Diffusion": {
+    "anchor": "dreamy pastel glow and soft luminous haze",
+    "lighting": [
+      "soft diffused lighting",
+      "soft glow",
+      "gentle bloom",
+      "ambient pastel mist",
+      "low-contrast scattered light"
+    ],
+    "color": [
+      "soft pastel colors",
+      "powder pastel palette",
+      "pink lavender softness",
+      "soft cyan tint",
+      "pale cream undertones"
+    ],
+    "composition": [
+      "gentle visual softness",
+      "soft diffused depth",
+      "airy low-contrast balance"
+    ],
+    "texture": [
+      "ethereal softness",
+      "soft haze",
+      "matte luminous softness",
+      "delicate pastel diffusion"
+    ]
+  },
+  "Volumetric Dust Light": {
+    "anchor": "strong volumetric light rays scattering through dusty air",
+    "lighting": [
+      "visible volumetric light shafts",
+      "floating dust motes dancing in the light rays",
+      "sunbeams cutting through dusty air",
+      "soft scattered backlight through haze",
+      "cinematic shafts of light"
+    ],
+    "color": [
+      "warm amber haze",
+      "muted golden air",
+      "pale dusty highlights",
+      "soft smoky neutrals"
+    ],
+    "composition": [
+      "atmosphere-forward cinematic composition",
+      "light rays crossing the scene",
+      "deep hazy layers",
+      "subject framed by illuminated dust-filled air"
+    ],
+    "texture": [
+      "floating dust motes",
+      "fine airborne particles",
+      "hazy volumetric atmosphere",
+      "soft bloom in the air",
+      "particulate glow in the beams"
+    ]
+  },
+  "Long Exposure Light Trails": {
+    "anchor": "long-exposure night light trails",
+    "lighting": [
+      "streaked moving light",
+      "extended luminous trails",
+      "flowing exposure glow",
+      "night light ribbons",
+      "motion-blurred highlights"
+    ],
+    "color": [
+      "red and white light streaks",
+      "neon trail accents",
+      "deep night contrast",
+      "glowing saturated lines"
+    ],
+    "composition": [
+      "dynamic trail-led composition",
+      "motion path framing",
+      "diagonal streak rhythm",
+      "long-exposure scene balance"
+    ],
+    "texture": [
+      "smooth light trails",
+      "motion blur streaks",
+      "glowing line traces",
+      "soft exposure bloom"
+    ]
+  },
+  "Fashion Editorial Studio Cinema": {
+    "anchor": "studio-cinematic fashion editorial",
+    "lighting": [
+      "broad diffused studio illumination",
+      "crisp edge highlights",
+      "controlled glossy highlights"
+    ],
+    "color": [
+      "black",
+      "cream",
+      "deep red",
+      "metallic accent"
+    ],
+    "composition": [
+      "magazine cover composition",
+      "controlled pose",
+      "polished editorial finish"
+    ],
+    "texture": [
+      "silk",
+      "latex-like shine without explicitness",
+      "polished reflective finish",
+      "high-end fabric"
+    ]
+  },
+  "Dark Fantasy Shadow Mass": {
+    "anchor": "ominous dark fantasy romance",
+    "lighting": [
+      "low warm side illumination",
+      "encroaching darkness",
+      "faint edge glow through mist",
+      "candlelit gloom",
+      "moonlit haze through shadow"
+    ],
+    "color": [
+      "blackened purple",
+      "deep crimson",
+      "cold blue shadow",
+      "ashen gold",
+      "bruise violet"
+    ],
+    "composition": [
+      "the subject held against a mass of darkness",
+      "large shadow shape in the background",
+      "mythic interior depth",
+      "looming gothic silhouettes"
+    ],
+    "texture": [
+      "smoky atmosphere",
+      "dense shadows",
+      "gritty atmospheric texture",
+      "velvet shadow texture"
+    ]
+  },
+  "Apocalyptic Wasteland": {
+    "anchor": "bleak devastated post-apocalyptic wasteland",
+    "lighting": [
+      "ashen overcast light",
+      "harsh survival sunlight",
+      "smoky backlight",
+      "dim dust-filtered glow",
+      "soot-choked daylight"
+    ],
+    "color": [
+      "desaturated rust tones",
+      "ash gray palette",
+      "burnt orange accents",
+      "dusty earth colors",
+      "charred brown ruin tones"
+    ],
+    "composition": [
+      "desolate survival composition",
+      "collapsed-ruin staging",
+      "ruined-world storytelling",
+      "abandoned end-of-civilization framing",
+      "widespread devastation"
+    ],
+    "texture": [
+      "ash in the air",
+      "worn metal texture",
+      "cracked concrete",
+      "dusty debris",
+      "weathered surfaces",
+      "rubble piles",
+      "scorched ruin detail"
+    ]
+  },
+  "Black & White Classic": {
+    "anchor": "classic monochrome tonal contrast",
+    "lighting": [
+      "high contrast lighting",
+      "dramatic side light",
+      "sharp highlight",
+      "deep shadow"
+    ],
+    "color": [
+      "monochrome",
+      "grayscale tones",
+      "silver highlights",
+      "deep blacks"
+    ],
+    "composition": [
+      "strong tonal contrast",
+      "classic composition",
+      "dramatic framing"
+    ],
+    "texture": [
+      "matte tonal grain",
+      "monochrome print texture",
+      "classic tonal feel"
+    ]
+  },
+  "Golden Hour Glow": {
+    "anchor": "golden hour warm glow",
+    "lighting": [
+      "golden hour illumination",
+      "warm rear glow",
+      "soft radiant halo",
+      "edge highlight glow"
+    ],
+    "color": [
+      "warm amber tones",
+      "golden highlights",
+      "soft orange",
+      "warm shadows"
+    ],
+    "composition": [
+      "backlit composition",
+      "natural framing",
+      "open airy feel"
+    ],
+    "texture": [
+      "soft bloom",
+      "warm haze",
+      "soft tonal grain"
+    ]
+  },
+  "Vintage Film Look": {
+    "anchor": "sun-faded analog film photograph aesthetic",
+    "lighting": [
+      "soft analog highlight roll-off",
+      "soft halation around highlights",
+      "bleached highlight bloom",
+      "lifted shadows",
+      "nostalgic low-contrast illumination"
+    ],
+    "color": [
+      "washed-out colors",
+      "sun-faded film palette",
+      "bleached color response",
+      "subtle amber-green film shift"
+    ],
+    "composition": [
+      "casual 35mm snapshot framing",
+      "relaxed candid composition",
+      "timeless film-photo balance"
+    ],
+    "texture": [
+      "visible fine film grain",
+      "slight emulsion softness",
+      "soft vignette",
+      "aged print texture",
+      "faded print look"
+    ]
+  },
+  "Cyberpunk Neon": {
+    "anchor": "cyberpunk neon atmosphere",
+    "lighting": [
+      "neon glow",
+      "holographic glow",
+      "electric blue glow",
+      "pink magenta edge glow",
+      "acid violet glow"
+    ],
+    "color": [
+      "electric cyan",
+      "hot magenta",
+      "neon purple",
+      "dark background"
+    ],
+    "composition": [
+      "dynamic angle",
+      "futuristic framing",
+      "layered depth",
+      "neon signage depth"
+    ],
+    "texture": [
+      "glossy surface",
+      "wet reflections",
+      "digital noise",
+      "glassy neon reflections"
+    ]
+  },
+  "Soft Romantic Glow": {
+    "anchor": "soft romantic glow and tender luminous intimacy",
+    "lighting": [
+      "soft rosy glow",
+      "gentle luminous diffusion",
+      "tender highlight bloom",
+      "caressing ambient light",
+      "soft candlelit blush"
+    ],
+    "color": [
+      "warm pink tones",
+      "soft peach",
+      "creamy highlights",
+      "gentle warmth",
+      "rose-cream tones"
+    ],
+    "composition": [
+      "intimate romantic arrangement",
+      "gentle visual spacing",
+      "soft balanced placement",
+      "dreamy closeness"
+    ],
+    "texture": [
+      "soft bloom",
+      "dreamy haze",
+      "smooth luminous texture",
+      "delicate glow diffusion",
+      "silken glow"
+    ]
+  },
+  "High-key Clean Light": {
+    "anchor": "bright high-key clean light",
+    "lighting": [
+      "soft even illumination",
+      "clean shadowless light",
+      "airy bright glow",
+      "gentle luminous highlights"
+    ],
+    "color": [
+      "fresh light tones",
+      "creamy whites",
+      "soft pastel accents",
+      "clear bright palette"
+    ],
+    "composition": [
+      "open airy composition",
+      "clean uncluttered layout",
+      "gentle visual balance",
+      "light spacious framing"
+    ],
+    "texture": [
+      "smooth luminous finish",
+      "soft clean texture",
+      "delicate tonal softness",
+      "minimal visual noise"
+    ]
+  },
+  "Watercolor / Painterly": {
+    "anchor": "watercolor painting on paper",
+    "lighting": [
+      "transparent wash light"
+    ],
+    "color": [
+      "diluted pigment"
+    ],
+    "composition": [
+      "loose painted composition"
+    ],
+    "texture": [
+      "bleeding edges and paper grain"
+    ]
+  },
+  "Oil Painting": {
+    "anchor": "thick oil painting",
+    "lighting": [
+      "painted highlights"
+    ],
+    "color": [
+      "layered pigment"
+    ],
+    "composition": [
+      "painterly composition"
+    ],
+    "texture": [
+      "impasto brushstrokes and canvas texture"
+    ]
+  },
+  "Charcoal Drawing": {
+    "anchor": "raw charcoal drawing",
+    "lighting": [
+      "dark smudged shadow"
+    ],
+    "color": [
+      "black charcoal tones"
+    ],
+    "composition": [
+      "gestural drawing layout"
+    ],
+    "texture": [
+      "broken charcoal strokes and dusty paper"
+    ]
+  },
+  "Graphite Pencil Sketch": {
+    "anchor": "detailed pencil illustration with fine line art and soft graphite shading",
+    "lighting": [
+      "subtle graphite value modeling",
+      "hand-drawn tonal depth",
+      "gentle pencil-modeled light",
+      "careful value transitions"
+    ],
+    "color": [
+      "monochrome graphite tones",
+      "subtle gray pencil palette",
+      "paper-and-graphite harmony",
+      "classic sketchbook neutrals"
+    ],
+    "composition": [
+      "coherent pencil illustration composition",
+      "clear room-and-window scene structure",
+      "readable background perspective",
+      "balanced hand-drawn layout"
+    ],
+    "texture": [
+      "delicate graphite linework",
+      "delicate pencil strokes",
+      "precise cross-hatching",
+      "subtle paper texture",
+      "rich graphite texture"
+    ]
+  },
+  "Pen and Ink Sketch": {
+    "anchor": "pen-and-ink drawing on paper",
+    "lighting": [
+      "line-based shadow",
+      "cross-hatched tonal contrast",
+      "inked shadow accents",
+      "graphic light separation"
+    ],
+    "color": [
+      "black ink on warm paper",
+      "monochrome ink tones",
+      "sepia ink accent",
+      "raw black linework"
+    ],
+    "composition": [
+      "loose contour drawing",
+      "visible drafting marks",
+      "illustrative negative paper space",
+      "graphic silhouette rhythm"
+    ],
+    "texture": [
+      "crosshatching",
+      "fine ink linework",
+      "dry pen texture",
+      "stray pen marks",
+      "uneven ink pressure",
+      "stippled shadow marks"
+    ]
+  },
+  "Ink Wash / Sumi-e": {
+    "anchor": "ink wash sumi-e illustration",
+    "lighting": [
+      "soft ink wash values",
+      "empty-space tonal balance",
+      "misty ink gradation",
+      "gentle paper brightness"
+    ],
+    "color": [
+      "black ink wash",
+      "gray ink gradients",
+      "rice-paper white",
+      "subtle sepia wash"
+    ],
+    "composition": [
+      "minimal brush composition",
+      "large quiet negative space",
+      "calligraphic balance",
+      "asymmetric ink placement"
+    ],
+    "texture": [
+      "bleeding ink wash",
+      "dry brush texture",
+      "rice paper grain",
+      "calligraphic brush marks"
+    ]
+  },
+  "Colored Pencil Illustration": {
+    "anchor": "colored-pencil illustration on textured paper",
+    "lighting": [
+      "drawn colored-pencil shading",
+      "layered pencil highlight",
+      "dry hand-rendered light"
+    ],
+    "color": [
+      "layered colored-pencil hues",
+      "visible dry pigment layering",
+      "cross-layered pencil color"
+    ],
+    "composition": [
+      "colored-pencil illustration composition",
+      "visible hand-drawn outlines",
+      "clear sketched silhouette"
+    ],
+    "texture": [
+      "obvious colored-pencil strokes",
+      "fine directional hatching",
+      "paper tooth",
+      "dry pigment buildup",
+      "visible hand-pressure marks"
+    ]
+  },
+  "Pastel Chalk Drawing": {
+    "anchor": "true soft pastel drawing on textured paper",
+    "lighting": [
+      "powder-soft diffuse light",
+      "gentle pastel-lit atmosphere",
+      "soft chalk-muted light",
+      "low-contrast pastel illumination"
+    ],
+    "color": [
+      "soft pastel pigments",
+      "chalky pastel tones",
+      "powdery pink-blue-lilac color harmony",
+      "muted layered pastel color"
+    ],
+    "composition": [
+      "hand-drawn pastel composition",
+      "clear but softly rendered scene structure",
+      "readable figure-and-background placement",
+      "soft sketchbook scene balance"
+    ],
+    "texture": [
+      "visible chalky pastel strokes",
+      "powdery pigment buildup",
+      "hand-smudged shading",
+      "paper tooth texture",
+      "dry pastel edges"
+    ]
+  },
+  "Gouache Storybook Illustration": {
+    "anchor": "opaque gouache picture-book illustration with a matte storybook page feel",
+    "lighting": [
+      "flat matte painted light",
+      "soft painted storybook glow",
+      "opaque color lighting",
+      "gentle gouache illumination",
+      "calm page-like painted light"
+    ],
+    "color": [
+      "opaque gouache color blocks",
+      "warm picture-book palette",
+      "matte saturated hues",
+      "layered painted color shapes",
+      "cream paper undertones"
+    ],
+    "composition": [
+      "static picture-book illustration composition",
+      "clear readable painted shapes",
+      "storybook page staging",
+      "charming gouache illustration balance",
+      "single-page illustrated scene design"
+    ],
+    "texture": [
+      "matte gouache texture",
+      "visible opaque brush marks",
+      "painted paper surface",
+      "layered gouache pigment",
+      "slightly uneven hand-painted edges"
+    ]
+  },
+  "Hand-Painted Storybook Animation": {
+    "anchor": "hand-painted 2D storybook animation frame",
+    "lighting": [
+      "warm painted animation glow",
+      "gentle storybook animation light",
+      "soft atmospheric painted illumination",
+      "paper-soft scene lighting for a hand-painted animation frame"
+    ],
+    "color": [
+      "hand-painted animation palette",
+      "warm gentle greens",
+      "soft sky blues",
+      "cream highlights",
+      "matte painted animation colors"
+    ],
+    "composition": [
+      "hand-painted animation keyframe composition",
+      "clear readable animated silhouette",
+      "storybook animation staging",
+      "frame-from-a-painted-animation balance",
+      "scene layout with animated storytelling energy"
+    ],
+    "texture": [
+      "hand-painted animation background texture",
+      "painted brush texture",
+      "storybook matte finish",
+      "soft paper-and-paint surface",
+      "visible traditional brushwork"
+    ]
+  },
+  "Miniature Diorama": {
+    "anchor": "handcrafted tabletop miniature diorama with miniature figure subject",
+    "lighting": [
+      "display-case illumination over a tiny model world",
+      "soft tabletop display lighting",
+      "small-scale handcrafted scene glow",
+      "gentle showcase lighting for a tabletop set"
+    ],
+    "color": [
+      "painted model-set palette",
+      "toy-like material colors",
+      "handcrafted scale-model tones",
+      "soft model-set color harmony"
+    ],
+    "composition": [
+      "the main subject appears as a miniature figure",
+      "subject, props, and environment share one consistent miniature scale",
+      "small-scale handcrafted model composition",
+      "tiny handcrafted environment staging",
+      "compressed model-world layout with tiny scale proportions"
+    ],
+    "texture": [
+      "handcrafted model texture",
+      "painted tiny surfaces",
+      "tiny set-piece detail",
+      "scale-model material finish",
+      "tiny props and furniture detail"
+    ]
+  },
+  "Pixel Art": {
+    "anchor": "pixel art style",
+    "lighting": [
+      "blocky pixel lighting",
+      "dithered shadow shapes",
+      "limited-palette highlights",
+      "sprite-like light blocks"
+    ],
+    "color": [
+      "limited pixel palette",
+      "indexed color look",
+      "crisp color blocks",
+      "retro game colors"
+    ],
+    "composition": [
+      "sprite-like composition",
+      "grid-based visual structure",
+      "simple readable silhouette",
+      "retro game scene layout"
+    ],
+    "texture": [
+      "visible square pixels",
+      "hard pixel edges",
+      "dithered texture",
+      "low-resolution pixel grid"
+    ]
+  },
+  "3D Collectible Figure": {
+    "anchor": "stylized 3D collectible figure render",
+    "lighting": [
+      "soft product-display lighting",
+      "gentle plastic highlight",
+      "toy showcase glow",
+      "clean studio display light"
+    ],
+    "color": [
+      "painted figure colors",
+      "smooth material colors",
+      "collectible toy palette",
+      "clean resin tones"
+    ],
+    "composition": [
+      "collectible figure presentation",
+      "toy-like character staging",
+      "display-stand composition",
+      "small figure centered layout"
+    ],
+    "texture": [
+      "smooth resin surface",
+      "painted plastic material",
+      "subtle toy seams",
+      "matte vinyl finish",
+      "miniature sculpt detail"
+    ]
+  },
+  "Chibi Style": {
+    "anchor": "cute chibi character illustration",
+    "lighting": [
+      "bright playful lighting",
+      "soft rounded highlights"
+    ],
+    "color": [
+      "bright cute colors",
+      "soft candy palette"
+    ],
+    "composition": [
+      "oversized head",
+      "tiny compact body",
+      "short simplified limbs when visible",
+      "super-deformed chibi proportions"
+    ],
+    "texture": [
+      "clean simplified anime shapes",
+      "rounded stylized edges",
+      "big expressive eyes",
+      "soft rosy cheeks"
+    ]
+  },
+  "Swedish Face Silence": {
+    "anchor": "quiet face-centered chamber drama",
+    "lighting": [
+      "soft window illumination",
+      "pale diffused illumination",
+      "gentle facial shadow"
+    ],
+    "color": [
+      "chalk white",
+      "pale gray",
+      "muted skin tones",
+      "dry earth brown"
+    ],
+    "composition": [
+      "intimate close-up",
+      "still face emphasis",
+      "spare background"
+    ],
+    "texture": [
+      "linen",
+      "matte skin",
+      "quiet empty wall"
+    ]
+  },
+  "French Natural Light New Wave": {
+    "anchor": "natural-light nouvelle-vague intimacy",
+    "lighting": [
+      "available window light",
+      "soft outdoor bounce",
+      "unpolished daylight"
+    ],
+    "color": [
+      "muted cream",
+      "faded blue",
+      "soft gray",
+      "natural skin tone"
+    ],
+    "composition": [
+      "casual off-center framing",
+      "unposed body language",
+      "documentary-like stillness"
+    ],
+    "texture": [
+      "soft tonal texture",
+      "ordinary apartment details",
+      "creased fabric"
+    ]
+  },
+  "Cinematic Widescreen Scope": {
+    "anchor": "cinematic widescreen scope",
+    "lighting": [
+      "controlled cinematic lighting",
+      "dramatic scene contrast",
+      "broad atmospheric illumination",
+      "subtle edge highlights"
+    ],
+    "color": [
+      "filmic color grading",
+      "balanced cinematic palette",
+      "rich but controlled tones",
+      "deep tonal separation"
+    ],
+    "composition": [
+      "wide horizontal composition",
+      "panoramic scene balance",
+      "strong cinematic staging",
+      "expansive visual scope"
+    ],
+    "texture": [
+      "clean filmic texture",
+      "subtle cinematic grain",
+      "polished image finish",
+      "coherent atmospheric depth"
+    ]
+  },
+  "Clean Cel Animation": {
+    "anchor": "clean cel animation style",
+    "lighting": [
+      "simple cel-shaded light",
+      "clean shadow shapes",
+      "flat animated lighting",
+      "soft highlight blocks"
+    ],
+    "color": [
+      "clear cel color",
+      "flat saturated palette",
+      "clean anime color blocks",
+      "controlled accent colors"
+    ],
+    "composition": [
+      "clear animation layout",
+      "readable character silhouette",
+      "graphic animated layout",
+      "balanced animated staging"
+    ],
+    "texture": [
+      "clean line art",
+      "flat color fills",
+      "subtle cel texture",
+      "crisp drawn edges"
+    ]
+  }
+}

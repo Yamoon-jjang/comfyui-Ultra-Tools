@@ -1,0 +1,540 @@
+﻿# Ultra Tools Translator
+
+`comfyui-Ultra-Tools`는 ComfyUI에서 사용할 수 있는 텍스트 번역용 커스텀 노드입니다.
+노드 이름은 `Ultra Tools Translator`, 카테고리는 `Ultra Tools`입니다.
+
+영어/일본어 등 다양한 원문을 한국어로 번역하거나, ComfyUI 워크플로우 안에서 텍스트 번역만 가볍게 사용하기 위한 목적의 경량 노드입니다.
+
+이 노드는 이미지 처리, CLIP 인코딩, 프롬프트 자동 생성 기능 없이 **문자열 번역 기능만 제공합니다.**
+
+---
+
+## 주요 특징 
+
+- ComfyUI용 경량 번역 커스텀 노드
+- API 키 없이도 기존 무료 Google/MyMemory 경로 사용 가능
+- 선택적으로 공식 Google Cloud Translation Basic v2 API Key 사용 가능
+- Ultra MiniMax H3 Prompt와 같은 Google 번역 API Key 공유
+- Google 번역 계열 기능 사용 가능
+- MyMemory 번역 서비스 선택 가능
+- 입력 텍스트의 줄바꿈 유지 옵션 제공
+- 번역 실패 시 원문 반환 옵션 제공
+- API Key는 workflow가 아닌 ComfyUI 사용자 로컬 설정에만 저장
+- 번역 전용 노드라 구조가 단순함
+
+---
+
+## 제공되는 노드
+
+ComfyUI에서 아래 이름으로 표시됩니다.
+
+```text
+Ultra Tools → Ultra Tools Translator
+```
+
+노드 출력은 `STRING` 타입입니다.
+
+따라서 다른 텍스트 노드, 프롬프트 노드, 텍스트 표시 노드 등에 연결해서 사용할 수 있습니다.
+
+---
+
+## 설치 위치
+
+압축을 푼 뒤 폴더 전체를 ComfyUI의 `custom_nodes` 폴더 안에 넣습니다.
+
+예시:
+
+```text
+ComfyUI/
+└─ custom_nodes/
+   └─ comfyui-Ultra-Tools/
+
+Translator와 직접 관련된 주요 파일:
+- ultra_translator_node.py
+- web/ultra_translator_api.js
+- 메뉴얼/Ultra Tools Translator 메뉴얼.txt
+
+통합 패키지에는 다른 Ultra Tools 노드 파일도 함께 들어 있습니다.
+```
+
+중요한 점은 `ultra_translator_node.py` 파일만 넣는 것이 아니라,  
+`comfyui-Ultra-Tools` 폴더 전체를 `custom_nodes` 안에 넣어야 한다는 것입니다.
+
+---
+
+## 추가 Python 라이브러리
+
+현재 버전은 번역 요청에 Python 표준 라이브러리만 사용합니다.
+
+따라서 `deep-translator`를 별도로 설치할 필요가 없습니다. `requirements.txt`도 추가 패키지를 요구하지 않습니다.
+노드 폴더를 `custom_nodes`에 넣은 뒤 ComfyUI를 재시작하면 됩니다.
+
+기존 환경에 `deep-translator`가 설치되어 있어도 문제는 없지만, 이 노드는 더 이상 그 패키지에 의존하지 않습니다.
+
+---
+
+## API 키가 필요한가요?
+
+필수는 아닙니다. API Key가 없어도 기존 무료 Google/MyMemory 번역 경로를 계속 사용할 수 있습니다.
+
+다만 무료·익명 Google 번역 경로는 정상적인 사용 중에도 `HTTP 429: Too Many Requests` 제한이 걸릴 수 있습니다. 이를 줄이기 위해 이 버전은 **공식 Google Cloud Translation Basic v2 API Key**를 선택적으로 사용할 수 있습니다.
+
+노드 아래의 `Google 번역 API 설정` 버튼을 누르면 Key를 저장·테스트·삭제할 수 있습니다. 버튼과 설정 창에는 다음 내용을 바로 확인할 수 있는 툴팁/안내 문구가 포함되어 있습니다.
+
+- 공식 API를 우선 사용한다는 점
+- API Key가 workflow에 저장되지 않는다는 점
+- Ultra MiniMax H3 Prompt와 동일한 Key를 공유한다는 점
+- Cloud Translation API 활성화, Billing 연결, API 제한 설정 안내
+- 무료 번역 경로의 429 제한과 공식 API의 할당량 차이
+
+**Ultra MiniMax H3 Prompt에서 이미 Google 번역 API Key를 저장했다면 Ultra Tools Translator에 다시 입력할 필요가 없습니다.** 반대로 Ultra Tools Translator에서 저장한 Key도 H3 Prompt가 함께 사용합니다.
+
+저장된 Key는 보안을 위해 브라우저에 다시 표시하지 않습니다. 입력란은 새 Key를 입력하거나 기존 Key를 교체할 때만 사용합니다.
+
+현재 지원하는 `translator_service`는 다음과 같습니다.
+
+```text
+google
+mymemory
+```
+
+`google` 선택 시 공유 API Key가 있으면 **Google Cloud Translation Basic v2 → 기존 무료 Google JSON → Google mobile → MyMemory fallback** 순서로 시도합니다. Key가 없으면 기존과 동일하게 무료 Google → MyMemory 순서로 동작합니다.
+
+`mymemory`를 직접 선택하면 MyMemory만 사용하며 Google Cloud API Key를 사용하지 않습니다.
+
+DeepL은 이 경량 버전에서 지원하지 않습니다.
+
+---
+
+## 사용 방법
+
+1. ComfyUI를 실행합니다.
+2. 노드 추가 메뉴에서 `Ultra Tools Translator` 항목을 찾습니다.
+3. `Ultra Tools Translator` 노드를 추가합니다.
+4. `text` 입력칸에 번역할 문장을 넣습니다.
+5. `target_language`를 원하는 번역 언어로 설정합니다.
+6. 필요하면 `source_language`를 설정합니다.
+7. 기본값으로 사용하려면 `source_language`는 `auto`, `target_language`는 `korean`으로 두면 됩니다.
+8. 워크플로우를 실행하면 번역된 텍스트가 `translated_text` 출력으로 나옵니다.
+
+---
+
+## 입력 옵션 설명
+
+### text
+
+번역할 원문 텍스트입니다.
+
+여러 줄 입력도 가능합니다.
+
+예:
+
+```text
+아름다운 조명 아래 서 있는 여성,
+시네마틱한 분위기,
+부드러운 배경 흐림
+```
+
+---
+
+### target_language
+
+번역 결과 언어입니다.
+
+기본값은 다음과 같습니다.
+
+```text
+korean
+```
+
+영어/일본어 등 다른 언어의 텍스트를 한국어로 바꾸고 싶다면 기본값 그대로 사용하면 됩니다.
+
+---
+
+### source_language
+
+원문 언어입니다.
+
+기본값은 다음과 같습니다.
+
+```text
+auto
+```
+
+일반적으로 `auto`로 두면 됩니다.
+
+특정 언어를 직접 지정하고 싶다면 `korean`, `japanese`, `english` 등을 선택하면 됩니다.
+
+---
+
+### translator_service
+
+사용할 번역 서비스를 선택합니다.
+
+현재 선택지는 다음과 같습니다.
+
+```text
+google
+mymemory
+```
+
+보통은 기본값인 `google`을 권장합니다. 공유 Google Cloud API Key가 저장되어 있으면 공식 API를 먼저 사용하고, 실패하면 기존 무료 경로로 자동 fallback 합니다.
+
+`mymemory`는 Google 계열을 사용하지 않고 MyMemory만 직접 사용하고 싶을 때 선택할 수 있습니다.
+
+MyMemory 자체의 `auto` 감지에 의존하지 않도록, 이 노드는 `source_language = auto`일 때 한글·일본어·중국어·태국어·아랍어·힌디어·키릴 문자처럼 문자 체계로 비교적 확실히 구분되는 경우를 먼저 판별합니다. 그 밖의 라틴 문자 입력은 기존 호환 동작처럼 영어로 간주합니다. 프랑스어·독일어·스페인어 등 라틴 문자 언어는 정확도를 위해 원문 언어를 직접 지정하는 것이 좋습니다.
+
+예:
+
+```text
+source_language = english
+target_language = korean
+translator_service = mymemory
+```
+
+---
+
+### preserve_newlines
+
+줄바꿈 유지 옵션입니다.
+
+기본값은 다음과 같습니다.
+
+```text
+True
+```
+
+이 옵션이 켜져 있으면 여러 줄 프롬프트를 번역할 때 줄 구조를 최대한 유지합니다.
+
+예:
+
+원문:
+
+```text
+긴 검은 머리의 여성
+밤거리 배경
+시네마틱 조명
+```
+
+번역 결과 예:
+
+```text
+A woman with long black hair
+Night street background
+Cinematic lighting
+```
+
+프롬프트를 줄 단위로 관리하는 경우에는 켜두는 것을 권장합니다.
+
+---
+
+### fallback_to_input_on_error
+
+번역 실패 시 원문을 그대로 반환할지 정하는 옵션입니다.
+
+기본값은 다음과 같습니다.
+
+```text
+False
+```
+
+`False`일 때는 번역 실패 메시지를 출력합니다.
+
+`True`로 설정하면 번역에 실패해도 원문 텍스트를 그대로 출력합니다.
+
+워크플로우가 중간에 끊기지 않게 하고 싶다면 `True`로 설정할 수 있습니다.
+
+---
+
+## 지원 언어
+
+노드에는 자주 쓰는 언어 목록이 기본으로 들어 있습니다.
+
+예:
+
+```text
+auto
+english
+korean
+japanese
+chinese (simplified)
+chinese (traditional)
+spanish
+french
+german
+italian
+portuguese
+russian
+ukrainian
+vietnamese
+thai
+indonesian
+hindi
+arabic
+turkish
+dutch
+polish
+```
+
+`auto`는 원문 언어 자동 감지용이며, 대상 언어에는 사용하지 않습니다.
+
+---
+
+## 일반적인 사용 예
+
+영어 프롬프트를 한국어로 번역하려면 다음처럼 설정합니다.
+
+```text
+source_language: auto
+target_language: korean
+translator_service: google
+preserve_newlines: True
+```
+
+입력:
+
+```text
+A woman wearing a white shirt,
+soft natural light,
+shallow depth of field,
+realistic photographic style
+```
+
+출력 예:
+
+```text
+흰 셔츠를 입은 여성,
+부드러운 자연광,
+얕은 심도,
+사실적인 사진 스타일
+```
+
+---
+
+## 폴더 이름을 바꿔도 되나요?
+
+네, 가능합니다.
+
+다만 README나 설치 명령에 적힌 경로는 바뀐 폴더명에 맞게 수정해야 합니다.
+
+권장 폴더명은 다음과 같습니다.
+
+```text
+comfyui-Ultra-Tools
+```
+
+---
+
+## Ultra Tools 이름과 카테고리
+
+통합 패키지는 여섯 노드를 쉽게 검색할 수 있도록 표시 이름을 `Ultra Tools ...` 형식으로 통일하고, 카테고리도 `Ultra Tools`로 통일합니다.
+
+Translator의 표시 이름은 다음과 같습니다.
+
+```text
+Ultra Tools Translator
+```
+
+통합 패키지의 검색성과 일관성을 유지하려면 이 표시 이름과 카테고리는 변경하지 않는 것을 권장합니다.
+
+---
+
+## 가능하면 바꾸지 않는 것이 좋은 부분
+
+아래 부분은 ComfyUI가 노드를 식별하는 내부 등록 이름이므로, 이미 저장한 워크플로우 호환성을 유지하려면 자주 바꾸지 않는 것이 좋습니다.
+
+```python
+NODE_CLASS_MAPPINGS = {
+    "UltraTranslatorTextNode": UltraTranslatorTextNode,
+}
+```
+
+그리고 클래스 이름도 가능하면 같은 이름을 유지하는 것이 좋습니다.
+
+```python
+class UltraTranslatorTextNode:
+```
+
+겉으로 보이는 이름만 바꾸고 싶다면 `NODE_DISPLAY_NAME_MAPPINGS`와 `CATEGORY`만 바꾸는 것이 더 안전합니다.
+
+---
+
+## 문제 해결
+
+### 노드가 ComfyUI에 보이지 않습니다
+
+다음을 확인하세요.
+
+1. 폴더 위치가 올바른지 확인합니다.
+
+```text
+ComfyUI/custom_nodes/comfyui-Ultra-Tools/
+```
+
+2. 폴더 안에 `__init__.py`가 있는지 확인합니다.
+
+```text
+comfyui-Ultra-Tools/__init__.py
+```
+
+3. ComfyUI를 완전히 종료한 뒤 다시 실행합니다.
+
+4. 콘솔 창에 에러 메시지가 있는지 확인합니다.
+
+---
+
+### 예전 버전에서 `No module named deep_translator` 오류가 났습니다
+
+현재 버전은 `deep-translator`를 사용하지 않으므로 이 오류 때문에 별도 설치할 필요가 없습니다.
+기존 노드 폴더를 완전히 교체한 뒤 ComfyUI를 재시작하십시오.
+
+---
+
+### 번역이 실패합니다
+
+인터넷 연결 상태를 확인하세요.
+
+이 노드는 로컬 번역 모델이 아니라 외부 번역 서비스를 사용하는 방식입니다.
+
+따라서 인터넷 연결이 필요합니다.
+
+일시적으로 번역 서비스가 응답하지 않거나 제한될 수도 있습니다.
+
+기본 `google` 모드에서는 공유 Google Cloud API Key가 저장되어 있으면 공식 Google Cloud Translation Basic v2를 먼저 사용합니다. 공식 API가 없거나 실패하면 기존 Google JSON → Google mobile → MyMemory 순서로 fallback 합니다. 무료 Google 경로에서 HTTP 429가 발생하면 Google을 계속 두드리지 않고 일정 시간 내부 cooldown으로 전환합니다. 동일한 텍스트의 성공 결과는 작은 메모리 캐시에 보관하여 반복 Queue 실행 때 불필요한 요청도 줄입니다.
+
+그래도 실패한다면 다음을 시도할 수 있습니다.
+
+```text
+잠시 후 다시 실행
+source_language를 auto 대신 korean / english 등으로 직접 지정
+translator_service를 mymemory로 직접 변경
+```
+
+---
+
+### MyMemory에서 번역이 이상하거나 실패합니다
+
+`mymemory`는 `source_language = auto`를 안정적으로 처리하지 못할 수 있습니다.
+
+이 경우 원문 언어를 직접 지정하세요.
+
+예:
+
+```text
+source_language = english
+target_language = korean
+translator_service = mymemory
+```
+
+---
+
+### 추가 pip 설치가 필요한가요?
+
+현재 Ultra Tools Translator는 `deep-translator` 같은 별도 패키지를 요구하지 않습니다.
+`requirements.txt`에도 추가 설치 항목이 없으므로 통합 폴더를 설치한 뒤 ComfyUI를 재시작하면 됩니다.
+
+---
+
+## 삭제 방법
+
+사용하지 않으려면 아래 폴더를 삭제하면 됩니다.
+
+```text
+ComfyUI/custom_nodes/comfyui-Ultra-Tools/
+```
+
+그 후 ComfyUI를 재시작하면 노드 목록에서 사라집니다.
+
+이 노드 자체는 `deep-translator`를 사용하지 않습니다. 기존 환경에 설치된 `deep-translator`는 다른 커스텀 노드가 사용할 수 있으므로 Ultra Tools Translator 때문에 제거할 필요는 없습니다.
+
+---
+
+## 주의 사항
+
+- API Key 없이도 사용할 수 있지만, 필요하면 공식 Google Cloud Translation Basic v2 API Key를 사용할 수 있습니다.
+- Google Cloud Translation API Key는 Ultra MiniMax H3 Prompt와 공유됩니다.
+- API Key는 workflow/노드 속성에 저장되지 않고 ComfyUI 사용자 로컬 설정에만 저장됩니다.
+- DeepL 공식 API 번역 기능은 포함되어 있지 않습니다.
+- 번역 품질은 사용하는 번역 서비스 상태에 따라 달라질 수 있습니다.
+- 인터넷 연결이 필요합니다.
+- 대량 번역이나 반복 요청 시 서비스 제한이 발생할 수 있습니다.
+
+---
+
+## 권장 사용 목적
+
+이 노드는 다음과 같은 용도에 적합합니다.
+
+```text
+영어 프롬프트를 한국어로 번역
+일본어 프롬프트를 한국어로 번역
+ComfyUI 워크플로우 안에서 간단한 텍스트 번역
+프롬프트 작성 보조
+텍스트 노드와 연결해 번역 결과 확인
+```
+
+다음과 같은 용도에는 적합하지 않을 수 있습니다.
+
+```text
+대량 문서 번역
+상업용 고정 품질 번역 파이프라인
+오프라인 번역
+DeepL API 기반 전문 번역
+```
+
+---
+
+## 파일 구성
+
+Translator 관련 파일은 통합 패키지 안에서 다음처럼 구성됩니다.
+
+```text
+comfyui-Ultra-Tools/
+├─ __init__.py
+├─ ultra_translator_node.py
+├─ requirements.txt
+├─ web/
+│  └─ ultra_translator_api.js
+└─ 메뉴얼/
+   └─ Ultra Tools Translator 메뉴얼.txt
+```
+
+`__init__.py`는 Ultra Tools 전체 6개 노드를 등록합니다. `ultra_translator_node.py`는 실제 번역 처리와 API 설정 route를 담당하고, `web/ultra_translator_api.js`는 Google 번역 API 설정 UI를 담당합니다.
+
+---
+
+## 요약 설치 순서
+
+가장 간단한 설치 순서는 다음과 같습니다.
+
+```text
+1. comfyui-Ultra-Tools 폴더를 ComfyUI/custom_nodes/ 안에 넣습니다.
+2. ComfyUI를 완전히 재시작합니다.
+3. Ultra Tools → Ultra Tools Translator 노드를 추가해서 사용합니다.
+```
+
+API Key는 필수가 아닙니다. 무료 Google/MyMemory 경로만으로도 사용할 수 있습니다. 다만 무료 경로에서 429가 반복된다면 노드의 `Google 번역 API 설정` 버튼에서 공식 Google Cloud Translation API Key 사용을 권장합니다.
+
+---
+
+## Google 429 / 500 오류 대응
+
+무료 Google 번역 경로는 API Key가 없는 웹 요청 방식이므로 서버 상태나 짧은 시간의 요청 집중에 따라 `HTTP 429: Too Many Requests`, 5xx 오류, 일시적인 연결 오류가 발생할 수 있습니다.
+
+공식 Google Cloud Translation API Key가 저장되어 있으면 먼저 공식 Basic v2 경로를 사용합니다. 이 Key는 Ultra MiniMax H3 Prompt와 공유됩니다. 공식 API 자체의 할당량/설정 오류가 발생하면 기존 무료 경로로 fallback 합니다.
+
+현재 버전은 다음 방식으로 대응합니다.
+
+- 공유 API Key가 있으면 공식 Google Cloud Translation Basic v2를 먼저 사용합니다.
+- Google Cloud API Key가 없거나 공식 API가 실패하면 기존 무료 Google 경로를 계속 사용합니다.
+- 무료 Google 요청 시작 간격을 프로세스 전체에서 제한합니다.
+- 500/502/503/504 또는 일시적인 네트워크 실패는 짧게 한 번 재시도합니다.
+- 429가 발생하면 `Retry-After`가 있으면 존중하고, 없으면 기본 cooldown을 설정합니다.
+- cooldown 중에는 Google mobile 같은 동일 Google 계열 경로를 연속 호출하지 않습니다.
+- 대신 별도 서비스인 MyMemory를 자동 fallback으로 사용합니다.
+- Google 오류/차단 HTML을 정상 번역으로 오인하지 않습니다.
+- 동일 입력의 성공 번역은 작은 메모리 캐시에 저장해 반복 Queue 실행의 요청 수를 줄입니다.
+- `preserve_newlines = True`에서는 우선 줄바꿈을 안전한 임시 토큰으로 보호하여 가능한 경우 한 번의 번역 요청으로 처리하고, 번역기가 토큰을 손상시킨 경우에만 보수적으로 줄 단위 처리로 돌아갑니다.
+- 오류 진단에는 HTTP 상태 등 구조 정보만 넣고 원문이 포함될 수 있는 전체 요청 URL은 출력하지 않습니다.
+
+따라서 예전처럼 `deep-translator`가 설치되지 않았다는 이유만으로 Google 번역 전체가 실패하지 않습니다. 무료 Google과 MyMemory가 동시에 제한될 때는 공식 Google Cloud Translation API Key를 설정하면 안정성을 높일 수 있습니다. 단, 공식 API도 Google Cloud 프로젝트의 할당량·Billing·API Key 제한 설정의 영향을 받으며 인터넷 연결은 필요합니다.
