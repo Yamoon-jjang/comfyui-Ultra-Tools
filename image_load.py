@@ -127,11 +127,75 @@ def _list_input_images_recursive():
 # input/output/temp.
 # ---------------------------------------------------------------------------
 
+# The registry lives in ComfyUI's user directory (ComfyUI/user/ultra_tools/)
+# so that a Manager update, which may replace this package folder, does not
+# wipe the user's registered folders.  Versions up to 1.0.0 stored it inside
+# the package folder; that legacy file is migrated once, then removed.
 _EXTERNAL_ROOTS_FILENAME = "ultra_tools_image_load_roots.json"
+_USER_SUBDIR = "ultra_tools"
+_USER_ROOTS_FILENAME = "image_load_roots.json"
+
+
+def _legacy_external_roots_path():
+    return os.path.join(os.path.dirname(os.path.abspath(__file__)), _EXTERNAL_ROOTS_FILENAME)
+
+
+def _user_external_roots_path():
+    try:
+        get_user_directory = getattr(folder_paths, "get_user_directory", None) if folder_paths else None
+        if not callable(get_user_directory):
+            return None
+        user_dir = get_user_directory()
+        if not user_dir:
+            return None
+        return os.path.join(os.path.abspath(str(user_dir)), _USER_SUBDIR, _USER_ROOTS_FILENAME)
+    except Exception:
+        return None
+
+
+def _write_json_atomic(path, data):
+    folder = os.path.dirname(path)
+    if folder:
+        os.makedirs(folder, exist_ok=True)
+    tmp_path = f"{path}.{uuid.uuid4().hex[:8]}.tmp"
+    try:
+        with open(tmp_path, "w", encoding="utf-8") as fh:
+            json.dump(data, fh, ensure_ascii=False, indent=2)
+        os.replace(tmp_path, path)
+    finally:
+        if os.path.exists(tmp_path):
+            try:
+                os.remove(tmp_path)
+            except Exception:
+                pass
+
+
+def _migrate_legacy_external_roots(user_path):
+    """Move a pre-1.0.1 registry from the package folder to the user folder."""
+    legacy_path = _legacy_external_roots_path()
+    if os.path.exists(user_path) or not os.path.isfile(legacy_path):
+        return
+    try:
+        with open(legacy_path, "r", encoding="utf-8") as fh:
+            data = json.load(fh)
+        if not isinstance(data, list):
+            return
+        _write_json_atomic(user_path, data)
+    except Exception:
+        return  # keep the legacy file; it is still read as a fallback
+    try:
+        os.remove(legacy_path)
+    except Exception:
+        pass
 
 
 def _external_roots_path():
-    return os.path.join(os.path.dirname(os.path.abspath(__file__)), _EXTERNAL_ROOTS_FILENAME)
+    user_path = _user_external_roots_path()
+    if user_path:
+        _migrate_legacy_external_roots(user_path)
+        if os.path.exists(user_path) or not os.path.isfile(_legacy_external_roots_path()):
+            return user_path
+    return _legacy_external_roots_path()
 
 
 def _load_external_roots():
@@ -159,8 +223,7 @@ def _load_external_roots():
 def _save_external_roots(roots):
     path = _external_roots_path()
     try:
-        with open(path, "w", encoding="utf-8") as fh:
-            json.dump(roots, fh, ensure_ascii=False, indent=2)
+        _write_json_atomic(path, roots)
         return True
     except Exception:
         return False
