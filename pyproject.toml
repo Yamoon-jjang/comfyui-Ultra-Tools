@@ -1,7 +1,7 @@
 [project]
 name = "comfyui-ultra-tools"
 description = "Ultra Tools: 13 utility nodes for ComfyUI - Textbox, Translator, Prompt Styler, Prompt Composer, Image + PiD, Image Load, Text/Image Watermark, Model Viewer, Wildcard Browser, Workflow Timer, Audio Fade."
-version = "1.0.1"
+version = "1.0.2"
 license = { file = "LICENSE" }
 dependencies = []
 

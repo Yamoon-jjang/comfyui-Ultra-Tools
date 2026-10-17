@@ -20,6 +20,10 @@ jobs:
     steps:
       - name: Check out code
         uses: actions/checkout@v4
+      # git은 기본 설정에서 한글 파일명을 "\355\226..." 같은 표기로 내보내서,
+      # 배포 zip을 만들 때 한글 이름의 글꼴·메뉴얼·예제가 빠짐. 원래 이름 그대로 내보내게 함
+      - name: Keep Korean file names in the package
+        run: git config --global core.quotePath false
       - name: Publish Custom Node
         uses: Comfy-Org/publish-node-action@v1
         with:
