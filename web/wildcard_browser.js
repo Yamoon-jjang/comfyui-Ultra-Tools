@@ -1,5 +1,6 @@
 import { app } from "../../scripts/app.js";
 import { api } from "../../scripts/api.js";
+import { ultraFetchApi } from "./ultra_tools_security.js";
 
 // Current frontends expose a DOM widget's element as widget.element;
 // widget.inputEl is a deprecated alias (warns on access). Prefer element and
@@ -511,7 +512,7 @@ app.registerExtension({
                 setEntries([{ type: "status", display: "Loading folders..." }]);
 
                 try {
-                    const response = await api.fetchApi("/Ultra-wildcard_browser/folders", {
+                    const response = await ultraFetchApi("/Ultra-wildcard_browser/folders", {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({ wildcards_path: requestPath }),
@@ -573,7 +574,7 @@ app.registerExtension({
                 setEntries([{ type: "status", display: "Loading..." }]);
 
                 try {
-                    const response = await api.fetchApi("/Ultra-wildcard_browser/get_files", {
+                    const response = await ultraFetchApi("/Ultra-wildcard_browser/get_files", {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({ folder, wildcards_path: requestPath }),

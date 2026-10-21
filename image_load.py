@@ -16,6 +16,11 @@ try:
 except Exception:  # pragma: no cover - always available inside ComfyUI
     folder_paths = None
 
+try:
+    from .request_guard import guard_request, register_token_route
+except ImportError:  # pragma: no cover - module loaded outside the package
+    from request_guard import guard_request, register_token_route
+
 
 # ---------------------------------------------------------------------------
 # Recursive input listing
@@ -809,9 +814,14 @@ def register_image_load_routes():
     if getattr(prompt_server, marker, False):
         return True
 
+    # Per-process token handed to the Ultra Tools frontend (see request_guard).
+    register_token_route()
+
     @routes.get("/ultra_tools/image_load/list")
     async def _list_route(request):
-        del request
+        denied = guard_request(request, web, require_token=False)
+        if denied is not None:
+            return denied
         # Backs the sort feature (date modified needs mtime, which isn't
         # available anywhere in the plain combo value list). Combines the
         # input folder with every registered external root so the frontend
@@ -825,11 +835,16 @@ def register_image_load_routes():
 
     @routes.get("/ultra_tools/image_load/roots")
     async def _roots_list_route(request):
-        del request
+        denied = guard_request(request, web, require_token=False)
+        if denied is not None:
+            return denied
         return web.json_response({"roots": _load_external_roots()})
 
     @routes.post("/ultra_tools/image_load/roots")
     async def _roots_add_route(request):
+        denied = guard_request(request, web)
+        if denied is not None:
+            return denied
         try:
             body = await request.json()
         except Exception:
@@ -841,6 +856,9 @@ def register_image_load_routes():
 
     @routes.delete("/ultra_tools/image_load/roots")
     async def _roots_remove_route(request):
+        denied = guard_request(request, web)
+        if denied is not None:
+            return denied
         root_id = request.rel_url.query.get("id", "")
         if not root_id or not _remove_external_root(root_id):
             return web.json_response({"error": "폴더를 찾을 수 없습니다."}, status=404)
@@ -848,6 +866,9 @@ def register_image_load_routes():
 
     @routes.post("/ultra_tools/image_load/delete_images")
     async def _delete_images_route(request):
+        denied = guard_request(request, web)
+        if denied is not None:
+            return denied
         try:
             body = await request.json()
         except Exception:
@@ -895,6 +916,9 @@ def register_image_load_routes():
         # directory tree — and see whether a folder actually has images in
         # it before committing — entirely through this one route, with no
         # browser file/folder picker involved at any point.
+        denied = guard_request(request, web)
+        if denied is not None:
+            return denied
         path = request.rel_url.query.get("path", "").strip()
         if not path:
             return web.json_response({"path": "", "parent": None, "entries": _list_drives(), "images": []})
@@ -915,6 +939,11 @@ def register_image_load_routes():
         type_ = request.rel_url.query.get("type", "input")
         root_id = request.rel_url.query.get("root", "")
         raw_path = request.rel_url.query.get("path", "")
+        # A raw disk path (folder-browse preview) needs the token; ComfyUI and
+        # registered-folder images only need a same-site request, like /view.
+        denied = guard_request(request, web, require_token=(type_ == "path"))
+        if denied is not None:
+            return denied
         source_path = _resolve_source_path(filename, subfolder, type_, root_id, raw_path)
         if not source_path or not os.path.isfile(source_path):
             return web.Response(status=404)
@@ -933,6 +962,10 @@ def register_image_load_routes():
         except (TypeError, ValueError):
             max_dim = 320
         max_dim = max(32, min(max_dim, _THUMB_MAX_DIMENSION_CAP))
+
+        denied = guard_request(request, web, require_token=(type_ == "path"))
+        if denied is not None:
+            return denied
 
         source_path = _resolve_source_path(filename, subfolder, type_, root_id, raw_path)
         if not source_path or not os.path.isfile(source_path):

@@ -7,6 +7,11 @@ from typing import Dict, List, Optional, Sequence, Set, Tuple
 import server
 from aiohttp import web
 
+try:
+    from .request_guard import guard_request, register_token_route
+except ImportError:  # pragma: no cover - module loaded outside the package
+    from request_guard import guard_request, register_token_route
+
 
 _SCAN_WORKERS = 2
 _SCAN_EXECUTOR = ThreadPoolExecutor(
@@ -341,8 +346,15 @@ class UltraWildcardBrowser:
         return entries
 
 
+# Per-process token handed to the Ultra Tools frontend (see request_guard).
+register_token_route()
+
+
 @server.PromptServer.instance.routes.post("/Ultra-wildcard_browser/folders")
 async def post_folders(request):
+    denied = guard_request(request, web)
+    if denied is not None:
+        return denied
     try:
         data = await request.json()
         wildcards_path = data.get("wildcards_path") or data.get("path") or None
@@ -360,6 +372,9 @@ async def post_folders(request):
 # Compatibility for older cached frontend files. The current frontend uses POST.
 @server.PromptServer.instance.routes.get("/Ultra-wildcard_browser/folders")
 async def get_folders(request):
+    denied = guard_request(request, web)
+    if denied is not None:
+        return denied
     try:
         wildcards_path = request.query.get("wildcards_path") or request.query.get("path") or None
         result = await _run_filesystem_call(UltraWildcardBrowser.get_folders_info, wildcards_path)
@@ -375,6 +390,9 @@ async def get_folders(request):
 
 @server.PromptServer.instance.routes.post("/Ultra-wildcard_browser/get_files")
 async def get_files(request):
+    denied = guard_request(request, web)
+    if denied is not None:
+        return denied
     try:
         data = await request.json()
         folder = data.get("folder", UltraWildcardBrowser.ROOT_FOLDER_LABEL)

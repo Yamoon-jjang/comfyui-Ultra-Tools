@@ -942,6 +942,14 @@ def register_translation_api_routes() -> bool:
     if getattr(prompt_server, marker, False):
         return True
 
+    try:
+        from .request_guard import guard_request, register_token_route
+    except ImportError:  # pragma: no cover - module loaded outside the package
+        from request_guard import guard_request, register_token_route
+
+    # Per-process token handed to the Ultra Tools frontend (see request_guard).
+    register_token_route()
+
     def _json_error(message: str, *, status: int = 400, error_type: str = "request_error"):
         return web.json_response(
             {"ok": False, "error": str(message or "Translation API request failed."), "type": error_type},
@@ -950,11 +958,16 @@ def register_translation_api_routes() -> bool:
 
     @routes.get("/ultra_translator/translation_api")
     async def _status_route(request):
-        del request
+        denied = guard_request(request, web, require_token=False)
+        if denied is not None:
+            return denied
         return web.json_response({"ok": True, **_google_cloud_translation_api_status()})
 
     @routes.post("/ultra_translator/translation_api")
     async def _save_route(request):
+        denied = guard_request(request, web)
+        if denied is not None:
+            return denied
         try:
             payload = await request.json()
         except Exception:
@@ -977,7 +990,9 @@ def register_translation_api_routes() -> bool:
 
     @routes.delete("/ultra_translator/translation_api")
     async def _delete_route(request):
-        del request
+        denied = guard_request(request, web)
+        if denied is not None:
+            return denied
         if not _clear_google_cloud_translation_api_key():
             return _json_error(
                 "Could not remove the saved API key from the ComfyUI user directory.",
@@ -988,6 +1003,9 @@ def register_translation_api_routes() -> bool:
 
     @routes.post("/ultra_translator/translation_api/test")
     async def _test_route(request):
+        denied = guard_request(request, web)
+        if denied is not None:
+            return denied
         try:
             payload = await request.json()
         except Exception:

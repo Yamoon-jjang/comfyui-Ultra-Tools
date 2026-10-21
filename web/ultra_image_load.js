@@ -1,5 +1,6 @@
 import { app } from "../../scripts/app.js";
 import { api } from "../../scripts/api.js";
+import { ultraFetchApi, getUltraToken, ULTRA_TOKEN_QUERY } from "./ultra_tools_security.js";
 
 const NODE_CLASS = "UltraToolsImageLoad";
 const IMAGE_WIDGET = "image";
@@ -318,6 +319,8 @@ function thumbUrl(value, maxDim = 320) {
 // images are visible while still just navigating, not only after commiting.
 function browseThumbUrl(absolutePath, maxDim = 160) {
     const query = new URLSearchParams({ type: "path", path: absolutePath, max: String(maxDim) });
+    // A raw disk path is only served with the Ultra Tools token (request_guard.py).
+    query.set(ULTRA_TOKEN_QUERY, getUltraToken());
     const path = `/ultra_tools/image_load/thumbnail?${query.toString()}`;
     return typeof api.apiURL === "function" ? api.apiURL(path) : path;
 }
@@ -333,6 +336,7 @@ function originalUrl(value, download = false) {
 
 function browseOriginalUrl(absolutePath, download = false) {
     const query = new URLSearchParams({ type: "path", path: absolutePath });
+    query.set(ULTRA_TOKEN_QUERY, getUltraToken());
     if (download) query.set("download", "1");
     const path = `/ultra_tools/image_load/original?${query.toString()}`;
     return typeof api.apiURL === "function" ? api.apiURL(path) : path;
@@ -573,7 +577,7 @@ function openBrowser(node, imageWidget) {
     sortItems();
     async function loadFileMeta() {
         try {
-            const response = await api.fetchApi("/ultra_tools/image_load/list");
+            const response = await ultraFetchApi("/ultra_tools/image_load/list");
             if (!response.ok) return;
             const payload = await response.json();
             if (!alive() || !Array.isArray(payload?.files)) return;
@@ -934,7 +938,7 @@ function openBrowser(node, imageWidget) {
             // Shift-selected range to be deleted from one confirmation.
             for (let offset = 0; offset < requestedValues.length; offset += 500) {
                 const batch = requestedValues.slice(offset, offset + 500);
-                const response = await api.fetchApi("/ultra_tools/image_load/delete_images", {
+                const response = await ultraFetchApi("/ultra_tools/image_load/delete_images", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ images: batch }),
@@ -1140,7 +1144,7 @@ function openBrowser(node, imageWidget) {
             removeButton.addEventListener("click", async () => {
                 removeButton.disabled = true;
                 try {
-                    const response = await api.fetchApi(`/ultra_tools/image_load/roots?id=${encodeURIComponent(root.id)}`, { method: "DELETE" });
+                    const response = await ultraFetchApi(`/ultra_tools/image_load/roots?id=${encodeURIComponent(root.id)}`, { method: "DELETE" });
                     if (!response.ok) {
                         const payload = await response.json().catch(() => ({}));
                         throw new Error(payload?.error || `${response.status} ${response.statusText}`);
@@ -1159,7 +1163,7 @@ function openBrowser(node, imageWidget) {
 
     async function loadRoots() {
         try {
-            const response = await api.fetchApi("/ultra_tools/image_load/roots");
+            const response = await ultraFetchApi("/ultra_tools/image_load/roots");
             if (!response.ok) return;
             const payload = await response.json();
             if (!alive() || !Array.isArray(payload?.roots)) return;
@@ -1218,7 +1222,7 @@ function openBrowser(node, imageWidget) {
         if (alive()) render();
         addRootSelectButton.disabled = true;
         try {
-            const response = await api.fetchApi(`/ultra_tools/image_load/browse_dirs?path=${encodeURIComponent(path)}`);
+            const response = await ultraFetchApi(`/ultra_tools/image_load/browse_dirs?path=${encodeURIComponent(path)}`);
             const payload = await response.json().catch(() => ({}));
             if (!response.ok) throw new Error(payload?.error || `${response.status} ${response.statusText}`);
             if (!alive()) return;
@@ -1571,7 +1575,7 @@ function openBrowser(node, imageWidget) {
         const label = addRootLabelInput.value.trim();
         addRootSelectButton.disabled = true;
         try {
-            const response = await api.fetchApi("/ultra_tools/image_load/roots", {
+            const response = await ultraFetchApi("/ultra_tools/image_load/roots", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ path: browsePath, label }),

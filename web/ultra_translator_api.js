@@ -1,5 +1,6 @@
 import { app } from "../../scripts/app.js";
 import { api } from "../../scripts/api.js";
+import { ultraFetchApi } from "./ultra_tools_security.js";
 
 const NODE_NAME = "UltraTranslatorTextNode";
 const STATUS_PATH = "/ultra_translator/translation_api";
@@ -67,7 +68,7 @@ function apiWidget(node) {
 }
 
 async function requestJson(path, options = {}) {
-  const response = await api.fetchApi(path, options);
+  const response = await ultraFetchApi(path, options);
   let payload = null;
   try {
     payload = await response.json();
