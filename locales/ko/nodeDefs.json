@@ -1277,7 +1277,7 @@
   },
   "UltraImagePiD": {
     "display_name": "Ultra Tools Image + PiD",
-    "description": "STRING 프롬프트로 Krea 2, Z-Image, Anima, Qwen Image를 생성하고 필요하면 통합 PiD 업스케일을 적용합니다. PiD Context Window는 내부 자동 적용되며 가로형은 dim 3, 세로형과 정사각형은 dim 2를 사용합니다.",
+    "description": "STRING 프롬프트로 Krea 2, Z-Image, Anima, Qwen Image, Qwen Image 2.1, MOSS-Image를 생성하고 필요하면 통합 PiD 업스케일을 적용합니다(Qwen Image 2.1은 PiD 미지원). PiD Context Window는 내부 자동 적용되며 가로형은 dim 3, 세로형과 정사각형은 dim 2를 사용합니다.",
     "inputs": {
       "positive_prompt": {
         "name": "positive_prompt",

@@ -1,7 +1,7 @@
 """Ultra Tools Image + PiD.
 
-Compact ComfyUI text-to-image node for Krea 2, Z-Image, Anima, and Qwen
-Image. It accepts a STRING prompt, loads the selected diffusion
+Compact ComfyUI text-to-image node for Krea 2, Z-Image, Anima, Qwen Image,
+Qwen Image 2.1, and MOSS-Image. It accepts a STRING prompt, loads the selected diffusion
 model/text encoder/VAE, applies an ordered dynamic stack of model-only
 LoRAs, samples once, and returns the original generated IMAGE and a PiD IMAGE output. When PiD is on, the PiD output is the upscaled result; when PiD is off, the PiD output mirrors the original image for convenient single-output downstream use. An optional integrated
 PiD stage can upscale the sampled latent while keeping CFG fixed at 1.0 and exposing
@@ -30,7 +30,7 @@ import comfy.samplers
 MAX_RESOLUTION = 16384
 MAX_SEED = 0xFFFFFFFFFFFFFFFF
 MAX_LORA_STRENGTH = 100.0
-MODEL_FAMILIES = ("Krea 2", "Z-Image", "Anima", "Qwen Image")
+MODEL_FAMILIES = ("Krea 2", "Z-Image", "Anima", "Qwen Image", "Qwen Image 2.1", "MOSS-Image")
 NEGATIVE_MODES = ("zero positive conditioning", "encode negative text")
 PID_UPSCALE_OFF = "off"
 PID_UPSCALE_ON = "on"
@@ -52,12 +52,12 @@ _SIGNATURE_CACHE_MISS = object()
 # Mirror of the PiD part lives in web/ultra_image_pid.js
 # (FAMILY_LATENT_SPACE / LATENT_SPACE_PID). Keep both in sync.
 #
-# How to enable Qwen Image 2.1 later:
-#   1) LATENT_SPACES["qwen21"]: fill pid_checkpoint_token / pid_latent_format
-#      with the officially published values.
-#   2) Add "Qwen Image 2.1" to MODEL_FAMILIES and MODEL_CONTRACTS with
-#      latent_space="qwen21" and verified text_encode / latent / sampling values.
-#   3) Mirror the family and PiD token in web/ultra_image_pid.js.
+# Qwen Image 2.1 samples in its own 64ch / 16x latent space. No PiD checkpoint
+# exists for it yet, so PiD is disabled for that family (the frontend locks the
+# toggle OFF; the backend falls back to PiD OFF for old workflows/API calls).
+# To enable it once NVIDIA/Comfy publish one: fill LATENT_SPACES["qwen21"]
+# pid_checkpoint_token / pid_latent_format here and mirror the token in
+# web/ultra_image_pid.js (LATENT_SPACE_PID.qwen21).
 # ---------------------------------------------------------------------------
 LATENT_SPACES = {
     "wan21": {
@@ -76,9 +76,18 @@ LATENT_SPACES = {
         "pid_latent_format": "flux",
         "pid_checkpoint_exclude": (),
     },
+    "flux2": {
+        "label": "Flux.2 latent (128ch / 16x)",
+        # Official ComfyUI PiD files: pid_flux2_512_to_2048_4step_bf16 /
+        # pid_flux2_1024_to_4096_4step_bf16. PiDConditioning "flux" detects the
+        # 128-channel Flux.2 format by itself.
+        "pid_checkpoint_token": "flux2",
+        "pid_latent_format": "flux",
+        "pid_checkpoint_exclude": (),
+    },
     "qwen21": {
         "label": "Qwen-Image 2.1 latent (64ch / 16x)",
-        # No family uses this space yet and no PiD checkpoint exists for it.
+        # No PiD checkpoint exists for this latent space yet.
         "pid_checkpoint_token": None,
         "pid_latent_format": None,
         "pid_checkpoint_exclude": (),
@@ -110,7 +119,7 @@ PID_CHECKPOINT_TOKEN_RE = re.compile(
     r"(?:^|[\/._\-\s])(?P<token>pid|pixeldit)",
     re.IGNORECASE,
 )
-PID_CONCAT_SUFFIXES = ("upscale", "upscaler", "flux1", "qwenimage", "model", "xl")
+PID_CONCAT_SUFFIXES = ("upscale", "upscaler", "flux1", "flux2", "qwenimage", "model", "xl")
 LORA_ORDER_MISSING = 2**31 - 1
 
 PID_CLIP_PREFERRED = (
@@ -229,6 +238,15 @@ def _normalize_pid_output_scale(value: str) -> str:
     raise ValueError("Unsupported PiD output scale: {}".format(value))
 
 
+# Qwen Image 2.1 Turbo (official template image_qwen_image_2_1_turbo_t2i.json)
+# samples with SamplerCustomAdvanced + this fixed 8-step ManualSigmas schedule
+# instead of KSampler steps/scheduler. Used when the selected diffusion model
+# file name contains "turbo".
+QWEN_IMAGE21_TURBO_SIGMAS = "1.0, 0.978453, 0.95418, 0.926626, 0.89508, 0.845148, 0.704534, 0.414568, 0"
+# The Turbo template's CFGGuider is fixed at 1 (distilled model).
+QWEN_IMAGE21_TURBO_CFG = 1.0
+
+
 MODEL_CONTRACTS = {
     "Krea 2": {
         "clip_type": "krea2",
@@ -261,6 +279,55 @@ MODEL_CONTRACTS = {
         "latent_node": "EmptySD3LatentImage",
         "model_sampling_class": "ModelSamplingAuraFlow",
         "model_sampling_shift": 3.1,
+    },
+    # Qwen Image 2.1 (ComfyUI 0.37+), following the official templates
+    # image_qwen_image_2_1_t2i.json / image_qwen_image_2_1_turbo_t2i.json:
+    # Qwen3-VL-8B text encoder loaded as CLIPLoader type "qwen_image",
+    # TextEncodeQwenImage21 for positive AND negative, EmptyLatentImage (ComfyUI
+    # turns it into the 64ch / 16x latent before sampling), no ModelSampling
+    # node (the model's own time shift is used). The template's
+    # QwenImage21Cache node is left out: at its default ("auto") it does exactly
+    # what the model does without it.
+    "Qwen Image 2.1": {
+        "clip_type": "qwen_image",
+        "latent_space": "qwen21",
+        "text_encode": "qwen_image21",
+        "latent_node": "EmptyLatentImage",
+        "model_sampling_class": None,
+        "model_sampling_shift": None,
+        "resolution_multiple": 16,
+        "turbo_name_token": "turbo",
+        "turbo_manual_sigmas": QWEN_IMAGE21_TURBO_SIGMAS,
+    },
+    # MOSS-Image (ComfyUI 0.42+): Qwen3.5-9B text encoder loaded as CLIPLoader
+    # type "moss_image", Flux.2 VAE latent (128ch / 16x). The model already
+    # samples with flow shift 5 and timestep multiplier 1.0 (ComfyUI
+    # supported_models.MOSSImage), so no ModelSampling node is applied.
+    # Do NOT use ModelSamplingSD3 here: it forces multiplier 1000, which feeds
+    # the model wrong timesteps and the output stays pure noise.
+    #
+    # Two more parts of the official ComfyUI MOSS template
+    # (workflow_templates/image_moss_image_t2i.json) are required for sharp
+    # results and are applied internally:
+    #   * negative: the empty/negative text is really encoded. A zeroed
+    #     positive is not a valid unconditional input for this CFG model.
+    #   * Skip Layer Guidance (Simple): single block 22 skipped in the
+    #     unconditional pass for the first 50% of sampling.
+    "MOSS-Image": {
+        "clip_type": "moss_image",
+        "latent_space": "flux2",
+        "text_encode": "clip_text_encode",
+        "latent_node": "EmptyFlux2LatentImage",
+        "model_sampling_class": None,
+        "model_sampling_shift": None,
+        "resolution_multiple": 16,
+        "zero_negative_encodes_empty_text": True,
+        "skip_layer_guidance": {
+            "double_layers": "",
+            "single_layers": "22",
+            "start_percent": 0.0,
+            "end_percent": 0.5,
+        },
     },
 }
 
@@ -578,6 +645,42 @@ def _collect_lora_rows(values: dict):
     # Mixed explicit/missing order is intentionally left in payload insertion
     # order. A partial order is ambiguous and should not silently move rows.
     return [item for item, _ in parsed]
+
+
+def _family_resolution_multiple(model_family: str) -> int:
+    """Pixel multiple the family's latent needs (8 unless the contract says more)."""
+    try:
+        return int(_family_contract(model_family).get("resolution_multiple") or 8)
+    except ValueError:
+        return 8
+
+
+def _require_family_resolution_multiple(model_family: str, value: int, label: str) -> None:
+    multiple = _family_resolution_multiple(model_family)
+    if multiple <= 8 or int(value) % multiple == 0:
+        return
+    lower = max(64, int(value) - (int(value) % multiple))
+    upper = lower + multiple
+    raise ValueError(
+        "{}의 {}는 {}의 배수여야 합니다: {} (가까운 값: {} 또는 {})".format(
+            model_family, label, multiple, value, lower, upper
+        )
+    )
+
+
+def _turbo_sigmas_for(contract: dict, diffusion_model: str) -> Optional[str]:
+    """Fixed sigma schedule when the selected checkpoint is the family's Turbo model."""
+    token = contract.get("turbo_name_token")
+    sigmas = contract.get("turbo_manual_sigmas")
+    if not token or not sigmas:
+        return None
+    filename = str(diffusion_model or "").replace("\\", "/").split("/")[-1].lower()
+    return str(sigmas) if str(token).lower() in filename else None
+
+
+def _family_supports_pid(model_family: str) -> bool:
+    space = _latent_space_for_family(model_family)
+    return bool(space.get("pid_checkpoint_token") and space.get("pid_latent_format"))
 
 
 def _latent_space_key_for_family(model_family: str) -> str:
@@ -1178,6 +1281,9 @@ class UltraImagePiD:
         lora_rows,
         resolved_clip_type: str,
         sage_attention: bool,
+        text_encode: str = "clip_text_encode",
+        skip_layer_guidance: Optional[dict] = None,
+        turbo_sampling: bool = False,
     ) -> None:
         if negative_mode not in NEGATIVE_MODES:
             raise ValueError(
@@ -1208,6 +1314,21 @@ class UltraImagePiD:
             "KSampler",
         ):
             _node_class(required_class)
+        if turbo_sampling:
+            for class_name in ("ManualSigmas", "KSamplerSelect", "RandomNoise", "CFGGuider", "SamplerCustomAdvanced"):
+                _modern_node_class(class_name, "comfy_extras.nodes_custom_sampler", class_name)
+        if skip_layer_guidance:
+            _modern_node_class(
+                "SkipLayerGuidanceDiTSimple",
+                "comfy_extras.nodes_slg",
+                "SkipLayerGuidanceDiTSimple",
+            )
+        if text_encode == "qwen_image21":
+            _modern_node_class(
+                "TextEncodeQwenImage21",
+                "comfy_extras.nodes_qwen",
+                "TextEncodeQwenImage21",
+            )
         _node_class("VAELoader")
         _node_class("VAEDecode")
         if negative_mode == "zero positive conditioning":
@@ -1321,6 +1442,8 @@ class UltraImagePiD:
         Add a new text_encode value here and reference it from MODEL_CONTRACTS.
         """
         text_encode = str(contract.get("text_encode") or "clip_text_encode")
+        if text_encode == "qwen_image21":
+            return self._encode_qwen_image21(clip, prompt, negative_mode, negative_prompt, model_family)
         if text_encode != "clip_text_encode":
             raise RuntimeError(
                 _error_message(
@@ -1364,6 +1487,22 @@ class UltraImagePiD:
                         exc,
                     )
                 ) from exc
+        elif contract.get("zero_negative_encodes_empty_text"):
+            # Families whose official graph encodes an empty negative (MOSS):
+            # "zero positive conditioning" means "no negative text" for them.
+            try:
+                negative = _call_core_node("CLIPTextEncode", clip=clip, text="")[0]
+            except Exception as exc:
+                raise RuntimeError(
+                    _error_message(
+                        "네거티브 conditioning 생성 실패",
+                        [
+                            "negative_mode: zero positive conditioning",
+                            "{}의 빈 네거티브 텍스트를 인코딩하지 못했습니다.".format(model_family),
+                        ],
+                        exc,
+                    )
+                ) from exc
         else:
             try:
                 negative = _call_core_node("ConditioningZeroOut", conditioning=positive)[0]
@@ -1379,6 +1518,76 @@ class UltraImagePiD:
                     )
                 ) from exc
         return positive, negative
+
+    def _encode_qwen_image21(
+        self,
+        clip,
+        prompt: str,
+        negative_mode: str,
+        negative_prompt: str,
+        model_family: str,
+    ):
+        """Text-only use of the official Text Encode Qwen Image 2.1 node.
+
+        The node encodes positive and negative together (empty text is padded
+        the same way the official workflow does). "encode negative text" encodes
+        negative_prompt; "zero positive conditioning" encodes empty text, which
+        is what the official templates feed as negative.
+        """
+        try:
+            positive, encoded_negative = _call_modern_core_node(
+                "TextEncodeQwenImage21",
+                "comfy_extras.nodes_qwen",
+                "TextEncodeQwenImage21",
+                clip=clip,
+                prompt=prompt,
+                negative_prompt=(
+                    str(negative_prompt or "").strip()
+                    if negative_mode == "encode negative text"
+                    else ""
+                ),
+                vae=None,
+                resolution=1024,
+                images={},
+            )[:2]
+        except Exception as exc:
+            raise RuntimeError(
+                _error_message(
+                    "프롬프트 인코딩 실패",
+                    [
+                        "Text Encode Qwen Image 2.1로 프롬프트를 인코딩하지 못했습니다.",
+                        "선택한 모델 계열: {}".format(model_family),
+                        "텍스트 인코더가 Qwen3-VL-8B(qwen3vl_8b) 파일인지 확인하십시오.",
+                    ],
+                    exc,
+                )
+            ) from exc
+
+        # Like the official templates, the negative is always the node's own
+        # encoding: of negative_prompt, or of empty text for "zero positive
+        # conditioning". (With the recommended CFG 1 it is not used at all.)
+        return positive, encoded_negative
+
+    def _sample_with_manual_sigmas(self, model, positive, negative, latent, seed, cfg, sampler_name, sigmas_text):
+        """RandomNoise + CFGGuider + KSamplerSelect + ManualSigmas + SamplerCustomAdvanced,
+        exactly the official Turbo template chain."""
+        module = "comfy_extras.nodes_custom_sampler"
+        sigmas = _call_modern_core_node("ManualSigmas", module, "ManualSigmas", sigmas=sigmas_text)[0]
+        sampler = _call_modern_core_node("KSamplerSelect", module, "KSamplerSelect", sampler_name=sampler_name)[0]
+        noise = _call_modern_core_node("RandomNoise", module, "RandomNoise", noise_seed=int(seed))[0]
+        guider = _call_modern_core_node(
+            "CFGGuider", module, "CFGGuider", model=model, positive=positive, negative=negative, cfg=float(cfg)
+        )[0]
+        return _call_modern_core_node(
+            "SamplerCustomAdvanced",
+            module,
+            "SamplerCustomAdvanced",
+            noise=noise,
+            guider=guider,
+            sampler=sampler,
+            sigmas=sigmas,
+            latent_image=latent,
+        )[0]
 
     def _apply_lora_stack(self, model, parsed):
         if not parsed:
@@ -1432,6 +1641,7 @@ class UltraImagePiD:
             resolved_clip_type = self._resolve_clip_type(contract)
             latent_node_name = self._resolve_latent_node(contract)
             model_sampling_class, model_sampling_shift = self._resolve_model_sampling(contract)
+            turbo_sigmas = _turbo_sigmas_for(contract, diffusion_model)
         except Exception as exc:
             if str(exc).startswith("Ultra Tools Image + PiD —"):
                 raise
@@ -1448,6 +1658,8 @@ class UltraImagePiD:
         try:
             width = _normalize_resolution_dimension(width, "width")
             height = _normalize_resolution_dimension(height, "height")
+            _require_family_resolution_multiple(model_family, width, "width")
+            _require_family_resolution_multiple(model_family, height, "height")
             lora_rows = _collect_lora_rows(lora_values)
             self._validate_configuration(
                 diffusion_model,
@@ -1461,6 +1673,9 @@ class UltraImagePiD:
                 lora_rows,
                 resolved_clip_type,
                 sage_attention,
+                str(contract.get("text_encode") or "clip_text_encode"),
+                contract.get("skip_layer_guidance"),
+                bool(turbo_sigmas),
             )
         except Exception as exc:
             if str(exc).startswith("Ultra Tools Image + PiD —"):
@@ -1475,6 +1690,17 @@ class UltraImagePiD:
                     exc,
                 )
             ) from exc
+
+        if pid_enabled and not _family_supports_pid(model_family):
+            # The frontend locks PiD OFF for these families. Old workflows or
+            # API prompts may still send ON: run without PiD (the PiD output
+            # mirrors the original image) instead of failing the whole job.
+            print(
+                "[Ultra Tools Image + PiD] {}에는 아직 PiD 체크포인트가 없어 PiD 업스케일 없이 실행합니다.".format(
+                    model_family
+                )
+            )
+            pid_enabled = False
 
         pid_clip_name = None
         if pid_enabled:
@@ -1543,6 +1769,31 @@ class UltraImagePiD:
         if sage_attention:
             model = _apply_sage_attention_patch(model)
 
+        slg = contract.get("skip_layer_guidance")
+        if slg:
+            try:
+                model = _call_modern_core_node(
+                    "SkipLayerGuidanceDiTSimple",
+                    "comfy_extras.nodes_slg",
+                    "SkipLayerGuidanceDiTSimple",
+                    model=model,
+                    double_layers=str(slg.get("double_layers", "")),
+                    single_layers=str(slg.get("single_layers", "")),
+                    start_percent=float(slg.get("start_percent", 0.0)),
+                    end_percent=float(slg.get("end_percent", 1.0)),
+                )[0]
+            except Exception as exc:
+                raise RuntimeError(
+                    _error_message(
+                        "Skip Layer Guidance 적용 실패",
+                        [
+                            "선택한 모델 계열: {}".format(model_family),
+                            "single_layers: {}".format(slg.get("single_layers")),
+                        ],
+                        exc,
+                    )
+                ) from exc
+
         positive, negative = self._encode_conditioning(
             contract, clip, prompt, negative_mode, negative_prompt, model_family
         )
@@ -1568,35 +1819,58 @@ class UltraImagePiD:
                 )
             ) from exc
 
-        try:
-            sampled = _call_core_node(
-                "KSampler",
-                model=model,
-                seed=seed,
-                steps=steps,
-                cfg=cfg,
-                sampler_name=sampler_name,
-                scheduler=scheduler,
-                positive=positive,
-                negative=negative,
-                latent_image=latent,
-                denoise=denoise,
-            )[0]
-        except Exception as exc:
-            raise RuntimeError(
-                _error_message(
-                    "KSampler 실행 실패",
-                    [
-                        "선택한 모델 계열: {}".format(model_family),
-                        "sampler: {}".format(sampler_name),
-                        "scheduler: {}".format(scheduler),
-                        "steps: {}".format(steps),
-                        "cfg: {}".format(cfg),
-                        "denoise: {}".format(denoise),
-                    ],
-                    exc,
+        if turbo_sigmas:
+            print(
+                "[Ultra Tools Image + PiD] {} Turbo 모델: 공식 템플릿대로 8단계 고정 스케줄·CFG 1로 샘플링합니다 "
+                "(steps/scheduler/denoise/cfg 입력값은 사용하지 않음).".format(model_family)
+            )
+            try:
+                sampled = self._sample_with_manual_sigmas(
+                    model, positive, negative, latent, seed, QWEN_IMAGE21_TURBO_CFG, sampler_name, turbo_sigmas
                 )
-            ) from exc
+            except Exception as exc:
+                raise RuntimeError(
+                    _error_message(
+                        "Turbo 샘플링 실행 실패",
+                        [
+                            "선택한 모델 계열: {}".format(model_family),
+                            "sampler: {}".format(sampler_name),
+                            "cfg: {} (Turbo 고정)".format(QWEN_IMAGE21_TURBO_CFG),
+                            "sigmas: {}".format(turbo_sigmas),
+                        ],
+                        exc,
+                    )
+                ) from exc
+        else:
+            try:
+                sampled = _call_core_node(
+                    "KSampler",
+                    model=model,
+                    seed=seed,
+                    steps=steps,
+                    cfg=cfg,
+                    sampler_name=sampler_name,
+                    scheduler=scheduler,
+                    positive=positive,
+                    negative=negative,
+                    latent_image=latent,
+                    denoise=denoise,
+                )[0]
+            except Exception as exc:
+                raise RuntimeError(
+                    _error_message(
+                        "KSampler 실행 실패",
+                        [
+                            "선택한 모델 계열: {}".format(model_family),
+                            "sampler: {}".format(sampler_name),
+                            "scheduler: {}".format(scheduler),
+                            "steps: {}".format(steps),
+                            "cfg: {}".format(cfg),
+                            "denoise: {}".format(denoise),
+                        ],
+                        exc,
+                    )
+                ) from exc
 
         # Once the main sampler has produced the final sampled latent, these
         # graph-stage objects are no longer needed. Releasing the local references

@@ -74,6 +74,8 @@ const FAMILY_LATENT_SPACE = {
   "Z-Image": "flux1",
   "Anima": "wan21",
   "Qwen Image": "wan21",
+  "Qwen Image 2.1": "qwen21",
+  "MOSS-Image": "flux2",
 };
 const DEFAULT_LATENT_SPACE = "wan21";
 const LATENT_SPACE_PID = {
@@ -83,7 +85,9 @@ const LATENT_SPACE_PID = {
     exclude: [/qwen[-_ ]?image[-_ .]?2[._-]?1(?!\d)/i],
   },
   flux1: { token: "flux1", exclude: [] },
-  // Qwen-Image 2.1 (64ch / 16x): no PiD checkpoint yet.
+  // Flux.2 latent (128ch / 16x), used by MOSS-Image: pid_flux2_* checkpoints.
+  flux2: { token: "flux2", exclude: [] },
+  // Qwen-Image 2.1 (64ch / 16x): no PiD checkpoint yet -> PiD toggle locked OFF.
   qwen21: { token: null, exclude: [] },
 };
 const PID_MODEL_PLACEHOLDER = "<auto PiD model>";
@@ -91,7 +95,7 @@ const PID_SAMPLER_DEFAULT = "lcm";
 const PID_SCHEDULER_DEFAULT = "sgm_uniform";
 const PID_SCHEDULER_FALLBACK = "simple";
 const PID_CHECKPOINT_TOKEN_RE = /(?:^|[\/._\-\s])(?:pid|pixeldit)/ig;
-const PID_CONCAT_SUFFIXES = ["upscale", "upscaler", "flux1", "qwenimage", "model", "xl"];
+const PID_CONCAT_SUFFIXES = ["upscale", "upscaler", "flux1", "flux2", "qwenimage", "model", "xl"];
 const PID_OUTPUT_SCALE_HALF = "0.5(x2)";
 const PID_OUTPUT_SCALE_FULL = "1(x4)";
 const PID_DETAIL_WIDGET_NAMES = [
@@ -698,7 +702,44 @@ function syncPidModelOptions(node, family = getWidgetValue(node, "model_family")
   return previous !== next;
 }
 
+function familySupportsPid(family) {
+  return Boolean(pidSpecForFamily(family).token);
+}
+
+// Families whose latent space has no PiD checkpoint (Qwen Image 2.1) keep the
+// PiD toggle OFF and locked. Switching back to a supported family unlocks it.
+function syncPidSupportLock(node) {
+  const enableWidget = findWidget(node, PID_ENABLE_WIDGET);
+  if (!enableWidget) return true;
+  const supported = familySupportsPid(getWidgetValue(node, "model_family"));
+  if (!enableWidget.__ultraPidLockState) {
+    enableWidget.__ultraPidLockState = { locked: false, label: enableWidget.label, tooltip: enableWidget.tooltip };
+  }
+  const lock = enableWidget.__ultraPidLockState;
+  if (!supported) {
+    if (normalizePidToggleValue(enableWidget.value)) enableWidget.value = false;
+    if (!lock.locked) {
+      lock.locked = true;
+      lock.label = enableWidget.label;
+      lock.tooltip = enableWidget.tooltip;
+    }
+    enableWidget.disabled = true;
+    enableWidget.label = tr("pid_upscale (not supported)", "pid_upscale (미지원)");
+    enableWidget.tooltip = tr(
+      "No PiD checkpoint exists for this model's latent yet, so PiD upscale is off.",
+      "이 모델의 latent용 PiD 체크포인트가 아직 없어 PiD 업스케일을 끕니다."
+    );
+  } else if (lock.locked) {
+    lock.locked = false;
+    enableWidget.disabled = false;
+    enableWidget.label = lock.label;
+    enableWidget.tooltip = lock.tooltip;
+  }
+  return supported;
+}
+
 function syncPidVisibility(node) {
+  syncPidSupportLock(node);
   const enableWidget = findWidget(node, PID_ENABLE_WIDGET);
   const visible = pidEnabled(node);
   if (enableWidget && enableWidget.value !== visible) {
@@ -942,6 +983,8 @@ function attachModelFamilyRestoreHook(node) {
     const result = originalCallback ? originalCallback.call(this, value, ...args) : undefined;
     const family = String(value || widget.value || "");
     syncPidModelOptions(node, family);
+    syncPidVisibility(node);
+    triggerRedraw(node, widget);
     const restoreToken = Number(node.__ultraSettingsRestoreToken || 0) + 1;
     node.__ultraSettingsRestoreToken = restoreToken;
     Promise.resolve()

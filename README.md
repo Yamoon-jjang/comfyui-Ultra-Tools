@@ -52,7 +52,9 @@ git clone https://github.com/Yamoon-jjang/comfyui-Ultra-Tools
 
 ## 🖼️ Ultra Tools Image + PiD
 
-**Krea 2 · Z-Image · Anima · Qwen Image** 이미지 생성에 필요한 과정을 노드 하나에 담았습니다. 원하면 같은 노드 안에서 **PiD(PixelDiT) 4배 업스케일**까지 이어서 실행합니다.
+**Krea 2 · Z-Image · Anima · Qwen Image · Qwen Image 2.1 · MOSS-Image** 이미지 생성에 필요한 과정을 노드 하나에 담았습니다. 원하면 같은 노드 안에서 **PiD(PixelDiT) 4배 업스케일**까지 이어서 실행합니다.
+
+> **1.0.4 업데이트 — 모델 지원**: **Qwen Image 2.1**(Turbo 포함)과 **MOSS-Image**를 지원합니다. 두 모델 모두 ComfyUI 공식 템플릿과 같은 내부 흐름으로 동작합니다. MOSS-Image는 FLUX.2용 PiD로 업스케일할 수 있고, Qwen Image 2.1은 전용 PiD가 아직 없어 PiD가 자동으로 꺼집니다.
 
 **이런 분께 좋습니다**
 - Loader, CLIP Text Encode, Empty Latent, KSampler, VAE Decode, LoRA Loader를 매번 연결하는 게 번거로운 분
@@ -60,19 +62,28 @@ git clone https://github.com/Yamoon-jjang/comfyui-Ultra-Tools
 - 고해상도 업스케일 결과를 원본과 나란히 비교하고 싶은 분
 
 **주요 기능**
-- `model_family`만 고르면 계열에 맞는 CLIP type, latent 생성 방식, AuraFlow sampling shift를 **노드가 알아서 적용**합니다.
+- `model_family`만 고르면 계열에 맞는 CLIP type, 프롬프트 인코딩 방식, latent 생성 방식, 샘플링 보정을 **노드가 알아서 적용**합니다. Qwen Image 2.1 Turbo의 고정 스케줄, MOSS-Image의 Skip Layer Guidance처럼 모델별로 필요한 처리도 공식 템플릿대로 들어갑니다.
 - **＋ LoRA 추가** 버튼으로 LoRA를 필요한 만큼 추가합니다. 행마다 ON/OFF, 강도, 순서 이동, 삭제가 됩니다.
 - **PiD 업스케일 토글**
   - OFF: PiD 관련 모델을 전혀 불러오지 않아 일반 생성만큼 가볍습니다. PiD 모델이 없어도 됩니다.
   - ON: 생성 해상도의 **4배**(1024×1024 → 4096×4096)로 업스케일합니다. 결과물 크기는 x4 / x2 중에서 고릅니다.
 - PiD 결과에는 원본과 명암·색감을 맞추는 보정(`reinhard_lab`)이 **자동으로** 적용됩니다. 색 보정 노드를 따로 연결할 필요가 없습니다.
 - 출력은 **`Original Image`와 `PiD Image` 두 개**라 원본과 업스케일 결과를 바로 비교할 수 있습니다.
-- **모델 계열별 설정 자동 기억**: Krea 2 / Z-Image / Anima / Qwen Image마다 마지막으로 실행한 모델, 해상도, 샘플러, LoRA 목록, PiD 설정을 따로 기억해 둡니다. 계열을 바꾸면 그 계열에서 쓰던 설정이 그대로 돌아옵니다. seed와 프롬프트 내용은 기억하지 않습니다.
+- **모델 계열별 설정 자동 기억**: Krea 2 / Z-Image / Anima / Qwen Image / Qwen Image 2.1 / MOSS-Image마다 마지막으로 실행한 모델, 해상도, 샘플러, LoRA 목록, PiD 설정을 따로 기억해 둡니다. 계열을 바꾸면 그 계열에서 쓰던 설정이 그대로 돌아옵니다. seed와 프롬프트 내용은 기억하지 않습니다.
 - 현재 모델 계열에 맞는 PiD 모델만 목록에 보여 줍니다. 엉뚱한 PiD 파일을 고를 일이 없습니다.
+
+| 모델 계열 | PiD 업스케일 |
+|---|---|
+| Krea 2 · Anima · Qwen Image | `qwenimage` PiD |
+| Z-Image | `flux1` PiD |
+| MOSS-Image | `flux2` PiD |
+| Qwen Image 2.1 | 미지원 (토글 자동 잠금) |
 - 선택 옵션 **SageAttention**: [ComfyUI-KJNodes](https://github.com/kijai/ComfyUI-KJNodes)가 설치되어 있으면 메인 생성을 가속합니다. 기본값은 OFF입니다.
 
 **사용 팁**
 - PiD를 쓰려면 `models/text_encoders/`에 `gemma_2_2b_it_elm_fp8_scaled.safetensors`(권장) 또는 `gemma_2_2b_it_elm_bf16.safetensors`가 있어야 합니다. 노드가 자동으로 찾습니다.
+- PiD 모델은 Hugging Face [Comfy-Org/PixelDiT](https://huggingface.co/Comfy-Org/PixelDiT/tree/main/diffusion_models)에서 받아 `models/diffusion_models/`에 둡니다. 공식 PiD 권장 설정은 sampler `lcm` / scheduler `simple` / steps 4입니다.
+- 권장 생성 설정: Qwen Image 2.1은 steps 25 / CFG 1 / euler / simple, MOSS-Image는 steps 50 / CFG 3 / euler. 계열을 처음 고를 때는 직전 계열의 설정이 남아 있을 수 있으니 한 번 맞춰 주세요.
 - PiD를 켤 때는 batch 1을 권장합니다. 4배 해상도에서는 VRAM 사용량이 크게 늘어납니다.
 - 최종본만 필요하면 `PiD Image` 출력 하나만 저장 노드에 연결하면 됩니다. PiD를 꺼 두면 원본이 그대로 나옵니다.
 
@@ -301,7 +312,7 @@ Copyright (C) 2026 Yamoon-jjang
 
 | Node | What it does |
 |---|---|
-| **Image + PiD** | All-in-one generation for Krea 2 / Z-Image / Anima / Qwen Image: model loading, conditioning, dynamic LoRA stack, KSampler and VAE decode in one node. Optional 4× PiD (PixelDiT) upscale with automatic color/tone matching. Outputs both `Original Image` and `PiD Image`. Remembers the last settings per model family. Optional SageAttention (via KJNodes). |
+| **Image + PiD** | All-in-one generation for Krea 2 / Z-Image / Anima / Qwen Image / Qwen Image 2.1 / MOSS-Image: model loading, conditioning, dynamic LoRA stack, KSampler and VAE decode in one node. Model-specific internal flows follow the official ComfyUI templates (Qwen Image 2.1 Turbo fixed schedule, MOSS-Image skip layer guidance). Optional 4× PiD (PixelDiT) upscale with automatic color/tone matching (qwenimage / flux1 / flux2 PiD; not available for Qwen Image 2.1 yet). Outputs both `Original Image` and `PiD Image`. Remembers the last settings per model family. Optional SageAttention (via KJNodes). |
 | **Prompt Composer** | Builds full scene prompts from menus (subject, location, time, weather, props, framing, lens, 22 moods × 34 styles), or styles an existing prompt. Outputs model-specific positive/negative prompts for 9 model formats (natural-language and tag-based). |
 | **Prompt Styler** | Keeps your prompt intact and adds mood/style/framing/lens in the right syntax for each model. Preserves weighted syntax `(tag:1.3)`, keeps photo/lens terms out of painterly styles, and resolves Pony/Illustrious/Anima rating and source tag conflicts. |
 | **Textbox** | Up to 32 independent text slots in one node (IN N → OUT N). Inputs stay editable and visible, rows can be reordered, renamed, copied, and deleted individually. |
