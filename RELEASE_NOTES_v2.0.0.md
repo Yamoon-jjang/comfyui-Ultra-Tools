@@ -10,6 +10,10 @@
 
 **나머지 노드 12개는 그대로 유지합니다.** Textbox, Audio Fade, Translator, Model Viewer 2종, Wildcard Browser, Workflow Timer, Text Watermark, Image Watermark, Prompt Styler, Prompt Composer, Image Load의 등록 ID 및 실행 코드는 이전 버전과 동일합니다.
 
+### 설치 / Manager 상태
+- **권장 설치:** Git 저장소를 `ComfyUI/custom_nodes/`에 `git clone https://github.com/Yamoon-jjang/comfyui-Ultra-Tools.git`로 설치하거나 [공식 v2.0.0 ZIP](https://github.com/Yamoon-jjang/comfyui-Ultra-Tools/releases/download/v2.0.0/comfyui-Ultra-Tools-v2.0.0.zip)을 사용합니다.
+- **Comfy Registry:** 버전 업로드 성공과 ComfyUI Manager에서 설치 가능한 Active 상태는 다릅니다. `Pending`/`Flagged`에서는 Manager 설치가 제한될 수 있으므로 Git 또는 ZIP을 사용하세요. [Registry 페이지](https://registry.comfy.org/publishers/yamoon-jjang/nodes/comfyui-ultra-tools)
+
 ### 기존 사용자 필독
 - 이전 워크플로우의 `UltraImagePiD`는 새 독립판의 `UltraStandaloneImagePiD`로 **자동 전환되지 않습니다**. 독립판 설치 후 새 노드로 교체하고 소켓 연결·모델 설정을 확인하세요.
 - **ZIP으로 수동 설치를 갱신할 때는** 기존 `ComfyUI/custom_nodes/comfyui-Ultra-Tools` 폴더를 백업 후 제거하고 새 폴더를 설치하세요. 단순 덮어쓰기에서는 삭제된 PiD 스크립트가 남습니다.
@@ -31,6 +35,9 @@ Starting with v2.0.0, **`Ultra Tools Image + PiD` is no longer bundled with Ultr
 **Why?** The model-specific image-generation/upscaling engine has different dependencies and maintenance requirements from the general utility nodes. Splitting them enables independent updates without disrupting the core utility collection.
 
 **The remaining 12 nodes are unchanged:** Their node IDs, Python implementations, and frontend scripts are preserved.
+
+**Installation and Registry status**
+- Install from [Git](https://github.com/Yamoon-jjang/comfyui-Ultra-Tools) or the [v2.0.0 install ZIP](https://github.com/Yamoon-jjang/comfyui-Ultra-Tools/releases/download/v2.0.0/comfyui-Ultra-Tools-v2.0.0.zip). Publishing a Registry version does not imply that it is Active or installable in ComfyUI Manager; Pending/Flagged may require review.
 
 **Upgrade guidance**
 - Old workflows referencing `UltraImagePiD` are **not automatically compatible** with the new `UltraStandaloneImagePiD`. Install the standalone package once released, then replace/reconnect the node and verify model selections.

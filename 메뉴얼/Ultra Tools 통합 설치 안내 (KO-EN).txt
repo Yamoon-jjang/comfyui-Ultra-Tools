@@ -25,11 +25,17 @@ v2.0.0 분리 내용 (13종 → 12종, Image + PiD 기능 폐지 아님)
   독립 노드를 새로 배치하고 연결을 다시 구성해 주세요.
 
 설치와 업데이트
-1. ComfyUI/custom_nodes/ 아래에 comfyui-Ultra-Tools 폴더를 설치합니다.
+1. Git 설치: ComfyUI/custom_nodes/ 경로에서 아래 명령을 실행합니다.
+   git clone https://github.com/Yamoon-jjang/comfyui-Ultra-Tools.git
+   Git으로 설치한 경우 해당 폴더에서 git pull로 갱신할 수 있습니다.
+   또는 GitHub 릴리즈 ZIP을 받아 내부 comfyui-Ultra-Tools 폴더를 설치합니다.
+   https://github.com/Yamoon-jjang/comfyui-Ultra-Tools/releases/tag/v2.0.0
 2. 이전 ZIP 배포판에서 업데이트할 때는 기존 폴더를 삭제한 뒤 설치합니다.
    단순 덮어쓰기를 하면 제거된 ultra_image_pid.py와 web/ultra_image_pid.js가 남을 수 있습니다.
 3. ComfyUI를 재시작하고 브라우저를 새로고침합니다.
 4. 기본 ComfyUI 외 별도의 pip 패키지는 요구하지 않습니다.
+5. Registry에서 Pending 또는 Flagged인 버전은 ComfyUI Manager 설치가 제한될 수 있습니다.
+   이때는 Git 또는 GitHub ZIP 설치를 사용하고 Active 승인 여부를 기다리세요.
 
 예제: 이미지 워크플로우/Ultra_Tools_Image_Load_Preview.json
 - Ultra Tools Image Load에서 실제 이미지를 선택하고 실행합니다.
@@ -63,11 +69,16 @@ Changes in v2.0.0 (13 → 12 nodes; Image + PiD is NOT discontinued)
   Add the standalone node and reconnect it manually.
 
 Installation and updates
-1. Install comfyui-Ultra-Tools in ComfyUI/custom_nodes/.
+1. In ComfyUI/custom_nodes/, run:
+   git clone https://github.com/Yamoon-jjang/comfyui-Ultra-Tools.git
+   For Git installations, use git pull to update.
+   Alternatively, download the GitHub release ZIP with a comfyui-Ultra-Tools root folder:
+   https://github.com/Yamoon-jjang/comfyui-Ultra-Tools/releases/tag/v2.0.0
 2. When updating an older ZIP release, delete the old directory before installing.
    Extracting on top leaves behind deleted Python and frontend files.
 3. Restart ComfyUI and refresh the browser.
 4. No extra pip dependencies beyond ComfyUI are required.
+5. Comfy Registry versions with Pending/Flagged status may not appear as installable in ComfyUI Manager. Use Git or the release ZIP until an Active version is available.
 
 Example: 이미지 워크플로우/Ultra_Tools_Image_Load_Preview.json
 - Select a real image using Ultra Tools Image Load before queueing.

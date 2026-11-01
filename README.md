@@ -1,7 +1,7 @@
 # 🧰 comfyui-Ultra-Tools
 
-**ComfyUI 작업을 하면서 매일 부딪히는 불편함을 하나씩 해결하기 위해 만든 노드 12종 모음입니다.**
-프롬프트 작성, 이미지 불러오기, 워터마크, 번역, 모델 관리, 실행 시간 측정, 오디오 정리까지 다룹니다. 각 노드는 실제 작업 흐름에서 오래 다듬어졌고, 기존 ComfyUI 노드를 그대로 대체하거나 기존 워크플로우 중간에 끼워 넣어 쓸 수 있도록 설계했습니다.
+**ComfyUI를 더 편하게 쓰기 위한 12개 실용 커스텀 노드 모음 — v2.0.0.**
+프롬프트 작성·스타일 조합, 이미지 탐색과 불러오기, 번역, 글자·이미지 워터마크, 모델 용량 확인, 워크플로우 실행 시간 기록, 오디오 페이드 등 자주 반복하는 작업을 간편하게 처리합니다. 기능은 노드별로 독립적이며 필요한 곳에 골라 연결할 수 있습니다.
 
 - ✅ **추가 pip 설치 없음** — ComfyUI에 기본 포함된 라이브러리만 사용합니다.
 - ✅ **한국어 / 영어 UI 자동 전환** — ComfyUI 언어 설정을 따릅니다.
@@ -26,23 +26,32 @@
 
 ---
 
-## 📦 설치
+## 📦 설치 / Installation
 
-**ComfyUI Manager (권장)**
-Custom Nodes Manager에서 **`Ultra Tools`** 를 검색해 설치합니다.
+**① Git 설치 — Registry가 Pending/Flagged일 때도 사용할 수 있는 방법**
 
-**수동 설치**
 ```bash
 cd ComfyUI/custom_nodes
-git clone https://github.com/Yamoon-jjang/comfyui-Ultra-Tools
+git clone https://github.com/Yamoon-jjang/comfyui-Ultra-Tools.git
 ```
-설치 후 ComfyUI를 완전히 재시작하고 브라우저를 새로고침(Ctrl+F5)하세요.
 
-> **v2.0.0 구성 변경:** `Ultra Tools Image + PiD`는 이 통합 패키지에서 분리되었습니다. 생성·PiD 기능은 **`Ultra Image + PiD` 독립 노드**로 분리했으며 GitHub·Manager 공개는 별도 진행할 예정입니다. 기존 `UltraImagePiD` 워크플로우는 자동 변환되지 않습니다. ZIP 수동 업데이트는 이전 `comfyui-Ultra-Tools` 폴더를 삭제한 뒤 새 패키지를 설치해야 제거된 파일이 남지 않습니다.
+이미 Git으로 설치했다면 `comfyui-Ultra-Tools` 폴더에서 `git pull`로 업데이트합니다. Git으로 관리되는 삭제 파일은 업데이트 과정에서 제거됩니다. 기존 폴더에 사용자 수정 파일이 있다면 먼저 백업하세요.
 
-> **v2.0.0 change:** `Ultra Tools Image + PiD` is no longer bundled. The standalone **Ultra Image + PiD** package will be published separately; it is not included here. Existing `UltraImagePiD` workflows are **not automatically migrated**. For ZIP upgrades, remove the old `comfyui-Ultra-Tools` folder first so removed scripts do not remain.
+**② GitHub 릴리즈 ZIP 수동 설치**
 
-> 이전에 개별 패키지(`comfyui-Ultra-textbox`, `comfyui-Ultra-Translator`, `comfyui-Ultra-model-viewer`, `comfyui-Ultra-wildcard_browser`)를 쓰셨다면 해당 폴더를 지우고 이 통합 패키지만 설치하세요.
+[**v2.0.0 설치용 ZIP**](https://github.com/Yamoon-jjang/comfyui-Ultra-Tools/releases/download/v2.0.0/comfyui-Ultra-Tools-v2.0.0.zip)을 받아 압축을 풀어 `ComfyUI/custom_nodes/comfyui-Ultra-Tools/` 형태로 설치합니다. 압축 내부 최상위 폴더는 `comfyui-Ultra-Tools`입니다.
+
+**중요:** 이전 버전 ZIP을 수동으로 설치했다면 기존 폴더를 백업 후 **삭제하고** 새 폴더를 넣어야 합니다. 기존 폴더에 덮어쓰기만 하면 분리된 PiD의 `ultra_image_pid.py` 또는 `web/ultra_image_pid.js`가 남을 수 있습니다.
+
+**③ ComfyUI Manager / Registry**
+
+[Comfy Registry의 Ultra Tools 페이지](https://registry.comfy.org/publishers/yamoon-jjang/nodes/comfyui-ultra-tools)에 버전이 게시되어 있더라도 `Pending` 또는 `Flagged`이면 Manager에서 설치 가능하다는 보장은 없습니다. **Active가 확인된 경우에만 Manager 설치·업데이트를 이용**하고, 그 전에는 위 Git 또는 릴리즈 ZIP을 사용하세요. Registry 심사 상태는 개발자가 임의로 바꿀 수 없습니다.
+
+설치·업데이트 후에는 ComfyUI를 완전히 재시작하고 브라우저를 새로고침(Ctrl+F5)하세요. 별도의 pip 패키지 설치는 요구하지 않으며 ComfyUI에 기본 포함된 라이브러리를 사용합니다.
+
+**Image + PiD 분리 안내:** v2.0.0에는 이미지 생성·PiD 업스케일 노드가 포함되지 않습니다. 독립 `Ultra Image + PiD`는 나중에 별도로 공개합니다. 기존 `UltraImagePiD` 워크플로우는 `UltraStandaloneImagePiD`로 자동 변환되지 않습니다.
+
+**🇬🇧 English:** Install with `git clone https://github.com/Yamoon-jjang/comfyui-Ultra-Tools.git` into `ComfyUI/custom_nodes/`, or use the [v2.0.0 ZIP](https://github.com/Yamoon-jjang/comfyui-Ultra-Tools/releases/download/v2.0.0/comfyui-Ultra-Tools-v2.0.0.zip). For manual ZIP upgrades, remove the old folder before extracting. Manager/Registry installation depends on the version becoming `Active`. Restart ComfyUI afterward. Image + PiD has moved to a separately released package; legacy workflows are not automatically converted.
 
 ---
 
@@ -285,6 +294,8 @@ Copyright (C) 2026 Yamoon-jjang
 ## 🇺🇸 English Summary
 
 **comfyui-Ultra-Tools** is a collection of 12 carefully refined ComfyUI nodes. No extra pip packages are needed. The UI switches between Korean and English automatically.
+
+**Install:** Clone the [Git repository](https://github.com/Yamoon-jjang/comfyui-Ultra-Tools) or download the [v2.0.0 install ZIP](https://github.com/Yamoon-jjang/comfyui-Ultra-Tools/releases/download/v2.0.0/comfyui-Ultra-Tools-v2.0.0.zip). Registry publication does not guarantee Manager installation until a version becomes Active; Git and ZIP installation work independently of Registry review. When updating older manually extracted ZIPs, remove the old folder first.
 
 **Since v2.0.0:** Image + PiD has been separated as **Ultra Image + PiD** and is not included in this 12-node collection. Its public standalone release will follow separately. The included example is Image Load → Preview Image; select an existing image before running.
 
