@@ -1,4 +1,4 @@
-comfyui-Ultra-Tools v1.0.5 | 통합 설치 안내 / Package Guide
+comfyui-Ultra-Tools v2.0.0 | 통합 설치 안내 / Package Guide
 ========================================================
 
 [한국어]
@@ -18,9 +18,9 @@ comfyui-Ultra-Tools v1.0.5 | 통합 설치 안내 / Package Guide
 11. Ultra Tools Prompt Composer
 12. Ultra Tools Image Load
 
-v1.0.5 분리 내용
+v2.0.0 분리 내용 (13종 → 12종, Image + PiD 기능 폐지 아님)
 - Ultra Tools Image + PiD는 이 통합 패키지에 포함되지 않습니다.
-- 이미지 생성과 PiD 업스케일은 별도 "Ultra Image + PiD" 독립 노드를 설치하세요.
+- 이미지 생성과 PiD 업스케일은 별도 "Ultra Image + PiD" 독립 노드로 분리되었습니다. 해당 독립판의 GitHub 공개와 Manager 등록은 추후 별도로 진행합니다.
 - 기존 UltraImagePiD 워크플로우는 자동으로 변환되지 않습니다.
   독립 노드를 새로 배치하고 연결을 다시 구성해 주세요.
 
@@ -56,9 +56,9 @@ Included nodes
 11. Ultra Tools Prompt Composer
 12. Ultra Tools Image Load
 
-Changes in v1.0.5
+Changes in v2.0.0 (13 → 12 nodes; Image + PiD is NOT discontinued)
 - Ultra Tools Image + PiD has been separated from the bundle.
-- Install the independent "Ultra Image + PiD" package for image generation and PixelDiT upscaling.
+- Image generation and PixelDiT upscaling have moved to the independent "Ultra Image + PiD" package, which will be released publicly in a separate step.
 - Old workflows referencing UltraImagePiD are not migrated automatically.
   Add the standalone node and reconnect it manually.
 

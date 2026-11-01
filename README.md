@@ -5,10 +5,24 @@
 
 - ✅ **추가 pip 설치 없음** — ComfyUI에 기본 포함된 라이브러리만 사용합니다.
 - ✅ **한국어 / 영어 UI 자동 전환** — ComfyUI 언어 설정을 따릅니다.
-- ✅ **노드별 상세 메뉴얼 포함** — `메뉴얼` 폴더에 노드마다 한국어 설명서가 있습니다.
+- ✅ **노드별 상세 메뉴얼 포함** — `메뉴얼` 폴더에 노드별 한국어 설명서와 통합 설치 안내(KO/EN)가 있습니다.
 - ✅ **Image Load 예제 워크플로우 포함** — `이미지 워크플로우/Ultra_Tools_Image_Load_Preview.json`
 
 > 🇺🇸 English summary is at the [bottom of this page](#english-summary).
+
+---
+
+## ⚠️ v2.0.0 중요 변경: Image + PiD 독립 분리 (기능 폐지 아님)
+
+**기존 13종 중 `Ultra Tools Image + PiD` 1종만 통합팩에서 분리되어, 이 버전에는 12종이 포함됩니다.** 기존 Textbox, Translator, Prompt Styler/Composer, Image Load, 워터마크, Model Viewer, Timer, Audio Fade 등 **나머지 12개 노드의 실행 코드와 등록 ID는 변경하지 않았습니다.**
+
+- **왜 분리했나요?** 이미지 생성·PixelDiT 업스케일 노드는 모델별 의존성과 갱신 주기가 다른 유틸리티 노드와 다릅니다. 독립적인 설치와 업데이트를 지원하고 나머지 Ultra Tools를 가볍고 안정적으로 유지하기 위해 분리했습니다.
+- **이제 어디서 사용하나요?** `Ultra Image + PiD`라는 **독립 커스텀 노드**로 분리했습니다. **GitHub 공개·Manager 등록은 별도로 진행할 예정**이므로 이 Ultra Tools 릴리즈에 포함됐다고 생각하지 마세요.
+- **기존 워크플로우는?** 과거 `UltraImagePiD`가 있던 워크플로우는 자동으로 새 `UltraStandaloneImagePiD`로 변환되지 않습니다. 독립판 설치 후 노드를 교체하고 입력·출력 연결 및 모델 설정을 확인해야 합니다.
+- **업데이트 시 주의:** ZIP을 기존 폴더에 그대로 덮어쓰면 삭제된 `ultra_image_pid.py`, `web/ultra_image_pid.js` 파일이 남을 수 있습니다. 기존 폴더를 백업 후 삭제하고 새 `comfyui-Ultra-Tools` 폴더를 설치하세요. ComfyUI Manager로 설치했다면 Manager의 업데이트 절차를 따르세요.
+- 이 변경은 **Image + PiD에만 해당**하며 다른 12종의 워크플로우는 변경할 필요가 없습니다.
+
+**🇬🇧 English:** v2.0.0 separates **Image + PiD** from Ultra Tools (13 → 12 nodes); **it is not discontinued**. The other 12 node IDs and runtime implementations remain unchanged. The standalone **Ultra Image + PiD** package will be published separately, not as part of this release. Old `UltraImagePiD` workflows are **not** auto-migrated to `UltraStandaloneImagePiD`: replace and reconnect the node. When upgrading from a ZIP, remove the old Ultra Tools directory first to avoid leftover scripts.
 
 ---
 
@@ -24,9 +38,9 @@ git clone https://github.com/Yamoon-jjang/comfyui-Ultra-Tools
 ```
 설치 후 ComfyUI를 완전히 재시작하고 브라우저를 새로고침(Ctrl+F5)하세요.
 
-> **v1.0.5 구성 변경:** `Ultra Tools Image + PiD`는 이 통합 패키지에서 분리되었습니다. 생성·PiD 기능이 필요하면 별도 배포되는 **`Ultra Image + PiD` 독립 노드**를 설치하세요. 기존 `UltraImagePiD` 워크플로우는 자동 변환되지 않습니다. ZIP 수동 업데이트는 이전 `comfyui-Ultra-Tools` 폴더를 삭제한 뒤 새 패키지를 설치해야 제거된 파일이 남지 않습니다.
+> **v2.0.0 구성 변경:** `Ultra Tools Image + PiD`는 이 통합 패키지에서 분리되었습니다. 생성·PiD 기능은 **`Ultra Image + PiD` 독립 노드**로 분리했으며 GitHub·Manager 공개는 별도 진행할 예정입니다. 기존 `UltraImagePiD` 워크플로우는 자동 변환되지 않습니다. ZIP 수동 업데이트는 이전 `comfyui-Ultra-Tools` 폴더를 삭제한 뒤 새 패키지를 설치해야 제거된 파일이 남지 않습니다.
 
-> **v1.0.5 change:** `Ultra Tools Image + PiD` is no longer bundled. Install the separate **Ultra Image + PiD** package for generation/upscaling. Existing `UltraImagePiD` workflows are **not automatically migrated**. For ZIP upgrades, remove the old `comfyui-Ultra-Tools` folder first so removed scripts do not remain.
+> **v2.0.0 change:** `Ultra Tools Image + PiD` is no longer bundled. The standalone **Ultra Image + PiD** package will be published separately; it is not included here. Existing `UltraImagePiD` workflows are **not automatically migrated**. For ZIP upgrades, remove the old `comfyui-Ultra-Tools` folder first so removed scripts do not remain.
 
 > 이전에 개별 패키지(`comfyui-Ultra-textbox`, `comfyui-Ultra-Translator`, `comfyui-Ultra-model-viewer`, `comfyui-Ultra-wildcard_browser`)를 쓰셨다면 해당 폴더를 지우고 이 통합 패키지만 설치하세요.
 
@@ -272,7 +286,7 @@ Copyright (C) 2026 Yamoon-jjang
 
 **comfyui-Ultra-Tools** is a collection of 12 carefully refined ComfyUI nodes. No extra pip packages are needed. The UI switches between Korean and English automatically.
 
-**Since v1.0.5:** Image + PiD is distributed separately as **Ultra Image + PiD**; it is not included in this 12-node collection. The included example is Image Load → Preview Image; select an existing image before running.
+**Since v2.0.0:** Image + PiD has been separated as **Ultra Image + PiD** and is not included in this 12-node collection. Its public standalone release will follow separately. The included example is Image Load → Preview Image; select an existing image before running.
 
 | Node | What it does |
 |---|---|
