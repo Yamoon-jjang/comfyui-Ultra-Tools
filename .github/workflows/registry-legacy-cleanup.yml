@@ -1,8 +1,8 @@
-name: Clean up obsolete flagged Registry versions (guarded)
+name: Delete only four obsolete Registry versions (preserve 1.0.4 and 2.0.0)
 
-# This workflow only runs after v2.0.0 is confirmed Active by the Registry.
-# It unpublishes exactly the obsolete flagged versions 1.0.0 to 1.0.4.
-# No changes are made to the GitHub repo, to v2.0.0 or to any Active version.
+# User explicitly requested deleting ONLY 1.0.0–1.0.3 (Flagged).
+# NEVER delete 1.0.4, 2.0.0 or any Active version.
+# One-shot on workflow file update, or manual workflow_dispatch. No schedule.
 on:
   workflow_dispatch:
   push:
@@ -10,8 +10,6 @@ on:
       - main
     paths:
       - ".github/workflows/registry-legacy-cleanup.yml"
-  schedule:
-    - cron: "21 * * * *"
 
 permissions:
   contents: read
@@ -22,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 3
     steps:
-      - name: Clean up five old flagged versions only when 2.0.0 is Active
+      - name: Delete Flagged 1.0.0–1.0.3 only; keep 1.0.4 and 2.0.0
         env:
           REGISTRY_ACCESS_TOKEN: ${{ secrets.REGISTRY_ACCESS_TOKEN }}
         run: |
@@ -33,8 +31,8 @@ jobs:
           BASE = "https://api.comfy.org"
           PUB = "yamoon-jjang"
           NODE = "comfyui-ultra-tools"
-          KEEP = "2.0.0"
-          OLD = {"1.0.0", "1.0.1", "1.0.2", "1.0.3", "1.0.4"}
+          KEEP = {"1.0.4", "2.0.0"}
+          OLD = {"1.0.0", "1.0.1", "1.0.2", "1.0.3"}
           token = os.environ.get("REGISTRY_ACCESS_TOKEN", "").strip()
 
           # This public read requires no token; never delete anything if it fails.
@@ -45,16 +43,16 @@ jobs:
           versions = payload if isinstance(payload, list) else payload.get("versions", [])
           if not isinstance(versions, list) or not versions:
               raise SystemExit("Registry version list empty/invalid: refuse deletion")
-          current = [v for v in versions if str(v.get("version")) == KEEP]
-          if len(current) != 1 or current[0].get("status") != "NodeVersionStatusActive" or current[0].get("deprecated", False):
-              print("v2.0.0 not confirmed Active. NO versions deleted.")
-              raise SystemExit(0)
+          # Both versions the user wants to keep must be present (status may be Pending/Flagged).
+          preserved = {str(v.get("version")) for v in versions if str(v.get("version")) in KEEP}
+          if preserved != KEEP:
+              raise SystemExit("Both protected versions must exist; refuse deletion")
 
           candidates = [v for v in versions if str(v.get("version")) in OLD]
           if not candidates:
-              print("All five obsolete versions are already absent. No action needed.")
+              print("All four obsolete versions are already absent. No action needed.")
               raise SystemExit(0)
-          if len(candidates) > 5 or len({v.get("version") for v in candidates}) != len(candidates):
+          if len(candidates) > 4 or len({v.get("version") for v in candidates}) != len(candidates):
               raise SystemExit("Unexpected duplicate registry versions: refuse deletion")
           for v in candidates:
               if v.get("status") != "NodeVersionStatusFlagged" or not v.get("id"):
@@ -62,7 +60,7 @@ jobs:
           if not token:
               raise SystemExit("REGISTRY_ACCESS_TOKEN missing: cannot unpublish old versions")
 
-          print("v2.0.0 is Active. Eligible obsolete Flagged versions:",
+          print("Protected 1.0.4 and 2.0.0 present. Eligible obsolete Flagged versions:",
                 ", ".join(sorted(v["version"] for v in candidates)))
           for v in sorted(candidates, key=lambda x: x["version"]):
               ver = v["version"]
@@ -82,5 +80,5 @@ jobs:
               except urllib.error.HTTPError as e:
                   raise RuntimeError("Unpublish "+ver+" failed with HTTP "+str(e.code)) from None
               print("Unpublished obsolete Flagged version:", ver)
-          print("Legacy Registry cleanup finished. v2.0.0 was not modified.")
+          print("Legacy cleanup finished. Protected 1.0.4 and 2.0.0 were not modified.")
           PY
