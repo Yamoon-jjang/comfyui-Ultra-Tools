@@ -1,14 +1,28 @@
 # 🧰 comfyui-Ultra-Tools
 
-**ComfyUI 작업을 하면서 매일 부딪히는 불편함을 하나씩 해결하기 위해 만든 노드 13종 모음입니다.**
-프롬프트 작성, 이미지 생성과 업스케일, 이미지 불러오기, 워터마크, 번역, 모델 관리, 실행 시간 측정, 오디오 정리까지 다룹니다. 각 노드는 실제 작업 흐름에서 오래 다듬어졌고, 기존 ComfyUI 노드를 그대로 대체하거나 기존 워크플로우 중간에 끼워 넣어 쓸 수 있도록 설계했습니다.
+**ComfyUI 작업을 하면서 매일 부딪히는 불편함을 하나씩 해결하기 위해 만든 노드 12종 모음입니다.**
+프롬프트 작성, 이미지 불러오기, 워터마크, 번역, 모델 관리, 실행 시간 측정, 오디오 정리까지 다룹니다. 각 노드는 실제 작업 흐름에서 오래 다듬어졌고, 기존 ComfyUI 노드를 그대로 대체하거나 기존 워크플로우 중간에 끼워 넣어 쓸 수 있도록 설계했습니다.
 
 - ✅ **추가 pip 설치 없음** — ComfyUI에 기본 포함된 라이브러리만 사용합니다.
 - ✅ **한국어 / 영어 UI 자동 전환** — ComfyUI 언어 설정을 따릅니다.
-- ✅ **노드별 상세 메뉴얼 포함** — `메뉴얼` 폴더에 노드마다 한국어 설명서가 있습니다.
-- ✅ **예제 워크플로우 포함** — `이미지 워크플로우/Ultra_Image_AIO_Simple.json`
+- ✅ **노드별 상세 메뉴얼 포함** — `메뉴얼` 폴더에 노드별 한국어 설명서와 통합 설치 안내(KO/EN)가 있습니다.
+- ✅ **Image Load 예제 워크플로우 포함** — `이미지 워크플로우/Ultra_Tools_Image_Load_Preview.json`
 
 > 🇺🇸 English summary is at the [bottom of this page](#english-summary).
+
+---
+
+## ⚠️ v2.0.0 중요 변경: Image + PiD 독립 분리 (기능 폐지 아님)
+
+**기존 13종 중 `Ultra Tools Image + PiD` 1종만 통합팩에서 분리되어, 이 버전에는 12종이 포함됩니다.** 기존 Textbox, Translator, Prompt Styler/Composer, Image Load, 워터마크, Model Viewer, Timer, Audio Fade 등 **나머지 12개 노드의 실행 코드와 등록 ID는 변경하지 않았습니다.**
+
+- **왜 분리했나요?** 이미지 생성·PixelDiT 업스케일 노드는 모델별 의존성과 갱신 주기가 다른 유틸리티 노드와 다릅니다. 독립적인 설치와 업데이트를 지원하고 나머지 Ultra Tools를 가볍고 안정적으로 유지하기 위해 분리했습니다.
+- **이제 어디서 사용하나요?** `Ultra Image + PiD`라는 **독립 커스텀 노드**로 분리했습니다. **GitHub 공개·Manager 등록은 별도로 진행할 예정**이므로 이 Ultra Tools 릴리즈에 포함됐다고 생각하지 마세요.
+- **기존 워크플로우는?** 과거 `UltraImagePiD`가 있던 워크플로우는 자동으로 새 `UltraStandaloneImagePiD`로 변환되지 않습니다. 독립판 설치 후 노드를 교체하고 입력·출력 연결 및 모델 설정을 확인해야 합니다.
+- **업데이트 시 주의:** ZIP을 기존 폴더에 그대로 덮어쓰면 삭제된 `ultra_image_pid.py`, `web/ultra_image_pid.js` 파일이 남을 수 있습니다. 기존 폴더를 백업 후 삭제하고 새 `comfyui-Ultra-Tools` 폴더를 설치하세요. ComfyUI Manager로 설치했다면 Manager의 업데이트 절차를 따르세요.
+- 이 변경은 **Image + PiD에만 해당**하며 다른 12종의 워크플로우는 변경할 필요가 없습니다.
+
+**🇬🇧 English:** v2.0.0 separates **Image + PiD** from Ultra Tools (13 → 12 nodes); **it is not discontinued**. The other 12 node IDs and runtime implementations remain unchanged. The standalone **Ultra Image + PiD** package will be published separately, not as part of this release. Old `UltraImagePiD` workflows are **not** auto-migrated to `UltraStandaloneImagePiD`: replace and reconnect the node. When upgrading from a ZIP, remove the old Ultra Tools directory first to avoid leftover scripts.
 
 ---
 
@@ -24,6 +38,10 @@ git clone https://github.com/Yamoon-jjang/comfyui-Ultra-Tools
 ```
 설치 후 ComfyUI를 완전히 재시작하고 브라우저를 새로고침(Ctrl+F5)하세요.
 
+> **v2.0.0 구성 변경:** `Ultra Tools Image + PiD`는 이 통합 패키지에서 분리되었습니다. 생성·PiD 기능은 **`Ultra Image + PiD` 독립 노드**로 분리했으며 GitHub·Manager 공개는 별도 진행할 예정입니다. 기존 `UltraImagePiD` 워크플로우는 자동 변환되지 않습니다. ZIP 수동 업데이트는 이전 `comfyui-Ultra-Tools` 폴더를 삭제한 뒤 새 패키지를 설치해야 제거된 파일이 남지 않습니다.
+
+> **v2.0.0 change:** `Ultra Tools Image + PiD` is no longer bundled. The standalone **Ultra Image + PiD** package will be published separately; it is not included here. Existing `UltraImagePiD` workflows are **not automatically migrated**. For ZIP upgrades, remove the old `comfyui-Ultra-Tools` folder first so removed scripts do not remain.
+
 > 이전에 개별 패키지(`comfyui-Ultra-textbox`, `comfyui-Ultra-Translator`, `comfyui-Ultra-model-viewer`, `comfyui-Ultra-wildcard_browser`)를 쓰셨다면 해당 폴더를 지우고 이 통합 패키지만 설치하세요.
 
 ---
@@ -32,7 +50,6 @@ git clone https://github.com/Yamoon-jjang/comfyui-Ultra-Tools
 
 | 분류 | 노드 | 한 줄 요약 |
 |---|---|---|
-| 🖼️ 생성 | [Image + PiD](#image-pid) | 모델 로드부터 생성·LoRA·PiD 4배 업스케일·색 보정까지 **노드 하나로** |
 | ✍️ 프롬프트 | [Prompt Composer](#prompt-composer) | 메뉴만 골라 **장면 프롬프트를 처음부터 조립** |
 | ✍️ 프롬프트 | [Prompt Styler](#prompt-styler) | 내 프롬프트는 그대로 두고 **스타일·분위기만 모델 문법에 맞게 입힘** |
 | ✍️ 프롬프트 | [Textbox](#textbox) | 노드 하나에 텍스트 칸 **최대 32개**, 칸마다 독립 입·출력 |
@@ -45,47 +62,6 @@ git clone https://github.com/Yamoon-jjang/comfyui-Ultra-Tools
 | 📊 관리 | [Model Viewer](#model-viewer) | 현재 워크플로우가 쓰는 **모델과 용량** 확인 |
 | 📊 관리 | [Model Viewer (All)](#model-viewer) | 모델 폴더 전체를 **종류별로 스캔**해 큰 파일 찾기 |
 | ⏱️ 관리 | [Workflow Timer](#workflow-timer) | 실행 시간 **실시간 표시 + 기록 + 평균** |
-
----
-
-<a id="image-pid"></a>
-
-## 🖼️ Ultra Tools Image + PiD
-
-**Krea 2 · Z-Image · Anima · Qwen Image · Qwen Image 2.1 · MOSS-Image** 이미지 생성에 필요한 과정을 노드 하나에 담았습니다. 원하면 같은 노드 안에서 **PiD(PixelDiT) 4배 업스케일**까지 이어서 실행합니다.
-
-> **1.0.4 업데이트 — 모델 지원**: **Qwen Image 2.1**(Turbo 포함)과 **MOSS-Image**를 지원합니다. 두 모델 모두 ComfyUI 공식 템플릿과 같은 내부 흐름으로 동작합니다. MOSS-Image는 FLUX.2용 PiD로 업스케일할 수 있고, Qwen Image 2.1은 전용 PiD가 아직 없어 PiD가 자동으로 꺼집니다.
-
-**이런 분께 좋습니다**
-- Loader, CLIP Text Encode, Empty Latent, KSampler, VAE Decode, LoRA Loader를 매번 연결하는 게 번거로운 분
-- 모델 계열마다 다른 CLIP type, latent 방식, sampling shift를 외우기 싫은 분
-- 고해상도 업스케일 결과를 원본과 나란히 비교하고 싶은 분
-
-**주요 기능**
-- `model_family`만 고르면 계열에 맞는 CLIP type, 프롬프트 인코딩 방식, latent 생성 방식, 샘플링 보정을 **노드가 알아서 적용**합니다. Qwen Image 2.1 Turbo의 고정 스케줄, MOSS-Image의 Skip Layer Guidance처럼 모델별로 필요한 처리도 공식 템플릿대로 들어갑니다.
-- **＋ LoRA 추가** 버튼으로 LoRA를 필요한 만큼 추가합니다. 행마다 ON/OFF, 강도, 순서 이동, 삭제가 됩니다.
-- **PiD 업스케일 토글**
-  - OFF: PiD 관련 모델을 전혀 불러오지 않아 일반 생성만큼 가볍습니다. PiD 모델이 없어도 됩니다.
-  - ON: 생성 해상도의 **4배**(1024×1024 → 4096×4096)로 업스케일합니다. 결과물 크기는 x4 / x2 중에서 고릅니다.
-- PiD 결과에는 원본과 명암·색감을 맞추는 보정(`reinhard_lab`)이 **자동으로** 적용됩니다. 색 보정 노드를 따로 연결할 필요가 없습니다.
-- 출력은 **`Original Image`와 `PiD Image` 두 개**라 원본과 업스케일 결과를 바로 비교할 수 있습니다.
-- **모델 계열별 설정 자동 기억**: Krea 2 / Z-Image / Anima / Qwen Image / Qwen Image 2.1 / MOSS-Image마다 마지막으로 실행한 모델, 해상도, 샘플러, LoRA 목록, PiD 설정을 따로 기억해 둡니다. 계열을 바꾸면 그 계열에서 쓰던 설정이 그대로 돌아옵니다. seed와 프롬프트 내용은 기억하지 않습니다.
-- 현재 모델 계열에 맞는 PiD 모델만 목록에 보여 줍니다. 엉뚱한 PiD 파일을 고를 일이 없습니다.
-
-| 모델 계열 | PiD 업스케일 |
-|---|---|
-| Krea 2 · Anima · Qwen Image | `qwenimage` PiD |
-| Z-Image | `flux1` PiD |
-| MOSS-Image | `flux2` PiD |
-| Qwen Image 2.1 | 미지원 (토글 자동 잠금) |
-- 선택 옵션 **SageAttention**: [ComfyUI-KJNodes](https://github.com/kijai/ComfyUI-KJNodes)가 설치되어 있으면 메인 생성을 가속합니다. 기본값은 OFF입니다.
-
-**사용 팁**
-- PiD를 쓰려면 `models/text_encoders/`에 `gemma_2_2b_it_elm_fp8_scaled.safetensors`(권장) 또는 `gemma_2_2b_it_elm_bf16.safetensors`가 있어야 합니다. 노드가 자동으로 찾습니다.
-- PiD 모델은 Hugging Face [Comfy-Org/PixelDiT](https://huggingface.co/Comfy-Org/PixelDiT/tree/main/diffusion_models)에서 받아 `models/diffusion_models/`에 둡니다. 공식 PiD 권장 설정은 sampler `lcm` / scheduler `simple` / steps 4입니다.
-- 권장 생성 설정: Qwen Image 2.1은 steps 25 / CFG 1 / euler / simple, MOSS-Image는 steps 50 / CFG 3 / euler. 계열을 처음 고를 때는 직전 계열의 설정이 남아 있을 수 있으니 한 번 맞춰 주세요.
-- PiD를 켤 때는 batch 1을 권장합니다. 4배 해상도에서는 VRAM 사용량이 크게 늘어납니다.
-- 최종본만 필요하면 `PiD Image` 출력 하나만 저장 노드에 연결하면 됩니다. PiD를 꺼 두면 원본이 그대로 나옵니다.
 
 ---
 
@@ -308,11 +284,12 @@ Copyright (C) 2026 Yamoon-jjang
 
 ## 🇺🇸 English Summary
 
-**comfyui-Ultra-Tools** is a collection of 13 carefully refined ComfyUI nodes. No extra pip packages are needed. The UI switches between Korean and English automatically.
+**comfyui-Ultra-Tools** is a collection of 12 carefully refined ComfyUI nodes. No extra pip packages are needed. The UI switches between Korean and English automatically.
+
+**Since v2.0.0:** Image + PiD has been separated as **Ultra Image + PiD** and is not included in this 12-node collection. Its public standalone release will follow separately. The included example is Image Load → Preview Image; select an existing image before running.
 
 | Node | What it does |
 |---|---|
-| **Image + PiD** | All-in-one generation for Krea 2 / Z-Image / Anima / Qwen Image / Qwen Image 2.1 / MOSS-Image: model loading, conditioning, dynamic LoRA stack, KSampler and VAE decode in one node. Model-specific internal flows follow the official ComfyUI templates (Qwen Image 2.1 Turbo fixed schedule, MOSS-Image skip layer guidance). Optional 4× PiD (PixelDiT) upscale with automatic color/tone matching (qwenimage / flux1 / flux2 PiD; not available for Qwen Image 2.1 yet). Outputs both `Original Image` and `PiD Image`. Remembers the last settings per model family. Optional SageAttention (via KJNodes). |
 | **Prompt Composer** | Builds full scene prompts from menus (subject, location, time, weather, props, framing, lens, 22 moods × 34 styles), or styles an existing prompt. Outputs model-specific positive/negative prompts for 9 model formats (natural-language and tag-based). |
 | **Prompt Styler** | Keeps your prompt intact and adds mood/style/framing/lens in the right syntax for each model. Preserves weighted syntax `(tag:1.3)`, keeps photo/lens terms out of painterly styles, and resolves Pony/Illustrious/Anima rating and source tag conflicts. |
 | **Textbox** | Up to 32 independent text slots in one node (IN N → OUT N). Inputs stay editable and visible, rows can be reordered, renamed, copied, and deleted individually. |

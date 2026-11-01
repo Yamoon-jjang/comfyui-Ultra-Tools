@@ -1,6 +1,7 @@
-name: Publish to Comfy Registry
+name: Publish to Comfy Registry and GitHub Release
 
-# pyproject.toml 의 version 을 올려서 main 브랜치에 올리면 자동으로 Registry 에 배포됩니다.
+# Changing pyproject.toml on main publishes a new Registry version.
+# A successful publish also creates a ZIP with the install folder name fixed.
 on:
   workflow_dispatch:
   push:
@@ -11,20 +12,78 @@ on:
 
 permissions:
   issues: write
+  contents: write
 
 jobs:
   publish-node:
-    name: Publish Custom Node to registry
+    name: Publish Custom Node to Registry
     runs-on: ubuntu-latest
     if: ${{ github.repository_owner == 'Yamoon-jjang' }}
     steps:
       - name: Check out code
         uses: actions/checkout@v4
-      # git은 기본 설정에서 한글 파일명을 "\355\226..." 같은 표기로 내보내서,
-      # 배포 zip을 만들 때 한글 이름의 글꼴·메뉴얼·예제가 빠짐. 원래 이름 그대로 내보내게 함
       - name: Keep Korean file names in the package
         run: git config --global core.quotePath false
       - name: Publish Custom Node
         uses: Comfy-Org/publish-node-action@v1
         with:
           personal_access_token: ${{ secrets.REGISTRY_ACCESS_TOKEN }}
+
+  github-release:
+    name: Package and publish GitHub release
+    needs: publish-node
+    runs-on: ubuntu-latest
+    if: ${{ github.ref == 'refs/heads/main' }}
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+      - name: Build ZIP with stable ComfyUI install directory
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          from zipfile import ZipFile, ZIP_DEFLATED
+          import re, subprocess
+          package = Path("pyproject.toml").read_text(encoding="utf-8")
+          match = re.search(r'(?m)^version\s*=\s*"([^"]+)"', package)
+          if not match:
+              raise SystemExit("Missing project version")
+          version = match.group(1)
+          archive = Path(f"comfyui-Ultra-Tools-v{version}.zip")
+          paths = [p.decode("utf-8") for p in subprocess.check_output(["git", "ls-files", "-z"]).split(b"\0") if p]
+          omitted = {".gitignore"}
+          with ZipFile(archive, "w", compression=ZIP_DEFLATED, compresslevel=6) as z:
+              for path in paths:
+                  if path in omitted or path.startswith(".github/"):
+                      continue
+                  z.write(path, f"comfyui-Ultra-Tools/{path}")
+          with ZipFile(archive) as z:
+              if z.testzip():
+                  raise SystemExit("ZIP CRC test failed")
+              members = z.namelist()
+              if any(not x.startswith("comfyui-Ultra-Tools/") for x in members):
+                  raise SystemExit("Unexpected archive root directory")
+              if any("ultra_image_pid" in x.lower() for x in members):
+                  raise SystemExit("Old Image + PiD files remain in archive")
+              if "comfyui-Ultra-Tools/__init__.py" not in members:
+                  raise SystemExit("Missing package initializer")
+          Path("release_archive.txt").write_text(str(archive), encoding="utf-8")
+          Path("release_tag.txt").write_text(f"v{version}", encoding="utf-8")
+          print(f"Archive: {archive}; file count: {len(members)}")
+          PY
+      - name: Publish GitHub release and installable ZIP
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="$(cat release_tag.txt)"
+          ARCHIVE="$(cat release_archive.txt)"
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "Release $TAG already exists; preserving published files."
+          else
+            gh release create "$TAG" "$ARCHIVE" \
+              --title "Ultra Tools $TAG — 12 nodes (Image + PiD separated)" \
+              --notes-file RELEASE_NOTES_v2.0.0.md \
+              --latest \
+              --target "${GITHUB_SHA}"
+          fi
