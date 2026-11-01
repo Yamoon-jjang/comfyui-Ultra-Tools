@@ -99,13 +99,6 @@ try:
 except Exception as exc:
     warnings.warn(f"Ultra Tools Prompt Composer could not be loaded: {exc}", RuntimeWarning, stacklevel=1)
 
-# Ultra Tools Image + PiD
-try:
-    from .ultra_image_pid import UltraImagePiD
-    _register({"UltraImagePiD": UltraImagePiD}, {"UltraImagePiD": "Ultra Tools Image + PiD"})
-except Exception as exc:
-    warnings.warn(f"Ultra Tools Image + PiD could not be loaded: {exc}", RuntimeWarning, stacklevel=1)
-
 # Ultra Tools Image Load
 register_image_load_routes = None
 try:
@@ -120,6 +113,6 @@ try:
 except Exception as exc:
     warnings.warn(f"Ultra Tools Image Load thumbnail routes could not be registered: {exc}", RuntimeWarning, stacklevel=1)
 
-print(f"[comfyui-Ultra-Tools] Loaded {len(NODE_CLASS_MAPPINGS)}/13 nodes")
+print(f"[comfyui-Ultra-Tools] Loaded {len(NODE_CLASS_MAPPINGS)}/12 nodes")
 
 __all__ = ["NODE_CLASS_MAPPINGS", "NODE_DISPLAY_NAME_MAPPINGS", "WEB_DIRECTORY"]
