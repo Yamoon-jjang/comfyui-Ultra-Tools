@@ -1,0 +1,66 @@
+name: Refresh v2.0.0 GitHub release documentation and install ZIP
+
+# Documentation-only refresh; does NOT publish or mutate any Registry version.
+# The 12 remaining runtime nodes remain exactly as published in v2.0.0.
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/refresh-release-documentation.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    if: ${{ github.repository_owner == 'Yamoon-jjang' }}
+    steps:
+      - name: Checkout verified current main
+        uses: actions/checkout@v4
+      - name: Build installation ZIP with exact root folder
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import subprocess, zipfile, tomllib
+          p = Path("pyproject.toml")
+          version = tomllib.loads(p.read_text(encoding="utf-8"))["project"]["version"]
+          if version != "2.0.0":
+              raise SystemExit(f"Version changed from 2.0.0: {version}")
+          names = [n.decode("utf-8") for n in subprocess.check_output(["git", "ls-files", "-z"]).split(b"\0") if n]
+          archive = "comfyui-Ultra-Tools-v2.0.0.zip"
+          with zipfile.ZipFile(archive, "w", zipfile.ZIP_DEFLATED, compresslevel=6) as z:
+              for name in names:
+                  if name == ".gitignore" or name.startswith(".github/"):
+                      continue
+                  z.write(name, "comfyui-Ultra-Tools/" + name)
+          with zipfile.ZipFile(archive) as z:
+              if z.testzip() is not None:
+                  raise SystemExit("CRC failure")
+              members = z.namelist()
+              if not members or any(not x.startswith("comfyui-Ultra-Tools/") for x in members):
+                  raise SystemExit("Invalid install root")
+              required = [
+                  "comfyui-Ultra-Tools/__init__.py",
+                  "comfyui-Ultra-Tools/README.md",
+                  "comfyui-Ultra-Tools/RELEASE_NOTES_v2.0.0.md",
+                  "comfyui-Ultra-Tools/메뉴얼/Ultra Tools 통합 설치 안내 (KO-EN).txt",
+              ]
+              for path in required:
+                  if path not in members:
+                      raise SystemExit("Missing " + path)
+              if any("ultra_image_pid" in x.casefold() for x in members):
+                  raise SystemExit("Separated PiD source included")
+          print("Verified install ZIP:", archive, "files:", len(members))
+          PY
+      - name: Update existing release text and asset, never Registry
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          gh release view v2.0.0 --json tagName --jq '.tagName' | grep -Fx 'v2.0.0'
+          gh release edit v2.0.0 --notes-file RELEASE_NOTES_v2.0.0.md
+          gh release upload v2.0.0 comfyui-Ultra-Tools-v2.0.0.zip --clobber
+          gh release view v2.0.0 --json assets --jq '.assets[].name' | grep -Fx 'comfyui-Ultra-Tools-v2.0.0.zip'
