@@ -38,4 +38,10 @@ jobs:
           if not match:
               raise SystemExit("New v2.0.0 not listed by the Registry API")
           print("v2.0.0 status:", match[0].get("status"))
+          for version in ("1.0.4", "2.0.0"):
+              item = next((v for v in versions if str(v.get("version")) == version), None)
+              if item:
+                  print("VERSION_DETAILS", version,
+                        "status_reason=", str(item.get("status_reason", ""))[:3000],
+                        "comfy_node_extract_status=", item.get("comfy_node_extract_status"))
           PY
