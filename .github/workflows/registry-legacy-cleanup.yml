@@ -1,0 +1,86 @@
+name: Clean up obsolete flagged Registry versions (guarded)
+
+# This workflow only runs after v2.0.0 is confirmed Active by the Registry.
+# It unpublishes exactly the obsolete flagged versions 1.0.0 to 1.0.4.
+# No changes are made to the GitHub repo, to v2.0.0 or to any Active version.
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/registry-legacy-cleanup.yml"
+  schedule:
+    - cron: "21 * * * *"
+
+permissions:
+  contents: read
+
+jobs:
+  guarded-cleanup:
+    if: ${{ github.repository_owner == 'Yamoon-jjang' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Clean up five old flagged versions only when 2.0.0 is Active
+        env:
+          REGISTRY_ACCESS_TOKEN: ${{ secrets.REGISTRY_ACCESS_TOKEN }}
+        run: |
+          python3 - <<'PY'
+          import json, os, urllib.request, urllib.error
+          from urllib.parse import quote
+
+          BASE = "https://api.comfy.org"
+          PUB = "yamoon-jjang"
+          NODE = "comfyui-ultra-tools"
+          KEEP = "2.0.0"
+          OLD = {"1.0.0", "1.0.1", "1.0.2", "1.0.3", "1.0.4"}
+          token = os.environ.get("REGISTRY_ACCESS_TOKEN", "").strip()
+
+          # This public read requires no token; never delete anything if it fails.
+          url = BASE + "/nodes/" + NODE + "/versions?include_status_reason=true"
+          req = urllib.request.Request(url, headers={"User-Agent": "Ultra-Tools-Registry-Cleanup/2.0.0"})
+          with urllib.request.urlopen(req, timeout=25) as res:
+              payload = json.load(res)
+          versions = payload if isinstance(payload, list) else payload.get("versions", [])
+          if not isinstance(versions, list) or not versions:
+              raise SystemExit("Registry version list empty/invalid: refuse deletion")
+          current = [v for v in versions if str(v.get("version")) == KEEP]
+          if len(current) != 1 or current[0].get("status") != "NodeVersionStatusActive" or current[0].get("deprecated", False):
+              print("v2.0.0 not confirmed Active. NO versions deleted.")
+              raise SystemExit(0)
+
+          candidates = [v for v in versions if str(v.get("version")) in OLD]
+          if not candidates:
+              print("All five obsolete versions are already absent. No action needed.")
+              raise SystemExit(0)
+          if len(candidates) > 5 or len({v.get("version") for v in candidates}) != len(candidates):
+              raise SystemExit("Unexpected duplicate registry versions: refuse deletion")
+          for v in candidates:
+              if v.get("status") != "NodeVersionStatusFlagged" or not v.get("id"):
+                  raise SystemExit("A legacy version is not Flagged or has no ID: refuse deletion")
+          if not token:
+              raise SystemExit("REGISTRY_ACCESS_TOKEN missing: cannot unpublish old versions")
+
+          print("v2.0.0 is Active. Eligible obsolete Flagged versions:",
+                ", ".join(sorted(v["version"] for v in candidates)))
+          for v in sorted(candidates, key=lambda x: x["version"]):
+              ver = v["version"]
+              ident = v["id"]
+              delete_url = (BASE + "/publishers/" + quote(PUB, safe="") +
+                            "/nodes/" + quote(NODE, safe="") +
+                            "/versions/" + quote(str(ident), safe=""))
+              delete_req = urllib.request.Request(
+                  delete_url, method="DELETE",
+                  headers={"Authorization": "Bearer " + token,
+                           "User-Agent": "Ultra-Tools-Registry-Cleanup/2.0.0"}
+              )
+              try:
+                  with urllib.request.urlopen(delete_req, timeout=25) as res:
+                      if res.status != 204:
+                          raise RuntimeError("Unexpected HTTP status: " + str(res.status))
+              except urllib.error.HTTPError as e:
+                  raise RuntimeError("Unpublish "+ver+" failed with HTTP "+str(e.code)) from None
+              print("Unpublished obsolete Flagged version:", ver)
+          print("Legacy Registry cleanup finished. v2.0.0 was not modified.")
+          PY
