@@ -1,0 +1,41 @@
+name: Audit Comfy Registry version statuses
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/registry-version-audit.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  registry-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Read public Registry version statuses (no secret/token)
+        run: |
+          python3 - <<'PY'
+          import json, urllib.request
+          url = "https://api.comfy.org/nodes/comfyui-ultra-tools/versions?include_status_reason=true"
+          req = urllib.request.Request(url, headers={"User-Agent": "Ultra-Tools-Registry-Audit/2.0.0"})
+          with urllib.request.urlopen(req, timeout=30) as response:
+              data = json.load(response)
+          if isinstance(data, list):
+              versions = data
+          elif isinstance(data, dict):
+              versions = data.get("versions", data.get("items", []))
+          else:
+              raise SystemExit("Unrecognized Registry version response")
+          if not isinstance(versions, list):
+              raise SystemExit("Expected list of versions")
+          print("Published versions:", len(versions))
+          for entry in versions:
+              print("VERSION", entry.get("version"), "STATUS", entry.get("status"), "DEPRECATED", entry.get("deprecated"), "VERSION_ID", entry.get("id"))
+          match = [e for e in versions if str(e.get("version")) == "2.0.0"]
+          if not match:
+              raise SystemExit("New v2.0.0 not listed by the Registry API")
+          print("v2.0.0 status:", match[0].get("status"))
+          PY
