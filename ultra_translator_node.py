@@ -9,6 +9,7 @@ import html
 import json
 import os
 import re
+import stat
 import sys
 import threading
 import time
@@ -219,16 +220,19 @@ def _write_shared_translation_api_key(key: str) -> bool:
     }
     try:
         path.parent.mkdir(parents=True, exist_ok=True)
-        tmp.write_text(json.dumps(payload, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+        data = json.dumps(payload, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
+        # Create the temp file owner-read/write only from the start, then
+        # atomically replace the config. A stale temp file is removed first so
+        # its old permission bits are never inherited.
         try:
-            os.chmod(tmp, 0o600)
-        except Exception:
+            tmp.unlink()
+        except FileNotFoundError:
             pass
+        flags = os.O_WRONLY | os.O_CREAT | os.O_TRUNC | getattr(os, "O_BINARY", 0)
+        fd = os.open(tmp, flags, stat.S_IRUSR | stat.S_IWUSR)
+        with os.fdopen(fd, "wb") as handle:
+            handle.write(data)
         os.replace(tmp, path)
-        try:
-            os.chmod(path, 0o600)
-        except Exception:
-            pass
         return True
     except Exception:
         try:
