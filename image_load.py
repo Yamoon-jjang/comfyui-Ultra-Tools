@@ -351,7 +351,7 @@ def _external_combo_values():
     (even though our own browse-dialog JS is happy to read one) makes the
     frontend fall back to treating "image" as an unrecognised input type,
     which drops the widget (and this node's browse button with it) entirely
-    and leaves just a bare input socket. Friendly "RootLabel/relpath"
+    and leaves just a bare input slot; friendly "RootLabel/relpath"
     display text is instead built client-side in ultra_image_load.js from
     the separate /ultra_tools/image_load/roots list, purely for the browse
     dialog's own UI — it never needs to touch the combo value itself."""

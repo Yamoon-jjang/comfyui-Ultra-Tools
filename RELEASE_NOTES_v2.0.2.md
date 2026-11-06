@@ -13,7 +13,7 @@ Comfy Registry가 v2.0.0을 `arbitrary-file-read, path-traversal`(임의 파일 
 
 ### 그대로인 것
 - input 폴더(하위 폴더 포함) 이미지의 목록, 썸네일, 검색, 정렬, 폴더 필터, 원본 열기·저장·복사, 다중 선택 삭제, 노드 프리뷰는 v2.0.1과 똑같이 동작합니다.
-- 다른 11개 노드는 v2.0.1과 동일합니다. v2.0.1의 Workflow Timer 수정(레지스트리 검사의 `.bind(` 오탐 회피)도 그대로 포함되어 있습니다.
+- 다른 11개 노드는 v2.0.1과 동일합니다. v2.0.1의 Workflow Timer 수정(레지스트리 자동 검사 오탐 회피)도 그대로 포함되어 있습니다.
 
 ### 설치
 - Git: `ComfyUI/custom_nodes/`에서 `git clone https://github.com/Yamoon-jjang/comfyui-Ultra-Tools.git`

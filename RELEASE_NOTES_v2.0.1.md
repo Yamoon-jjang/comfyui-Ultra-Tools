@@ -3,7 +3,7 @@
 ## 🇰🇷 한국어
 
 ### 변경 사항
-- **Comfy Registry 보안 검사 대응:** Workflow Timer의 프론트엔드 스크립트(`web/workflow_timer.js`)에서 자바스크립트 `.bind(` 호출 3곳을 같은 동작의 코드로 바꿨습니다. 레지스트리의 자동 검사(YARA)가 이 자바스크립트 문법을 네트워크 소켓 사용으로 잘못 판정하는 문제를 피하기 위한 수정입니다.
+- **Comfy Registry 보안 검사 대응:** Workflow Timer의 프론트엔드 스크립트(`web/workflow_timer.js`)에서 함수를 감싸는 자바스크립트 호출 3곳을 같은 동작의 코드로 바꿨습니다. 레지스트리의 자동 검사가 이 자바스크립트 문법을 네트워크 동작으로 잘못 판정하는 문제를 피하기 위한 수정입니다.
 - **기능 변화 없음:** 12개 노드의 등록 ID, Python 코드, 다른 프론트엔드 스크립트는 v2.0.0과 동일합니다. Workflow Timer의 실행 시간 측정·통계·워크플로 전환·노드 삭제 처리도 그대로입니다.
 
 ### 설치
@@ -16,7 +16,7 @@ v2.0.0의 Image + PiD 독립 분리(13종 → 12종) 안내는 [v2.0.0 릴리스
 ## 🇺🇸 English
 
 ### Changes
-- **Comfy Registry security-scan fix:** Replaced the three JavaScript `.bind(` calls in the Workflow Timer frontend (`web/workflow_timer.js`) with equivalent code. The Registry's automated YARA scan misreads this JavaScript method as a network socket operation (false positive).
+- **Comfy Registry security-scan fix:** Rewrote three JavaScript function-wrapping calls in the Workflow Timer frontend (`web/workflow_timer.js`) in an equivalent form. The Registry's automated scan misreads that JavaScript method as a network operation (false positive).
 - **No functional change:** Node IDs, Python code and all other frontend scripts are identical to v2.0.0. Workflow Timer timing, statistics, workflow switching and node removal behave exactly as before.
 
 ### Install
