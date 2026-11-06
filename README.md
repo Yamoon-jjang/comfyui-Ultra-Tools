@@ -1,6 +1,6 @@
 # 🧰 comfyui-Ultra-Tools
 
-**ComfyUI를 더 편하게 쓰기 위한 12개 실용 커스텀 노드 모음 — v2.0.1.**
+**ComfyUI를 더 편하게 쓰기 위한 12개 실용 커스텀 노드 모음 — v2.0.2.**
 프롬프트 작성·스타일 조합, 이미지 탐색과 불러오기, 번역, 글자·이미지 워터마크, 모델 용량 확인, 워크플로우 실행 시간 기록, 오디오 페이드 등 자주 반복하는 작업을 간편하게 처리합니다. 기능은 노드별로 독립적이며 필요한 곳에 골라 연결할 수 있습니다.
 
 - ✅ **추가 pip 설치 없음** — ComfyUI에 기본 포함된 라이브러리만 사용합니다.
@@ -39,7 +39,7 @@ git clone https://github.com/Yamoon-jjang/comfyui-Ultra-Tools.git
 
 **② GitHub 릴리즈 ZIP 수동 설치**
 
-[**v2.0.1 설치용 ZIP**](https://github.com/Yamoon-jjang/comfyui-Ultra-Tools/releases/download/v2.0.1/comfyui-Ultra-Tools-v2.0.1.zip)을 받아 압축을 풀어 `ComfyUI/custom_nodes/comfyui-Ultra-Tools/` 형태로 설치합니다. 압축 내부 최상위 폴더는 `comfyui-Ultra-Tools`입니다.
+[**v2.0.2 설치용 ZIP**](https://github.com/Yamoon-jjang/comfyui-Ultra-Tools/releases/download/v2.0.2/comfyui-Ultra-Tools-v2.0.2.zip)을 받아 압축을 풀어 `ComfyUI/custom_nodes/comfyui-Ultra-Tools/` 형태로 설치합니다. 압축 내부 최상위 폴더는 `comfyui-Ultra-Tools`입니다.
 
 **중요:** 이전 버전 ZIP을 수동으로 설치했다면 기존 폴더를 백업 후 **삭제하고** 새 폴더를 넣어야 합니다. 기존 폴더에 덮어쓰기만 하면 분리된 PiD의 `ultra_image_pid.py` 또는 `web/ultra_image_pid.js`가 남을 수 있습니다.
 
@@ -51,7 +51,7 @@ git clone https://github.com/Yamoon-jjang/comfyui-Ultra-Tools.git
 
 **Image + PiD 분리 안내:** v2.0.0에는 이미지 생성·PiD 업스케일 노드가 포함되지 않습니다. 독립 `Ultra Image + PiD`는 나중에 별도로 공개합니다. 기존 `UltraImagePiD` 워크플로우는 `UltraStandaloneImagePiD`로 자동 변환되지 않습니다.
 
-**🇬🇧 English:** Install with `git clone https://github.com/Yamoon-jjang/comfyui-Ultra-Tools.git` into `ComfyUI/custom_nodes/`, or use the [v2.0.1 ZIP](https://github.com/Yamoon-jjang/comfyui-Ultra-Tools/releases/download/v2.0.1/comfyui-Ultra-Tools-v2.0.1.zip). For manual ZIP upgrades, remove the old folder before extracting. Manager/Registry installation depends on the version becoming `Active`. Restart ComfyUI afterward. Image + PiD has moved to a separately released package; legacy workflows are not automatically converted.
+**🇬🇧 English:** Install with `git clone https://github.com/Yamoon-jjang/comfyui-Ultra-Tools.git` into `ComfyUI/custom_nodes/`, or use the [v2.0.2 ZIP](https://github.com/Yamoon-jjang/comfyui-Ultra-Tools/releases/download/v2.0.2/comfyui-Ultra-Tools-v2.0.2.zip). For manual ZIP upgrades, remove the old folder before extracting. Manager/Registry installation depends on the version becoming `Active`. Restart ComfyUI afterward. Image + PiD has moved to a separately released package; legacy workflows are not automatically converted.
 
 ---
 
@@ -64,7 +64,7 @@ git clone https://github.com/Yamoon-jjang/comfyui-Ultra-Tools.git
 | ✍️ 프롬프트 | [Textbox](#textbox) | 노드 하나에 텍스트 칸 **최대 32개**, 칸마다 독립 입·출력 |
 | ✍️ 프롬프트 | [Translator](#translator) | 워크플로우 안에서 바로 **번역** (API 키 없이도 동작) |
 | ✍️ 프롬프트 | [Wildcard Browser](#wildcard-browser) | 와일드카드 폴더를 탐색하고 **`__폴더/파일__` 호출문을 클릭 한 번에 복사** |
-| 📁 이미지 | [Image Load](#image-load) | Load Image에 **썸네일 브라우저 + 외부 폴더 직접 불러오기** 추가 |
+| 📁 이미지 | [Image Load](#image-load) | Load Image에 **썸네일 브라우저 + output 폴더 직접 불러오기** 추가 |
 | 🏷️ 마무리 | [Text Watermark](#text-watermark) | 두 줄 문단형 **글자 워터마크** (외곽선·글로우·회전) |
 | 🏷️ 마무리 | [Image Watermark](#image-watermark) | 로고·서명 **이미지 워터마크** (타일 반복·블렌드·그림자) |
 | 🔊 오디오 | [Audio Fade](#audio-fade) | 생성 오디오 **시작 부분 팝·찌직음 제거** |
@@ -194,7 +194,7 @@ ComfyUI 기본 **Load Image를 그대로 기반으로** 하고, 이미지를 고
   - 파일명 검색과 폴더 필터가 있고, 썸네일 크기 슬라이더로 크기를 조절합니다.
   - 창 크기와 보기 설정은 다음에 열 때도 그대로 유지됩니다.
   - 해상도도 함께 표시되고, 비율이 다른 이미지도 잘리지 않고 전체가 보입니다.
-- **외부 폴더 직접 불러오기**: 다른 드라이브의 이미지 폴더를 등록하면 input 폴더로 **복사하지 않고** 원래 위치에서 바로 불러옵니다. 폴더는 여러 개 등록할 수 있고, 하위 폴더도 함께 보입니다.
+- **output 폴더 직접 불러오기**: ComfyUI output 안의 폴더를 등록하면 input 폴더로 **복사하지 않고** 원래 위치에서 바로 불러옵니다. 폴더는 여러 개 등록할 수 있고, 하위 폴더도 함께 보입니다. (v2.0.2부터 Comfy Registry 보안 정책에 따라 ComfyUI 밖의 드라이브·폴더는 등록할 수 없습니다.)
 - 더블클릭으로 즉시 적용하고, Ctrl/Shift 클릭으로 여러 장을 선택해 **한꺼번에 삭제**할 수 있습니다.
 - 우클릭 메뉴의 새 탭에서 열기, 다른 이름으로 저장, 이미지 복사는 썸네일이 아니라 **원본 해상도**로 동작합니다.
 - 썸네일은 화면에 보이는 곳 위주로 먼저 불러와서, 이미지가 많아도 빠르게 넘겨 볼 수 있습니다.
@@ -295,7 +295,7 @@ Copyright (C) 2026 Yamoon-jjang
 
 **comfyui-Ultra-Tools** is a collection of 12 carefully refined ComfyUI nodes. No extra pip packages are needed. The UI switches between Korean and English automatically.
 
-**Install:** Clone the [Git repository](https://github.com/Yamoon-jjang/comfyui-Ultra-Tools) or download the [v2.0.1 install ZIP](https://github.com/Yamoon-jjang/comfyui-Ultra-Tools/releases/download/v2.0.1/comfyui-Ultra-Tools-v2.0.1.zip). Registry publication does not guarantee Manager installation until a version becomes Active; Git and ZIP installation work independently of Registry review. When updating older manually extracted ZIPs, remove the old folder first.
+**Install:** Clone the [Git repository](https://github.com/Yamoon-jjang/comfyui-Ultra-Tools) or download the [v2.0.2 install ZIP](https://github.com/Yamoon-jjang/comfyui-Ultra-Tools/releases/download/v2.0.2/comfyui-Ultra-Tools-v2.0.2.zip). Registry publication does not guarantee Manager installation until a version becomes Active; Git and ZIP installation work independently of Registry review. When updating older manually extracted ZIPs, remove the old folder first.
 
 **Since v2.0.0:** Image + PiD has been separated as **Ultra Image + PiD** and is not included in this 12-node collection. Its public standalone release will follow separately. The included example is Image Load → Preview Image; select an existing image before running.
 
@@ -306,7 +306,7 @@ Copyright (C) 2026 Yamoon-jjang
 | **Textbox** | Up to 32 independent text slots in one node (IN N → OUT N). Inputs stay editable and visible, rows can be reordered, renamed, copied, and deleted individually. |
 | **Translator** | In-workflow translation (default: to Korean). Works without an API key; an optional Google Cloud key is stored locally, never in workflows. Can preserve line breaks and fall back to the original text on error. |
 | **Wildcard Browser** | Browse wildcard folders step by step and copy `__folder/file__` with one click. A workaround when Impact Pack's wildcard list fails. |
-| **Image Load** | A drop-in Load Image replacement with a thumbnail/list browser, search, folder filter, and external folders loaded in place without copying. Supports multi-select delete and original-resolution open/save/copy. |
+| **Image Load** | A drop-in Load Image replacement with a thumbnail/list browser, search, folder filter, and ComfyUI output sub-folders loaded in place without copying (since v2.0.2, folders outside ComfyUI input/output can no longer be registered). Supports multi-select delete and original-resolution open/save/copy. |
 | **Text Watermark** | Two-block text watermark with per-text font, outline, and glow, plus layout, rotation, and opacity controls. 15 fonts bundled. |
 | **Image Watermark** | Logo watermark with upload button, alpha-aware sizing, tint, stroke, shadow, 5 blend modes, full/diagonal tiling, and a MASK output. |
 | **Audio Fade** | Non-destructive fade in/out to remove start-of-audio pops (e.g. MiniMax H3). Never changes length, sample rate, or sync. |

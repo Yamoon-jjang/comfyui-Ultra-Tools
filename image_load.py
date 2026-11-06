@@ -115,7 +115,7 @@ def _list_input_images_recursive():
 
 
 # ---------------------------------------------------------------------------
-# External roots (drives/folders outside the ComfyUI input directory)
+# Extra folders (sub-folders of ComfyUI output, registered by the user)
 #
 # Core's node-loading pipeline (INPUT_TYPES combo, get_annotated_filepath,
 # the /view endpoint) all assume "input", "output" or "temp" — there is no
@@ -131,6 +131,51 @@ def _list_input_images_recursive():
 # registered root, the same containment check core's own /view uses for
 # input/output/temp.
 # ---------------------------------------------------------------------------
+
+# Allowed base folders (since 2.0.2)
+#
+# Every path this node lists, previews, registers, serves or deletes must sit
+# inside ComfyUI's own input or output directory.  Comfy Registry policy
+# treats a route that can browse or read anywhere on disk as
+# arbitrary-file-read / path-traversal, so the old "whole drive" folder
+# browser is gone: the "+ 폴더 추가" browser now starts at these two folders
+# and can only add folders inside output (input is already listed in full).  Containment is checked on the
+# *real* path (symlinks/junctions resolved), so a link inside input/output
+# that points elsewhere is refused as well.
+# ---------------------------------------------------------------------------
+
+def _allowed_base_dirs():
+    """[(key, absolute real path)] for ComfyUI's input and output folders."""
+    bases = []
+    if not folder_paths:
+        return bases
+    for key, getter in (("input", "get_input_directory"), ("output", "get_output_directory")):
+        try:
+            path = getattr(folder_paths, getter)()
+        except Exception:
+            path = None
+        if path:
+            real = os.path.realpath(os.path.abspath(str(path)))
+            if os.path.isdir(real) and all(real != existing for _k, existing in bases):
+                bases.append((key, real))
+    return bases
+
+
+def _is_within(path, base_real):
+    try:
+        real = os.path.realpath(os.path.abspath(path))
+        return os.path.normcase(os.path.commonpath((real, base_real))) == os.path.normcase(base_real)
+    except (ValueError, OSError):  # e.g. different drive letters on Windows
+        return False
+
+
+def _allowed_base_for(path):
+    """Key of the allowed base folder that really contains `path`, else None."""
+    for key, base_real in _allowed_base_dirs():
+        if _is_within(path, base_real):
+            return key
+    return None
+
 
 # The registry lives in ComfyUI's user directory (ComfyUI/user/ultra_tools/)
 # so that a Manager update, which may replace this package folder, does not
@@ -220,6 +265,8 @@ def _load_external_roots():
         root_path = str(entry.get("path") or "").strip()
         if not root_id or not root_path:
             continue
+        if _allowed_base_for(root_path) is None:
+            continue  # registered before 2.0.2 outside input/output: no longer served
         label = str(entry.get("label") or "").strip() or os.path.basename(root_path.rstrip("/\\")) or root_path
         roots.append({"id": root_id, "path": root_path, "label": label})
     return roots
@@ -247,6 +294,11 @@ def _add_external_root(raw_path, label):
     candidate = os.path.abspath(raw_path.strip())
     if not os.path.isdir(candidate):
         return None, f"폴더를 찾을 수 없습니다: {candidate}"
+    base_key = _allowed_base_for(candidate)
+    if base_key is None:
+        return None, "ComfyUI input/output 폴더 안의 폴더만 추가할 수 있습니다."
+    if base_key == "input":
+        return None, "input 폴더의 이미지는 이미 목록에 모두 표시됩니다. output 폴더를 선택해 주세요."
     roots = _load_external_roots()
     for entry in roots:
         try:
@@ -279,7 +331,14 @@ def _remove_external_root(root_id):
 
 
 def _scan_external_images(root_entry):
-    return _scan_dir_images(root_entry["path"], root_entry["id"])
+    # Leave out links whose real target is outside the registered folder:
+    # they could never be loaded (see _resolve_external_path) and would only
+    # show up as broken tiles.
+    root_real = os.path.realpath(os.path.abspath(root_entry["path"]))
+    return [
+        item for item in _scan_dir_images(root_entry["path"], root_entry["id"])
+        if _is_within(os.path.join(root_real, *item["path"].split("/")), root_real)
+    ]
 
 
 def _external_combo_values():
@@ -327,6 +386,10 @@ def _resolve_external_path(value):
         if os.path.commonpath((full_path, root_dir)) != root_dir:
             return None
     except ValueError:  # e.g. different drive letters on Windows
+        return None
+    # Resolve symlinks/junctions: the real file must stay inside the real
+    # registered root, and that root inside ComfyUI input/output.
+    if not _is_within(full_path, os.path.realpath(root_dir)) or _allowed_base_for(full_path) is None:
         return None
     return full_path
 
@@ -545,9 +608,10 @@ def _resolve_source_path(filename, subfolder, type_, root_id=None, raw_path=None
         if not raw_path:
             return None
         candidate = os.path.abspath(raw_path)
-        # Only raster image files may be read this way (this route backs the
-        # folder-browse image preview, nothing else). Without this check any
-        # file on disk could be downloaded through ?type=path&path=...
+        # Only raster image files inside ComfyUI input/output may be read
+        # this way (this route backs the folder-browse image preview).
+        if _allowed_base_for(candidate) is None:
+            return None
         if not os.path.isfile(candidate) or not _is_safe_raster_image(candidate):
             return None
         return candidate
@@ -705,45 +769,10 @@ def _build_thumbnail(source_path, source_mtime, max_dim):
 
 
 def _list_drives():
-    """Top-level entries for the folder browser when no path has been
-    navigated into yet: drive letters on Windows, or the filesystem root
-    plus the user's home and common mount points elsewhere. This is the
-    "하드 드라이브 리스트" starting point the browse UI opens on."""
-    import platform
-    import string
-
-    if platform.system() == "Windows":
-        drives = []
-        try:
-            import ctypes
-
-            bitmask = ctypes.windll.kernel32.GetLogicalDrives()  # type: ignore[attr-defined]
-            for index, letter in enumerate(string.ascii_uppercase):
-                if bitmask & (1 << index):
-                    drive = f"{letter}:\\"
-                    drives.append({"name": drive, "path": drive})
-        except Exception:
-            for letter in string.ascii_uppercase:
-                drive = f"{letter}:\\"
-                if os.path.exists(drive):
-                    drives.append({"name": drive, "path": drive})
-        return drives
-
-    entries = [{"name": "/", "path": "/"}]
-    home = os.path.expanduser("~")
-    if home and os.path.isdir(home) and home != "/":
-        entries.append({"name": f"Home ({home})", "path": home})
-    for mount_root in ("/mnt", "/media", "/Volumes"):
-        if not os.path.isdir(mount_root):
-            continue
-        try:
-            for name in sorted(os.listdir(mount_root), key=str.casefold):
-                full = os.path.join(mount_root, name)
-                if os.path.isdir(full):
-                    entries.append({"name": full, "path": full})
-        except Exception:
-            pass
-    return entries
+    """Top-level entries for the folder browser: ComfyUI's input and output
+    folders only (since 2.0.2 the browser never lists whole drives)."""
+    labels = {"input": "ComfyUI input", "output": "ComfyUI output"}
+    return [{"name": f"{labels.get(key, key)} ({path})", "path": path} for key, path in _allowed_base_dirs()]
 
 
 _MAX_BROWSE_ENTRIES = 3000
@@ -760,10 +789,17 @@ def _list_subdirectories(path):
     response."""
     if not path or not os.path.isdir(path):
         raise ValueError("폴더를 찾을 수 없습니다.")
-    abs_path = os.path.abspath(path)
+    abs_path = os.path.realpath(os.path.abspath(path))
+    if _allowed_base_for(abs_path) is None:
+        raise ValueError("ComfyUI input/output 폴더 안에서만 탐색할 수 있습니다.")
     parent = os.path.dirname(abs_path.rstrip("/\\"))
-    if not parent or os.path.normcase(parent) == os.path.normcase(abs_path):
-        parent = None  # already at a drive root (Windows) or "/" (POSIX)
+    if (
+        not parent
+        or os.path.normcase(parent) == os.path.normcase(abs_path)
+        or any(os.path.normcase(abs_path) == os.path.normcase(base) for _k, base in _allowed_base_dirs())
+        or _allowed_base_for(parent) is None
+    ):
+        parent = None  # at input/output itself: "up" returns to the start list
 
     folder_names = []
     file_names = []
@@ -780,6 +816,7 @@ def _list_subdirectories(path):
                     file_names.append(entry.name)
             except OSError:
                 continue
+    folder_names = [name for name in folder_names if _is_within(os.path.join(abs_path, name), abs_path)]
     folder_names.sort(key=str.casefold)
     folders = [{"name": name, "path": os.path.join(abs_path, name)} for name in folder_names]
 
@@ -787,7 +824,10 @@ def _list_subdirectories(path):
         keep = set(folder_paths.filter_files_content_types(file_names, ["image"])) if folder_paths else set()
     except Exception:
         keep = set()  # older ComfyUI versions without this helper: skip the preview rather than guess
-    image_names = sorted((name for name in file_names if name in keep), key=str.casefold)[:_MAX_BROWSE_IMAGES]
+    image_names = sorted(
+        (name for name in file_names if name in keep and _is_within(os.path.join(abs_path, name), abs_path)),
+        key=str.casefold,
+    )[:_MAX_BROWSE_IMAGES]
     images = [{"name": name, "path": os.path.join(abs_path, name)} for name in image_names]
 
     return abs_path, parent, folders, images
@@ -909,8 +949,9 @@ def register_image_load_routes():
 
     @routes.get("/ultra_tools/image_load/browse_dirs")
     async def _browse_dirs_route(request):
-        # Backs the "+ 폴더 추가" folder browser: no path -> the drive/root
-        # list; a path -> that folder's immediate subfolders (to navigate
+        # Backs the "+ 폴더 추가" folder browser: no path -> ComfyUI
+        # input/output (never whole drives); a path inside them -> that
+        # folder's immediate subfolders (to navigate
         # further) plus a preview of its own image files, and its parent,
         # so the frontend can click its way down (and back up) a real
         # directory tree — and see whether a folder actually has images in
