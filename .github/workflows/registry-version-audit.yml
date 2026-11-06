@@ -1,5 +1,8 @@
 name: Audit Comfy Registry version statuses
 
+# Read-only: lists every Yamoon-jjang node pack and every version status
+# (including deleted/banned) from the public Comfy Registry API.
+# Never publishes, edits or deletes anything.
 on:
   workflow_dispatch:
   push:
@@ -15,33 +18,49 @@ jobs:
   registry-audit:
     runs-on: ubuntu-latest
     steps:
-      - name: Read public Registry version statuses (no secret/token)
+      - name: Read public Registry statuses for all Yamoon-jjang node packs
         run: |
           python3 - <<'PY'
-          import json, urllib.request
-          url = "https://api.comfy.org/nodes/comfyui-ultra-tools/versions?include_status_reason=true"
-          req = urllib.request.Request(url, headers={"User-Agent": "Ultra-Tools-Registry-Audit/2.0.0"})
-          with urllib.request.urlopen(req, timeout=30) as response:
-              data = json.load(response)
-          if isinstance(data, list):
-              versions = data
-          elif isinstance(data, dict):
-              versions = data.get("versions", data.get("items", []))
-          else:
-              raise SystemExit("Unrecognized Registry version response")
-          if not isinstance(versions, list):
-              raise SystemExit("Expected list of versions")
-          print("Published versions:", len(versions))
-          for entry in versions:
-              print("VERSION", entry.get("version"), "STATUS", entry.get("status"), "DEPRECATED", entry.get("deprecated"), "VERSION_ID", entry.get("id"))
-          match = [e for e in versions if str(e.get("version")) == "2.0.0"]
-          if not match:
-              raise SystemExit("New v2.0.0 not listed by the Registry API")
-          print("v2.0.0 status:", match[0].get("status"))
-          for version in ("1.0.4", "2.0.0"):
-              item = next((v for v in versions if str(v.get("version")) == version), None)
-              if item:
-                  print("VERSION_DETAILS", version,
-                        "status_reason=", str(item.get("status_reason", ""))[:3000],
-                        "comfy_node_extract_status=", item.get("comfy_node_extract_status"))
+          import json, urllib.request, urllib.parse
+          API = "https://api.comfy.org"
+          UA = {"User-Agent": "Ultra-Tools-Registry-Audit/2.0.2"}
+          def get(path, params=None):
+              url = API + path + ("?" + urllib.parse.urlencode(params, doseq=True) if params else "")
+              try:
+                  with urllib.request.urlopen(urllib.request.Request(url, headers=UA), timeout=30) as r:
+                      return r.status, json.load(r)
+              except urllib.error.HTTPError as e:
+                  return e.code, None
+          known = ["comfyui-ultra-tools", "ultra-minimax-h3-prompt", "comfyui-ultra-qwen-image-editor",
+                   "comfyui-ultra-lora-reference-images", "comfyui-ultra-image-pid"]
+          code, pub = get("/publishers/yamoon-jjang/nodes")
+          listed = []
+          if isinstance(pub, list):
+              listed = pub
+          elif isinstance(pub, dict):
+              listed = pub.get("nodes") or pub.get("items") or []
+          print("PUBLISHER_NODES http", code, "count", len(listed))
+          for n in listed:
+              print("PUBNODE", n.get("id"), "|", n.get("name"), "| node_status", n.get("status"),
+                    "| latest", (n.get("latest_version") or {}).get("version"))
+          ids = list(dict.fromkeys(known + [n.get("id") for n in listed if n.get("id")]))
+          statuses = ["NodeVersionStatusActive", "NodeVersionStatusPending", "NodeVersionStatusFlagged",
+                      "NodeVersionStatusBanned", "NodeVersionStatusDeleted"]
+          for node_id in ids:
+              c1, node = get(f"/nodes/{node_id}")
+              node_status = node.get("status") if isinstance(node, dict) else None
+              c2, vers = get(f"/nodes/{node_id}/versions", {"include_status_reason": "true", "statuses": statuses})
+              vers = vers if isinstance(vers, list) else []
+              print(f"NODE {node_id} | http {c1} | node_status {node_status} | versions {len(vers)}")
+              for v in sorted(vers, key=lambda x: x.get("createdAt", ""), reverse=True):
+                  reason = str(v.get("status_reason") or "")
+                  try:
+                      parsed = json.loads(reason)
+                      if isinstance(parsed, dict):
+                          reason = parsed.get("message", "")
+                      elif isinstance(parsed, list):
+                          reason = "; ".join(f"{i.get('scanner')}:{i.get('file_path')}:{i.get('line_number')}:{(i.get('metadata') or {}).get('matched_patterns')}" for i in parsed if isinstance(i, dict))
+                  except Exception:
+                      pass
+                  print(f"  VER {node_id} {v.get('version')} | {v.get('status')} | deprecated {v.get('deprecated')} | {str(v.get('createdAt'))[:16]} | {reason[:300]}")
           PY
