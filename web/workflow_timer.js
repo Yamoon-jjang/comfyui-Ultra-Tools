@@ -1448,7 +1448,8 @@ function resetIfNoNodes() {
 function patchGraphRemove(graph) {
     if (!graph || graph.__ultraWorkflowTimerRemovePatched) return;
 
-    const originalRemove = graph.remove.bind(graph);
+    const removeFn = graph.remove;
+    const originalRemove = (...a) => removeFn.apply(graph, a);
     graph.__ultraWorkflowTimerRemovePatched = true;
 
     graph.remove = function (node) {
@@ -1472,7 +1473,8 @@ function patchAllGraphRemoves() {
 function patchLoadGraphData() {
     if (!app.loadGraphData || app.__ultraWorkflowTimerLoadPatched) return;
 
-    const original = app.loadGraphData.bind(app);
+    const loadGraphDataFn = app.loadGraphData;
+    const original = (...a) => loadGraphDataFn.apply(app, a);
     app.__ultraWorkflowTimerLoadPatched = true;
 
     app.loadGraphData = async function (...args) {
@@ -1538,7 +1540,8 @@ function patchQueuePrompt() {
             continue;
         }
 
-        const original = target.queuePrompt.bind(target);
+        const queuePromptFn = target.queuePrompt;
+        const original = (...a) => queuePromptFn.apply(target, a);
         const wrappedQueuePrompt = function (...args) {
             // Use the loaded workflow identity, not a stale/default fallback. This keeps
             // saved-as duplicates independent while all timer nodes in the same root

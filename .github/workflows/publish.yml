@@ -82,8 +82,8 @@ jobs:
             echo "Release $TAG already exists; preserving published files."
           else
             gh release create "$TAG" "$ARCHIVE" \
-              --title "Ultra Tools $TAG — 12 nodes (Image + PiD separated)" \
-              --notes-file RELEASE_NOTES_v2.0.0.md \
+              --title "Ultra Tools $TAG — 12 nodes" \
+              --notes-file "RELEASE_NOTES_${TAG}.md" \
               --latest \
               --target "${GITHUB_SHA}"
           fi
