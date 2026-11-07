@@ -251,8 +251,16 @@ def list_system_fonts(max_files: int = 1200) -> Tuple[List[str], Dict[str, str]]
     """
     roots = []
     if os.name == "nt":
-        windir = os.environ.get("WINDIR") or os.environ.get("SystemRoot") or r"C:\\Windows"
-        roots.append(os.path.join(windir, "Fonts"))
+        # Windows font folder: the Windows directory on the drive ComfyUI runs
+        # from, then the usual C: location (first existing folder wins).
+        for base in (sys.executable, os.path.abspath(__file__), "C:\\"):
+            drive = os.path.splitdrive(base)[0]
+            if not drive:
+                continue
+            fonts_dir = os.path.join(drive + os.sep, "Windows", "Fonts")
+            if fonts_dir not in roots and os.path.isdir(fonts_dir):
+                roots.append(fonts_dir)
+                break
     elif sys.platform == "darwin":
         roots.extend([
             "/System/Library/Fonts",

@@ -416,7 +416,7 @@ function markNodeChanged(node) {
 const NODE_PREVIEW_MAX_DIMENSION = 1024;
 
 function refreshNodeImagePreview(node, value) {
-    const image = new Image();
+    const image = document.createElement("img");
     image.onload = () => {
         // setSizeForImage() is deprecated (no effect) in current frontends;
         // the preview area sizes itself, so only a repaint is needed.
@@ -1073,7 +1073,7 @@ function openBrowser(node, imageWidget) {
                 if (selected?.value === item.value) updateCandidate();
                 return;
             }
-            const probe = new Image();
+            const probe = document.createElement("img");
             probe.decoding = "async";
             probe.onload = () => storeDimensions(item, probe);
             probe.onerror = () => {

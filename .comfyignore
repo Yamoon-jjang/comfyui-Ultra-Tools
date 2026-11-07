@@ -1,0 +1,5 @@
+# Files kept in the GitHub repository but left out of the Comfy Registry package.
+.github/
+RELEASE_NOTES_*.md
+__pycache__/
+*.py[cod]
