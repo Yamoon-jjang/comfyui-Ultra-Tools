@@ -1,7 +1,7 @@
 # comfyui-Ultra-Tools · Translator module
 # ComfyUI custom node for lightweight text translation.
-# Primary service: shared Google Cloud Translation API key when configured,
-# with the existing free Google web routes and MyMemory as fallbacks.
+# Services: the official Google Cloud Translation API (user's own key) and the
+# public MyMemory API.  Text is only sent when the node is run by the user.
 
 from __future__ import annotations
 
@@ -10,7 +10,6 @@ import json
 import os
 import re
 import stat
-import sys
 import threading
 import time
 from datetime import datetime, timezone
@@ -152,9 +151,10 @@ _TRANSLATION_CACHE: Dict[Tuple[str, str, str, str, bool], str] = {}
 _TRANSLATION_CACHE_ORDER: List[Tuple[str, str, str, str, bool]] = []
 _TRANSLATION_CACHE_LIMIT = 192
 
-# Shared official Google Cloud Translation Basic v2 key.  Ultra Translator uses
-# the same ComfyUI-user-local config file as Ultra MiniMax H3 Prompt so either
-# node can use one key without placing the secret in a workflow.
+# Official Google Cloud Translation Basic v2 key, kept in a ComfyUI user-folder
+# config file (never in a workflow).  The file location and format are shared
+# with the same author's Ultra MiniMax H3 Prompt pack, so one saved key works
+# for both; this module only reads and writes that file.
 _SHARED_API_CONFIG_SCHEMA_VERSION = 1
 _SHARED_API_KEY_MAX_LENGTH = 512
 _SHARED_API_CONFIG_LOCK = threading.Lock()
@@ -243,48 +243,16 @@ def _write_shared_translation_api_key(key: str) -> bool:
         return False
 
 
-def _loaded_h3_prompt_module():
-    """Best-effort bridge so saving here also refreshes H3's in-memory key."""
-    for module in list(sys.modules.values()):
-        if module is None:
-            continue
-        try:
-            filename = Path(str(getattr(module, "__file__", ""))).name
-        except Exception:
-            filename = ""
-        if filename != "ultra_minimax_h3_prompt.py":
-            continue
-        if callable(getattr(module, "_google_cloud_translation_api_key", None)):
-            return module
-    return None
-
-
 def _save_google_cloud_translation_api_key(value: Any) -> bool:
     key = _normalize_google_cloud_translation_api_key(value)
     if not key:
         raise ValueError("Google Cloud Translation API key is empty.")
     with _SHARED_API_CONFIG_LOCK:
-        h3 = _loaded_h3_prompt_module()
-        save = getattr(h3, "_save_google_cloud_translation_api_key", None) if h3 is not None else None
-        if callable(save):
-            try:
-                if bool(save(key)):
-                    return True
-            except Exception:
-                pass
         return _write_shared_translation_api_key(key)
 
 
 def _clear_google_cloud_translation_api_key() -> bool:
     with _SHARED_API_CONFIG_LOCK:
-        h3 = _loaded_h3_prompt_module()
-        clear = getattr(h3, "_clear_google_cloud_translation_api_key", None) if h3 is not None else None
-        if callable(clear):
-            try:
-                if bool(clear()):
-                    return True
-            except Exception:
-                pass
         path = _shared_translation_api_config_path(create=False)
         try:
             if path is not None and path.exists():
@@ -585,7 +553,7 @@ def _translate_google_cloud_v2_request(
         headers={
             "Content-Type": "application/json; charset=utf-8",
             "x-goog-api-key": key,
-            "User-Agent": "Ultra-Translator/1.0",
+            "User-Agent": "ComfyUI-Ultra-Tools-Translator",
         },
     )
     try:
@@ -638,130 +606,6 @@ def _translate_google_cloud_v2_request(
     if not translated or _looks_like_provider_error_page(translated):
         raise _TranslationRouteUnusableResultError(
             "Google Cloud Translation API returned no usable translation"
-        )
-    return translated
-
-
-def _translate_google_json_request(text: str, source: str, target: str) -> str:
-    """Primary no-key Google JSON route with one bounded retry for transient 5xx/network errors."""
-    params = urlencode(
-        {
-            "client": "gtx",
-            "sl": _language_code(_GOOGLE_LANGUAGE_CODES, source, "Google"),
-            "tl": _language_code(_GOOGLE_LANGUAGE_CODES, target, "Google"),
-            "dt": "t",
-            "ie": "UTF-8",
-            "oe": "UTF-8",
-            "q": text,
-        }
-    )
-    url = f"https://translate.googleapis.com/translate_a/single?{params}"
-
-    last_error: Optional[Exception] = None
-    for attempt in range(2):
-        _provider_wait("google")
-        request = Request(url, headers={"User-Agent": "Mozilla/5.0"})
-        try:
-            with urlopen(request, timeout=20) as response:
-                raw = response.read(2_000_000)
-        except HTTPError as exc:
-            last_error = exc
-            if exc.code == 429:
-                _provider_note_429("google", exc.headers)
-                raise _TranslationRouteRateLimitedError(
-                    "Google JSON translation was rate-limited (HTTP 429)"
-                ) from exc
-            if exc.code in (500, 502, 503, 504) and attempt == 0:
-                _sleep(_TRANSIENT_RETRY_DELAY_SECONDS)
-                continue
-            raise _TranslationRouteUnavailableError(
-                f"Google JSON translation request failed (HTTP {exc.code})"
-            ) from exc
-        except (URLError, TimeoutError, OSError) as exc:
-            last_error = exc
-            if attempt == 0:
-                _sleep(_TRANSIENT_RETRY_DELAY_SECONDS)
-                continue
-            raise _TranslationRouteUnavailableError(
-                "Google JSON translation request failed"
-            ) from exc
-
-        try:
-            payload = json.loads(_decode_http_body(response, raw))
-            segments = payload[0]
-            translated = "".join(
-                segment[0]
-                for segment in segments
-                if isinstance(segment, list) and segment and isinstance(segment[0], str)
-            ).strip()
-        except Exception as exc:
-            raise _TranslationRouteUnusableResultError(
-                "Google JSON translation returned an unexpected response"
-            ) from exc
-
-        if not translated or _looks_like_provider_error_page(translated):
-            raise _TranslationRouteUnusableResultError(
-                "Google JSON translation returned no usable translation"
-            )
-        return translated
-
-    if last_error is not None:
-        raise _TranslationRouteUnavailableError("Google JSON translation failed") from last_error
-    raise _TranslationRouteUnavailableError("Google JSON translation failed")
-
-
-def _translate_google_mobile_request(text: str, source: str, target: str) -> str:
-    """Secondary Google route. Automatically skipped during a provider 429 cooldown."""
-    params = urlencode(
-        {
-            "sl": _language_code(_GOOGLE_LANGUAGE_CODES, source, "Google"),
-            "tl": _language_code(_GOOGLE_LANGUAGE_CODES, target, "Google"),
-            "hl": "en",
-            "q": text,
-        }
-    )
-    _provider_wait("google")
-    request = Request(
-        f"https://translate.google.com/m?{params}",
-        headers={"User-Agent": "Mozilla/5.0"},
-    )
-    try:
-        with urlopen(request, timeout=20) as response:
-            raw = response.read(2_000_000)
-            page = _decode_http_body(response, raw)
-    except HTTPError as exc:
-        if exc.code == 429:
-            _provider_note_429("google", exc.headers)
-            raise _TranslationRouteRateLimitedError(
-                "Google mobile translation was rate-limited (HTTP 429)"
-            ) from exc
-        raise _TranslationRouteUnavailableError(
-            f"Google mobile translation request failed (HTTP {exc.code})"
-        ) from exc
-    except (URLError, TimeoutError, OSError) as exc:
-        raise _TranslationRouteUnavailableError(
-            "Google mobile translation request failed"
-        ) from exc
-
-    try:
-        match = re.search(
-            r'<div[^>]*class=["\']result-container["\'][^>]*>(.*?)</div>',
-            page,
-            flags=re.IGNORECASE | re.DOTALL,
-        )
-        if not match:
-            raise ValueError("result-container not found")
-        translated = re.sub(r"<[^>]+>", "", match.group(1))
-        translated = html.unescape(translated)
-        translated = re.sub(r"\s+", " ", translated).strip()
-    except Exception as exc:
-        raise _TranslationRouteUnusableResultError(
-            "Google mobile translation returned an unexpected response"
-        ) from exc
-
-    if not translated or _looks_like_provider_error_page(translated):
-        raise _TranslationRouteUnusableResultError(
-            "Google mobile translation returned no usable translation"
         )
     return translated
 
@@ -834,7 +678,7 @@ def _translate_mymemory_single(text: str, source: str, target: str) -> str:
     )
     request = Request(
         f"https://api.mymemory.translated.net/get?{params}",
-        headers={"User-Agent": "Mozilla/5.0"},
+        headers={"User-Agent": "ComfyUI-Ultra-Tools-Translator"},
     )
     try:
         with urlopen(request, timeout=20) as response:
@@ -889,10 +733,10 @@ def _translate_mymemory_request(text: str, source: str, target: str) -> str:
 
 
 def _translate_google_with_independent_fallback(text: str, source: str, target: str) -> str:
-    """Shared official API first, then the existing free Google/MyMemory routes.
+    """Official Google Cloud Translation API first, then MyMemory.
 
-    With a shared API key: Google Cloud v2 -> Google JSON -> Google mobile -> MyMemory.
-    Without a key the old behavior is unchanged: Google JSON -> Google mobile -> MyMemory.
+    With a shared API key: Google Cloud v2 -> MyMemory.
+    Without a key: MyMemory (public API) only.
     """
     errors: List[Tuple[str, Exception]] = []
 
@@ -901,23 +745,16 @@ def _translate_google_with_independent_fallback(text: str, source: str, target: 
             return _translate_google_cloud_v2_request(text, source, target)
         except Exception as exc:
             errors.append(("Google Cloud Translation v2", exc))
-
-    try:
-        return _translate_google_json_request(text, source, target)
-    except Exception as exc:
-        errors.append(("Google JSON", exc))
-
-    # If JSON produced a 429, _provider_wait() will reject this route locally
-    # without making another Google network request.  That is intentional.
-    try:
-        return _translate_google_mobile_request(text, source, target)
-    except Exception as exc:
-        errors.append(("Google mobile", exc))
+    else:
+        errors.append((
+            "Google Cloud Translation v2",
+            _TranslationRouteConfigurationError("API key is not configured."),
+        ))
 
     try:
         return _translate_mymemory_request(text, source, target)
     except Exception as exc:
-        errors.append(("MyMemory fallback", exc))
+        errors.append(("MyMemory", exc))
 
     diagnostic = _translation_routes_diagnostic(errors)
     try:
