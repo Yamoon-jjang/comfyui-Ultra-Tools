@@ -601,7 +601,7 @@ function openBrowser(node, imageWidget) {
     let locale = currentLocale();
     let localeTimer = null;
     const dimensions = new Map();
-    const dimensionRequests = new Set();
+    const pendingDimensionProbes = new Set();
     // Current location inside the "+ 폴더 추가" folder browser panel.
     // "" means the top-level drive/root list (browseParent stays null there
     // — there's nowhere further "up" to go).
@@ -1048,14 +1048,14 @@ function openBrowser(node, imageWidget) {
     // the size — that used to be the same slow, uncached "/view" request the
     // grid itself was switched away from above.
     async function requestDimensions(item) {
-        if (!item || dimensions.has(item.value) || dimensionRequests.has(item.value)) return;
-        dimensionRequests.add(item.value);
+        if (!item || dimensions.has(item.value) || pendingDimensionProbes.has(item.value)) return;
+        pendingDimensionProbes.add(item.value);
         try {
             const response = await fetch(thumbUrl(item.value, 64));
             if (!response.ok) throw new Error(String(response.status));
             const width = Number(response.headers.get("X-Ultra-Original-Width"));
             const height = Number(response.headers.get("X-Ultra-Original-Height"));
-            dimensionRequests.delete(item.value);
+            pendingDimensionProbes.delete(item.value);
             if (width > 0 && height > 0) {
                 dimensions.set(item.value, { width, height });
                 if (selected?.value === item.value) updateCandidate();
@@ -1063,7 +1063,7 @@ function openBrowser(node, imageWidget) {
             }
             throw new Error("missing dimension headers");
         } catch (_) {
-            dimensionRequests.delete(item.value);
+            pendingDimensionProbes.delete(item.value);
             // Older/mismatched backend without the header — fall back to a
             // full-resolution probe rather than showing no size at all.
             // Core's own "/view" only ever understands input/output/temp, so
