@@ -11,7 +11,7 @@ function ultraWidgetEl(widget) {
 }
 
 
-const DEFAULT_WILDCARDS_PATH = "F:\\models\\wildcards";
+const DEFAULT_WILDCARDS_PATH = "models/wildcards";
 const ROOT_FOLDER_LABEL = "[Root]";
 const LEGACY_ROOT_FOLDER_LABELS = new Set(["[최상위]"]);
 const MAX_FOLDER_VALUE_LENGTH = 2048;

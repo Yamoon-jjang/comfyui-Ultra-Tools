@@ -13,7 +13,6 @@ Ultra Text Watermark
 """
 
 import os
-import sys
 import math
 import numpy as np
 import torch
@@ -241,62 +240,6 @@ def list_supported_fonts(font_dir: str) -> List[str]:
     fonts = [f for f in files if isinstance(f, str) and f.lower().endswith(SUPPORTED_FONT_EXTS)]
     fonts.sort(key=lambda s: s.lower())
     return fonts
-
-
-def list_system_fonts(max_files: int = 1200) -> Tuple[List[str], Dict[str, str]]:
-    """Find a bounded set of OS fonts as a no-bundle fallback.
-
-    Local ./fonts files always take priority.  This fallback keeps the node usable
-    when Ultra Tools is installed without bundled font binaries.
-    """
-    roots = []
-    if os.name == "nt":
-        # Windows font folder: the Windows directory on the drive ComfyUI runs
-        # from, then the usual C: location (first existing folder wins).
-        for base in (sys.executable, os.path.abspath(__file__), "C:\\"):
-            drive = os.path.splitdrive(base)[0]
-            if not drive:
-                continue
-            fonts_dir = os.path.join(drive + os.sep, "Windows", "Fonts")
-            if fonts_dir not in roots and os.path.isdir(fonts_dir):
-                roots.append(fonts_dir)
-                break
-    elif sys.platform == "darwin":
-        roots.extend([
-            "/System/Library/Fonts",
-            "/Library/Fonts",
-            os.path.expanduser("~/Library/Fonts"),
-        ])
-    else:
-        roots.extend([
-            "/usr/share/fonts",
-            "/usr/local/share/fonts",
-            os.path.expanduser("~/.fonts"),
-            os.path.expanduser("~/.local/share/fonts"),
-        ])
-
-    found: Dict[str, str] = {}
-    for root in roots:
-        if len(found) >= max_files or not os.path.isdir(root):
-            continue
-        try:
-            for dirpath, dirnames, filenames in os.walk(root):
-                dirnames.sort(key=str.lower)
-                for filename in sorted(filenames, key=str.lower):
-                    if not filename.lower().endswith(SUPPORTED_FONT_EXTS):
-                        continue
-                    # Keep the first path for duplicate basenames; local ./fonts
-                    # still wins because this map is consulted only as fallback.
-                    found.setdefault(filename, os.path.join(dirpath, filename))
-                    if len(found) >= max_files:
-                        break
-                if len(found) >= max_files:
-                    break
-        except (PermissionError, OSError):
-            continue
-
-    names = sorted(found.keys(), key=str.lower)
-    return names, found
 
 
 # -------------------------
@@ -703,7 +646,6 @@ class UltraTextWatermark:
     # Font list cache for INPUT_TYPES (avoid rescanning on every UI refresh)
     _font_list_cache: Optional[List[str]] = None
     _font_list_dir_mtime: Optional[float] = None
-    _font_external_paths: Dict[str, str] = {}
 
     @classmethod
     def INPUT_TYPES(cls):
@@ -715,7 +657,7 @@ class UltraTextWatermark:
         try:
             dir_mtime = os.path.getmtime(font_dir)
         except OSError as e:
-            print(f"[Ultra Text Watermark] Warning: Cannot get mtime for {font_dir}: {e}")
+            print(f"[Ultra Text Watermark] Warning: Cannot read the fonts folder: {e}")
             dir_mtime = None
 
         cached_list = getattr(cls, "_font_list_cache", None)
@@ -723,13 +665,9 @@ class UltraTextWatermark:
         if isinstance(cached_list, list) and (dir_mtime is not None) and (cached_mtime == dir_mtime):
             file_list = cached_list
         else:
+            # Only the fonts bundled in ./fonts are used; system font folders
+            # are never scanned.
             file_list = list_supported_fonts(font_dir)
-            cls._font_external_paths = {}
-            if not file_list:
-                # Ultra Tools does not require bundled font binaries.  When the
-                # local fonts folder is empty, use installed OS fonts as a safe
-                # fallback so the node remains immediately usable.
-                file_list, cls._font_external_paths = list_system_fonts()
             if not file_list:
                 file_list = ["<NO_FONTS_FOUND>"]
 
@@ -828,12 +766,7 @@ class UltraTextWatermark:
     CATEGORY = "Ultra Tools"
 
     def _ensure_fonts_exist_or_raise(self, font_dir: str):
-        if len(list_supported_fonts(font_dir)) == 0 and not getattr(self.__class__, "_font_external_paths", {}):
-            # INPUT_TYPES normally populates the system fallback map first, but
-            # direct/server-side execution can reach here without a UI refresh.
-            _, external = list_system_fonts()
-            self.__class__._font_external_paths = external
-        if len(list_supported_fonts(font_dir)) == 0 and not getattr(self.__class__, "_font_external_paths", {}):
+        if len(list_supported_fonts(font_dir)) == 0:
             raise Exception(
                 "[Ultra Text Watermark] No supported fonts were found.\n"
                 f"Supported: {', '.join(SUPPORTED_FONT_EXTS)}\n"
@@ -858,21 +791,18 @@ class UltraTextWatermark:
                 f"Supported: {', '.join(SUPPORTED_FONT_EXTS)}"
             )
         
-        # Prefer user fonts in ./fonts.  If absent, use only a path that was
-        # discovered by our bounded OS-font scan; arbitrary absolute paths are
-        # never accepted from workflow input.
+        # Fonts are read only from ./fonts; other paths are never accepted.
         local_path = os.path.abspath(os.path.join(font_dir, name))
         abs_font_dir = os.path.abspath(font_dir)
         if local_path.startswith(abs_font_dir + os.sep) and os.path.exists(local_path):
             abs_path = local_path
         else:
-            external = getattr(self.__class__, "_font_external_paths", {}) or {}
-            abs_path = os.path.abspath(external.get(name, "")) if name in external else ""
+            abs_path = ""
 
         if not abs_path or not os.path.isfile(abs_path):
             raise Exception(
                 f"[Ultra Text Watermark] Font file not found: {name}\n"
-                "Put the font in ./fonts, install it in the operating system, or choose another font."
+                "Put the font in ./fonts and restart ComfyUI, or choose another font."
             )
 
         try:

@@ -317,9 +317,9 @@ function thumbUrl(value, maxDim = 320) {
 // Preview thumbnail for a file surfaced by /browse_dirs, before it's part
 // of any registered folder — the "+ 폴더 추가" panel uses this so a folder's
 // images are visible while still just navigating, not only after commiting.
-function browseThumbUrl(absolutePath, maxDim = 160) {
-    const query = new URLSearchParams({ type: "path", path: absolutePath, max: String(maxDim) });
-    // A raw disk path is only served with the Ultra Tools token (request_guard.py).
+function browseThumbUrl(folderPath, maxDim = 160) {
+    const query = new URLSearchParams({ type: "path", path: folderPath, max: String(maxDim) });
+    // Folder-browse previews are only served with the Ultra Tools token (request_guard.py).
     query.set(ULTRA_TOKEN_QUERY, getUltraToken());
     const path = `/ultra_tools/image_load/thumbnail?${query.toString()}`;
     return typeof api.apiURL === "function" ? api.apiURL(path) : path;
@@ -334,8 +334,8 @@ function originalUrl(value, download = false) {
     return typeof api.apiURL === "function" ? api.apiURL(path) : path;
 }
 
-function browseOriginalUrl(absolutePath, download = false) {
-    const query = new URLSearchParams({ type: "path", path: absolutePath });
+function browseOriginalUrl(folderPath, download = false) {
+    const query = new URLSearchParams({ type: "path", path: folderPath });
     query.set(ULTRA_TOKEN_QUERY, getUltraToken());
     if (download) query.set("download", "1");
     const path = `/ultra_tools/image_load/original?${query.toString()}`;
@@ -603,7 +603,7 @@ function openBrowser(node, imageWidget) {
     const dimensions = new Map();
     const pendingDimensionProbes = new Set();
     // Current location inside the "+ 폴더 추가" folder browser panel.
-    // "" means the top-level drive/root list (browseParent stays null there
+    // "" means the top-level ComfyUI folder list (browseParent stays null there
     // — there's nowhere further "up" to go).
     let browsePath = "";
     let browseParent = null;
@@ -695,9 +695,10 @@ function openBrowser(node, imageWidget) {
     // end, just like picking an input image already does.
     //
     // Inline "add folder" browser, hidden until openAddRootButton is
-    // clicked. It's a real folder browser: opens on the drive/root list and
-    // lets the user click their way down (and back up) a directory tree,
-    // purely through the browse_dirs route.
+    // clicked. It opens on the ComfyUI input/output list and lets the user
+    // click their way down (and back up) inside those folders, purely
+    // through the browse_dirs route, which only exchanges virtual paths
+    // such as "output/sub".
     const addRootRow = createEl("div", "ultra-image-load-addroot-row");
     addRootRow.hidden = true;
     const addRootNav = createEl("div", "ultra-image-load-addroot-nav");
@@ -1196,7 +1197,7 @@ function openBrowser(node, imageWidget) {
         loadFileMeta();
     }
 
-    // Drives/root list (path === "") or one folder's immediate subfolders,
+    // ComfyUI folder list (path === "") or one folder's immediate subfolders,
     // via GET /ultra_tools/image_load/browse_dirs — the whole "+ 폴더 추가"
     // panel is just this one call driving click-to-navigate, never a
     // browser file/folder picker. The folder's own images (payload.images)
@@ -1229,10 +1230,10 @@ function openBrowser(node, imageWidget) {
             browsePath = payload.path || "";
             browseParent = payload.parent ?? null;
             browsePathLabel.textContent = browsePath || tr("browseDrives");
-            // Disabled only at the very top (the drive/root list itself —
-            // browsePath === ""). At a drive's own root, browseParent is
+            // Disabled only at the very top (the ComfyUI folder list itself —
+            // browsePath === ""). At input/output itself, browseParent is
             // null but browsePath is still set, so "up" stays enabled and
-            // steps back out to the drive list (see the click handler).
+            // steps back out to that list (see the click handler).
             browseUpButton.disabled = !browsePath;
             addRootSelectButton.disabled = !browsePath;
             renderBrowseList(Array.isArray(payload.entries) ? payload.entries : []);
@@ -1544,8 +1545,8 @@ function openBrowser(node, imageWidget) {
             }
         }
     });
-    // "+ 폴더 추가" reveals the browser panel and opens it on the drive/root
-    // list — no window.prompt(), no file/folder picker, just this dialog's
+    // "+ 폴더 추가" reveals the browser panel and opens it on the ComfyUI
+    // folder list — no window.prompt(), no file/folder picker, just this dialog's
     // own styled panel driven entirely by /ultra_tools/image_load/browse_dirs.
     // The main content grid switches to previewing whatever folder is open
     // here (see loadBrowseDir/renderBrowsingPreview) until the panel closes
@@ -1563,15 +1564,14 @@ function openBrowser(node, imageWidget) {
         setLibraryControlsEnabled(true);
         render();
     });
-    // At a drive's root (browseParent is null but a folder IS open), "up"
-    // steps back out to the drive/root list instead of going nowhere — so
-    // repeatedly pressing it always eventually lands back on the initial
-    // drive-selection screen.
+    // At input/output itself (browseParent is null but a folder IS open),
+    // "up" steps back out to the ComfyUI folder list instead of going
+    // nowhere — so repeatedly pressing it always lands back on that list.
     browseUpButton.addEventListener("click", () => {
         loadBrowseDir(browseParent != null ? browseParent : "");
     });
     async function submitAddRoot() {
-        if (!browsePath) return; // still at the drive list — nothing concrete to add yet
+        if (!browsePath) return; // still at the folder list — nothing concrete to add yet
         const label = addRootLabelInput.value.trim();
         addRootSelectButton.disabled = true;
         try {

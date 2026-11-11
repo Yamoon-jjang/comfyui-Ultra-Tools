@@ -132,17 +132,15 @@ def _list_input_images_recursive():
 # input/output/temp.
 # ---------------------------------------------------------------------------
 
-# Allowed base folders (since 2.0.2)
+# Allowed base folders
 #
 # Every path this node lists, previews, registers, serves or deletes must sit
-# inside ComfyUI's own input or output directory.  Comfy Registry policy
-# treats a route that can browse or read anywhere on disk as
-# arbitrary-file-read / path-traversal, so the old "whole drive" folder
-# browser is gone: the "+ 폴더 추가" browser now starts at these two folders
-# and can only add folders inside output (input is already listed in full).  Containment is checked on the
-# *real* path (symlinks/junctions resolved), so a link inside input/output
-# that points elsewhere is refused as well.
+# inside ComfyUI's own input or output directory, and the browser only ever
+# sees virtual paths such as "output/sub" (see _virtual_path).  Containment
+# is checked on the *real* path (symlinks/junctions resolved), so a link
+# inside input/output that points elsewhere is refused as well.
 # ---------------------------------------------------------------------------
+
 
 def _allowed_base_dirs():
     """[(key, absolute real path)] for ComfyUI's input and output folders."""
@@ -175,6 +173,54 @@ def _allowed_base_for(path):
         if _is_within(path, base_real):
             return key
     return None
+
+
+# Paths exchanged with the browser are "virtual": "input", "output" or
+# "output/sub/folder".  The real location on disk never leaves the server.
+def _virtual_path(path):
+    """'output/sub/dir' for a real path inside input/output, else None."""
+    try:
+        real = os.path.realpath(os.path.abspath(path))
+    except (OSError, ValueError):
+        return None
+    for key, base_real in _allowed_base_dirs():
+        if _is_within(real, base_real):
+            rel = os.path.relpath(real, base_real)
+            if rel in (".", ""):
+                return key
+            return f"{key}/" + rel.replace("\\", "/")
+    return None
+
+
+def _resolve_virtual_path(value):
+    """Real path for a virtual path from the browser, or None if not allowed.
+
+    The containment check runs before the path is looked at on disk, so a
+    refused value never tells whether something exists there.
+    """
+    raw = str(value or "").strip().replace("\\", "/")
+    if not raw or "\x00" in raw or len(raw) > 4096:
+        return None
+    parts = [part for part in raw.split("/") if part and part != "."]
+    if not parts or any(part == ".." for part in parts):
+        return None
+    bases = dict(_allowed_base_dirs())
+    base_real = bases.get(parts[0])
+    if base_real is None:
+        return None
+    candidate = os.path.normpath(os.path.join(base_real, *parts[1:]))
+    if not _is_within(candidate, base_real):
+        return None
+    return candidate
+
+
+def _public_root(entry):
+    """Root entry as sent to the browser: id, label and a virtual path only."""
+    return {
+        "id": entry["id"],
+        "label": entry["label"],
+        "path": _virtual_path(entry["path"]) or "",
+    }
 
 
 # The registry lives in ComfyUI's user directory (ComfyUI/user/ultra_tools/)
@@ -291,12 +337,15 @@ def _external_root_by_id(root_id):
 def _add_external_root(raw_path, label):
     if not raw_path or not isinstance(raw_path, str):
         return None, "경로를 입력해 주세요."
-    candidate = os.path.abspath(raw_path.strip())
-    if not os.path.isdir(candidate):
-        return None, f"폴더를 찾을 수 없습니다: {candidate}"
+    candidate = _resolve_virtual_path(raw_path)
+    if candidate is None:
+        return None, "ComfyUI input/output 폴더 안의 폴더만 추가할 수 있습니다."
+    candidate = os.path.realpath(candidate)
     base_key = _allowed_base_for(candidate)
     if base_key is None:
         return None, "ComfyUI input/output 폴더 안의 폴더만 추가할 수 있습니다."
+    if not os.path.isdir(candidate):
+        return None, "폴더를 찾을 수 없습니다."
     if base_key == "input":
         return None, "input 폴더의 이미지는 이미 목록에 모두 표시됩니다. output 폴더를 선택해 주세요."
     roots = _load_external_roots()
@@ -600,16 +649,12 @@ def _resolve_source_path(filename, subfolder, type_, root_id=None, raw_path=None
     root, or — for the folder-browse preview only — an exact file the
     person can already see listed via /browse_dirs itself."""
     if type_ == "path":
-        # Folder-browse preview: the caller already saw this exact path in
-        # a /browse_dirs listing (that route is a full local directory
-        # browser by design), so showing its thumbnail here exposes
-        # nothing new — this just confirms it resolves to a real file, not
-        # a symlink pointing somewhere unexpected.
-        if not raw_path:
+        # Folder-browse preview of an image listed by /browse_dirs.  The
+        # value is a virtual path ("output/sub/file.png"); only raster
+        # images inside ComfyUI input/output can be read this way.
+        candidate = _resolve_virtual_path(raw_path)
+        if candidate is None:
             return None
-        candidate = os.path.abspath(raw_path)
-        # Only raster image files inside ComfyUI input/output may be read
-        # this way (this route backs the folder-browse image preview).
         if _allowed_base_for(candidate) is None:
             return None
         if not os.path.isfile(candidate) or not _is_safe_raster_image(candidate):
@@ -768,11 +813,10 @@ def _build_thumbnail(source_path, source_mtime, max_dim):
     return _generate_thumbnail(source_path, max_dim, cache_dir, cache_path, meta_path)
 
 
-def _list_drives():
-    """Top-level entries for the folder browser: ComfyUI's input and output
-    folders only (since 2.0.2 the browser never lists whole drives)."""
+def _list_base_folders():
+    """Top-level entries for the folder browser: ComfyUI's input and output."""
     labels = {"input": "ComfyUI input", "output": "ComfyUI output"}
-    return [{"name": f"{labels.get(key, key)} ({path})", "path": path} for key, path in _allowed_base_dirs()]
+    return [{"name": labels.get(key, key), "path": key} for key, _path in _allowed_base_dirs()]
 
 
 _MAX_BROWSE_ENTRIES = 3000
@@ -787,11 +831,14 @@ def _list_subdirectories(path):
     Returns (abs_path, parent_or_None, folders, images) or raises
     ValueError/OSError, which the route below turns into a 400/404
     response."""
-    if not path or not os.path.isdir(path):
-        raise ValueError("폴더를 찾을 수 없습니다.")
-    abs_path = os.path.realpath(os.path.abspath(path))
+    resolved = _resolve_virtual_path(path)
+    if resolved is None:
+        raise ValueError("ComfyUI input/output 폴더 안에서만 탐색할 수 있습니다.")
+    abs_path = os.path.realpath(resolved)
     if _allowed_base_for(abs_path) is None:
         raise ValueError("ComfyUI input/output 폴더 안에서만 탐색할 수 있습니다.")
+    if not os.path.isdir(abs_path):
+        raise ValueError("폴더를 찾을 수 없습니다.")
     parent = os.path.dirname(abs_path.rstrip("/\\"))
     if (
         not parent
@@ -818,7 +865,7 @@ def _list_subdirectories(path):
                 continue
     folder_names = [name for name in folder_names if _is_within(os.path.join(abs_path, name), abs_path)]
     folder_names.sort(key=str.casefold)
-    folders = [{"name": name, "path": os.path.join(abs_path, name)} for name in folder_names]
+    folders = [{"name": name, "path": _virtual_path(os.path.join(abs_path, name))} for name in folder_names]
 
     try:
         keep = set(folder_paths.filter_files_content_types(file_names, ["image"])) if folder_paths else set()
@@ -828,9 +875,14 @@ def _list_subdirectories(path):
         (name for name in file_names if name in keep and _is_within(os.path.join(abs_path, name), abs_path)),
         key=str.casefold,
     )[:_MAX_BROWSE_IMAGES]
-    images = [{"name": name, "path": os.path.join(abs_path, name)} for name in image_names]
+    images = [{"name": name, "path": _virtual_path(os.path.join(abs_path, name))} for name in image_names]
 
-    return abs_path, parent, folders, images
+    return (
+        _virtual_path(abs_path),
+        _virtual_path(parent) if parent else None,
+        [entry for entry in folders if entry["path"]],
+        [entry for entry in images if entry["path"]],
+    )
 
 
 def register_image_load_routes():
@@ -875,10 +927,10 @@ def register_image_load_routes():
 
     @routes.get("/ultra_tools/image_load/roots")
     async def _roots_list_route(request):
-        denied = guard_request(request, web, require_token=False)
+        denied = guard_request(request, web)
         if denied is not None:
             return denied
-        return web.json_response({"roots": _load_external_roots()})
+        return web.json_response({"roots": [_public_root(entry) for entry in _load_external_roots()]})
 
     @routes.post("/ultra_tools/image_load/roots")
     async def _roots_add_route(request):
@@ -892,7 +944,7 @@ def register_image_load_routes():
         entry, error = _add_external_root(body.get("path"), body.get("label"))
         if error:
             return web.json_response({"error": error}, status=400)
-        return web.json_response({"root": entry})
+        return web.json_response({"root": _public_root(entry)})
 
     @routes.delete("/ultra_tools/image_load/roots")
     async def _roots_remove_route(request):
@@ -949,28 +1001,24 @@ def register_image_load_routes():
 
     @routes.get("/ultra_tools/image_load/browse_dirs")
     async def _browse_dirs_route(request):
-        # Backs the "+ 폴더 추가" folder browser: no path -> ComfyUI
-        # input/output (never whole drives); a path inside them -> that
-        # folder's immediate subfolders (to navigate
-        # further) plus a preview of its own image files, and its parent,
-        # so the frontend can click its way down (and back up) a real
-        # directory tree — and see whether a folder actually has images in
-        # it before committing — entirely through this one route, with no
-        # browser file/folder picker involved at any point.
+        # Backs the "+ 폴더 추가" folder browser: no path -> the ComfyUI
+        # input/output folders; a virtual path inside them ("output/sub")
+        # -> that folder's immediate subfolders plus a preview of its own
+        # image files, and its parent.  Only virtual paths are exchanged.
         denied = guard_request(request, web)
         if denied is not None:
             return denied
         path = request.rel_url.query.get("path", "").strip()
         if not path:
-            return web.json_response({"path": "", "parent": None, "entries": _list_drives(), "images": []})
+            return web.json_response({"path": "", "parent": None, "entries": _list_base_folders(), "images": []})
         try:
             abs_path, parent, entries, images = await asyncio.get_running_loop().run_in_executor(
                 None, _list_subdirectories, path
             )
         except ValueError as exc:
             return web.json_response({"error": str(exc)}, status=404)
-        except OSError as exc:
-            return web.json_response({"error": str(exc)}, status=400)
+        except OSError:
+            return web.json_response({"error": "폴더를 읽을 수 없습니다."}, status=400)
         return web.json_response({"path": abs_path, "parent": parent, "entries": entries, "images": images})
 
     @routes.get("/ultra_tools/image_load/original")
@@ -1034,8 +1082,8 @@ def register_image_load_routes():
             data, orig_w, orig_h = await loop.run_in_executor(
                 None, _build_thumbnail, source_path, source_mtime, max_dim
             )
-        except Exception as exc:
-            return web.Response(status=500, text=f"thumbnail generation failed: {exc}")
+        except Exception:
+            return web.Response(status=500, text="thumbnail generation failed")
 
         return web.Response(
             body=data,

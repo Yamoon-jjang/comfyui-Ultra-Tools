@@ -8,6 +8,11 @@ import server
 from aiohttp import web
 
 try:
+    import folder_paths  # type: ignore
+except Exception:  # pragma: no cover - ComfyUI always provides this module
+    folder_paths = None
+
+try:
     from .request_guard import guard_request, register_token_route
 except ImportError:  # pragma: no cover - module loaded outside the package
     from request_guard import guard_request, register_token_route
@@ -41,7 +46,10 @@ async def _run_filesystem_call(function, *args):
 class UltraWildcardBrowser:
     """ComfyUI helper node for browsing wildcard folders and copying wildcard calls."""
 
-    DEFAULT_WILDCARDS_PATH = r"F:\models\wildcards"
+    # Relative paths are resolved against the ComfyUI folder, so the default
+    # is ComfyUI/models/wildcards.  Absolute paths are accepted only inside the
+    # folders ComfyUI itself knows about (see _allowed_roots).
+    DEFAULT_WILDCARDS_PATH = "models/wildcards"
     ROOT_FOLDER_LABEL = "[Root]"
     LEGACY_ROOT_FOLDER_LABELS = frozenset({"[최상위]"})
     ROOT_FOLDER_ESCAPE_PREFIX = "./"
@@ -53,6 +61,8 @@ class UltraWildcardBrowser:
     MAX_ROOT_FOLDERS = 5000
     MAX_VISIBLE_ENTRIES = 10000
     MAX_SCANNED_ENTRIES = 50000
+    # folder_paths keys that are not model folders (never browsable as such).
+    _NON_MODEL_FOLDER_KEYS = frozenset({"custom_nodes", "datasets"})
 
     @classmethod
     def INPUT_TYPES(cls):
@@ -77,6 +87,101 @@ class UltraWildcardBrowser:
         # UI-only node: never fail an unrelated prompt run because a drive is offline.
         return ()
 
+    @staticmethod
+    def _is_within(path: str, root: str) -> bool:
+        try:
+            common = os.path.commonpath([os.path.normcase(path), os.path.normcase(root)])
+        except ValueError:
+            return False
+        return common == os.path.normcase(root)
+
+    @staticmethod
+    def _is_filesystem_root(path: str) -> bool:
+        return os.path.dirname(path.rstrip("/\\")) in ("", path.rstrip("/\\")) or os.path.dirname(path) == path
+
+    @classmethod
+    def _comfy_base_dir(cls) -> str:
+        base = getattr(folder_paths, "base_path", None) if folder_paths else None
+        if not base:
+            base = os.getcwd()
+        return os.path.abspath(str(base))
+
+    @classmethod
+    def _allowed_roots(cls) -> List[str]:
+        """Folders ComfyUI is configured to use; the browser never leaves them.
+
+        * ComfyUI's models folder and every registered model folder
+          (including the ones added by extra_model_paths.yaml).
+        * A shared "models root" from extra_model_paths.yaml: a folder that is
+          the direct parent of two or more registered model folders
+          (e.g. X:/models holding loras/ and checkpoints/).  Drive roots are
+          never used.
+        * Any folder named "wildcards" (or "..._wildcards") inside the ComfyUI
+          folder, e.g. the wildcards / custom_wildcards folders that come with
+          Impact Pack.  Other packs' config files are never read.
+        """
+        roots: List[str] = []
+        comfy_base = os.path.normcase(cls._comfy_base_dir())
+        home = os.path.normcase(os.path.abspath(os.path.expanduser("~")))
+
+        def add(path) -> None:
+            if not path:
+                return
+            try:
+                absolute = os.path.abspath(str(path))
+            except Exception:
+                return
+            # Never the drive root, the whole ComfyUI folder or the home folder.
+            if cls._is_filesystem_root(absolute) or os.path.normcase(absolute) in (comfy_base, home):
+                return
+            if all(os.path.normcase(absolute) != os.path.normcase(r) for r in roots):
+                roots.append(absolute)
+
+        if folder_paths is None:
+            return roots
+
+        add(getattr(folder_paths, "models_dir", None))
+        registered: List[str] = []
+        try:
+            for name, info in dict(getattr(folder_paths, "folder_names_and_paths", {}) or {}).items():
+                if name in cls._NON_MODEL_FOLDER_KEYS:
+                    continue
+                for path in list((info[0] if info else None) or []):
+                    registered.append(os.path.abspath(str(path)))
+        except Exception:
+            registered = []
+        for path in registered:
+            add(path)
+
+        parents: Dict[str, Set[str]] = {}
+        for path in registered:
+            parent = os.path.dirname(path.rstrip("/\\"))
+            if parent:
+                parents.setdefault(os.path.normcase(parent), set()).add(os.path.normcase(path))
+                parents.setdefault("__orig__" + os.path.normcase(parent), set()).add(parent)
+        for key, children in parents.items():
+            if key.startswith("__orig__") or len(children) < 2:
+                continue
+            for original in parents.get("__orig__" + key, ()):
+                add(original)
+                break
+        return roots
+
+    @classmethod
+    def _is_named_wildcards_folder(cls, path: str) -> bool:
+        base = cls._comfy_base_dir()
+        if not cls._is_within(path, base):
+            return False
+        relative = os.path.relpath(path, base).replace("\\", "/")
+        # "wildcards" or e.g. Impact Pack's "custom_wildcards"
+        return any(part.casefold().endswith("wildcards") for part in relative.split("/"))
+
+    @classmethod
+    def _is_allowed_root(cls, path: str) -> bool:
+        if cls._is_named_wildcards_folder(path):
+            return True
+        return any(cls._is_within(path, root) for root in cls._allowed_roots())
+
     @classmethod
     def _resolve_wildcards_path(cls, wildcards_path=None) -> Tuple[str, bool]:
         raw = "" if wildcards_path is None else str(wildcards_path).strip().strip('"').strip("'")
@@ -88,7 +193,23 @@ class UltraWildcardBrowser:
         defaulted = not raw
         if defaulted:
             raw = cls.DEFAULT_WILDCARDS_PATH
-        return os.path.normpath(os.path.expandvars(os.path.expanduser(raw))), defaulted
+        if not os.path.isabs(raw) and not os.path.splitdrive(raw)[0]:
+            raw = os.path.join(cls._comfy_base_dir(), raw)
+        resolved = os.path.normpath(os.path.abspath(raw))
+        # Checked before the folder is looked at, so a path outside ComfyUI's
+        # folders is refused without telling whether it exists.
+        if not cls._is_allowed_root(resolved):
+            raise PermissionError(
+                "[Ultra Tools Wildcard Browser] ComfyUI 모델 폴더(extra_model_paths.yaml 포함) "
+                "안의 와일드카드 폴더만 열 수 있습니다."
+            )
+        real = os.path.realpath(resolved)
+        if os.path.normcase(real) != os.path.normcase(resolved) and not cls._is_allowed_root(real):
+            raise PermissionError(
+                "[Ultra Tools Wildcard Browser] ComfyUI 모델 폴더(extra_model_paths.yaml 포함) "
+                "안의 와일드카드 폴더만 열 수 있습니다."
+            )
+        return resolved, defaulted
 
     @classmethod
     def _decode_folder_value(cls, folder_name) -> str:
@@ -162,15 +283,20 @@ class UltraWildcardBrowser:
 
     @classmethod
     def get_folders_info(cls, wildcards_path=None) -> Dict[str, object]:
-        base_path, defaulted = cls._resolve_wildcards_path(wildcards_path)
         result: Dict[str, object] = {
             "ok": True,
             "folders": [cls.ROOT_FOLDER_LABEL],
-            "path_defaulted": defaulted,
+            "path_defaulted": False,
             "default_path": cls.DEFAULT_WILDCARDS_PATH,
             "error": None,
             "warning": None,
         }
+        try:
+            base_path, defaulted = cls._resolve_wildcards_path(wildcards_path)
+        except (PermissionError, ValueError) as exc:
+            result.update(ok=False, error=str(exc))
+            return result
+        result["path_defaulted"] = defaulted
 
         if not os.path.isdir(base_path):
             result.update(ok=False, error="Wildcards folder not found")
@@ -202,8 +328,8 @@ class UltraWildcardBrowser:
                         names.append(entry.name)
                     except OSError:
                         continue
-        except OSError as exc:
-            result.update(ok=False, error=str(exc))
+        except OSError:
+            result.update(ok=False, error="Wildcards folder could not be read")
             return result
 
         names.sort(key=str.casefold)
@@ -340,8 +466,10 @@ class UltraWildcardBrowser:
 
             if not entries:
                 entries.append({"type": "status", "display": "No files or folders found"})
-        except Exception as exc:
+        except (PermissionError, ValueError) as exc:
             entries.append({"type": "status", "display": f"Error: {str(exc)}"})
+        except OSError:
+            entries.append({"type": "status", "display": "Error: 폴더를 읽을 수 없습니다."})
 
         return entries
 
@@ -360,12 +488,12 @@ async def post_folders(request):
         wildcards_path = data.get("wildcards_path") or data.get("path") or None
         result = await _run_filesystem_call(UltraWildcardBrowser.get_folders_info, wildcards_path)
         return web.json_response(result)
-    except Exception as exc:
+    except Exception:
         return web.json_response({
             "ok": False,
             "folders": [UltraWildcardBrowser.ROOT_FOLDER_LABEL],
             "default_path": UltraWildcardBrowser.DEFAULT_WILDCARDS_PATH,
-            "error": str(exc),
+            "error": "Invalid request",
         }, status=400)
 
 
@@ -379,12 +507,12 @@ async def get_folders(request):
         wildcards_path = request.query.get("wildcards_path") or request.query.get("path") or None
         result = await _run_filesystem_call(UltraWildcardBrowser.get_folders_info, wildcards_path)
         return web.json_response(result)
-    except Exception as exc:
+    except Exception:
         return web.json_response({
             "ok": False,
             "folders": [UltraWildcardBrowser.ROOT_FOLDER_LABEL],
             "default_path": UltraWildcardBrowser.DEFAULT_WILDCARDS_PATH,
-            "error": str(exc),
+            "error": "Invalid request",
         }, status=400)
 
 
@@ -401,5 +529,5 @@ async def get_files(request):
             UltraWildcardBrowser._get_entries_for_folder, folder, wildcards_path
         )
         return web.json_response({"ok": True, "entries": entries})
-    except Exception as exc:
-        return web.json_response({"ok": False, "entries": [], "error": str(exc)}, status=400)
+    except Exception:
+        return web.json_response({"ok": False, "entries": [], "error": "Invalid request"}, status=400)

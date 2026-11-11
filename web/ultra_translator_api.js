@@ -12,10 +12,10 @@ const T = Object.freeze({
   buttonUnset: "Google 번역 API 설정",
   buttonReady: "Google 번역 API · 키 저장됨",
   tooltip:
-    "공식 Google Cloud Translation Basic v2 API Key를 설정합니다. Ultra MiniMax H3 Prompt와 같은 Key를 공유하며, Key는 workflow에 저장되지 않습니다. Key가 없거나 공식 API가 실패하면 기존 무료 Google/MyMemory 경로를 계속 사용합니다.",
+    "공식 Google Cloud Translation Basic v2 API Key를 설정합니다. Ultra MiniMax H3 Prompt와 같은 Key를 공유하며, Key는 workflow에 저장되지 않습니다. Key가 없거나 공식 API가 실패하면 MyMemory 공개 API를 사용합니다.",
   title: "Google 번역 API 설정",
   intro:
-    "공식 Google Cloud Translation Basic v2를 우선 사용합니다. 이 Key는 Ultra MiniMax H3 Prompt와 공유되므로 한쪽에서 저장한 Key를 다른 쪽에서도 사용할 수 있습니다. 공식 API가 실패하면 기존 무료 Google/MyMemory 번역 경로를 계속 시도합니다.",
+    "공식 Google Cloud Translation Basic v2를 우선 사용합니다. 이 Key는 Ultra MiniMax H3 Prompt와 공유되므로 한쪽에서 저장한 Key를 다른 쪽에서도 사용할 수 있습니다. 공식 API가 실패하면 MyMemory 공개 API로 번역합니다.",
   configured: "상태: API Key 저장됨 · H3 Prompt와 공유됨",
   notConfigured: "상태: API Key 미설정",
   keyLabel: "Google Cloud Translation API Key",

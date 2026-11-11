@@ -16,6 +16,11 @@ from aiohttp import web
 import folder_paths
 import server
 
+try:
+    from .request_guard import guard_request
+except ImportError:  # pragma: no cover - module loaded outside the package
+    from request_guard import guard_request
+
 # ---- constants (no functional change) ----
 MODEL_EXTENSIONS = (
     ".safetensors", ".ckpt", ".pt", ".pth", ".bin",
@@ -1013,7 +1018,8 @@ class ModelViewerAPI:
                         try:
                             rel_path = os.path.relpath(full_path, base_path)
                         except Exception:
-                            rel_path = full_path
+                            # Never send an absolute path to the browser.
+                            rel_path = os.path.basename(full_path)
 
                         display_name = _to_posix(rel_path)
                         if "/" in display_name:
@@ -1656,6 +1662,9 @@ class ModelSizeViewerWorkflow:
 
 @server.PromptServer.instance.routes.get("/Ultra-model-viewer/scan/{category}")
 async def api_scan(request):
+    denied = guard_request(request, web, require_token=False)
+    if denied is not None:
+        return denied
     try:
         category = request.match_info.get("category", "LORA")
         result = await asyncio.to_thread(ModelViewerAPI.scan_category, category)
@@ -1667,6 +1676,9 @@ async def api_scan(request):
 
 @server.PromptServer.instance.routes.post("/Ultra-model-viewer/workflow-models")
 async def api_workflow(request):
+    denied = guard_request(request, web, require_token=False)
+    if denied is not None:
+        return denied
     try:
         data = await request.json()
         workflow = data.get("workflow", {})

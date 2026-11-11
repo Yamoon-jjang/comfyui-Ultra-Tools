@@ -64,7 +64,7 @@ wildcards_path에는 여러 와일드카드 묶음이 들어 있는 최상위 �
 
 예:
 
-F:\models\wildcards
+ComfyUI\models\wildcards
 ├─ 01_Natural
 │  ├─ K-Pop
 │  │  ├─ female_singer.txt
@@ -96,10 +96,19 @@ wildcards_path
 와일드카드 루트 폴더의 실제 경로입니다.
 
 기본값:
-F:\models\wildcards
+models/wildcards  (ComfyUI 폴더 기준 상대 경로 = ComfyUI\models\wildcards)
 
 다른 위치를 사용한다면 실제 환경에 맞는 경로를 입력합니다.
-절대 경로뿐 아니라 ComfyUI 실행 위치를 기준으로 한 상대 경로도 사용할 수 있습니다.
+절대 경로뿐 아니라 ComfyUI 폴더를 기준으로 한 상대 경로도 사용할 수 있습니다.
+
+보안을 위해 다음 위치 안의 폴더만 열 수 있습니다.
+- ComfyUI의 models 폴더와 ComfyUI에 등록된 모든 모델 폴더
+  (extra_model_paths.yaml로 추가한 폴더 포함)
+- extra_model_paths.yaml의 모델 루트 폴더
+  (예: 그 아래에 loras, checkpoints 등이 등록된 X:\models → X:\models\wildcards 사용 가능)
+- ComfyUI 폴더 안의 wildcards / custom_wildcards 폴더
+  (예: Impact Pack의 wildcards 폴더)
+그 밖의 위치(드라이브 루트, 사용자 폴더 등)는 열리지 않습니다.
 경로 변경 후 Enter를 누르거나 입력칸 밖을 클릭하면 목록이 갱신됩니다.
 
 folder
@@ -226,8 +235,8 @@ sample.json
 정상적으로 탐색할 수 있습니다.
 
 예:
-F:\models\wildcards\MyPack
-→ 실제 대상 D:\WildcardPacks\MyPack
+ComfyUI\models\wildcards\MyPack
+→ 실제 대상: 다른 드라이브의 와일드카드 팩 폴더
 
 단, 자기 자신이나 상위 폴더로 다시 돌아가는 순환 링크는 무한 탐색을 막기 위해
 열리지 않습니다. 목록에는 다음처럼 표시될 수 있습니다.
@@ -291,7 +300,9 @@ folder 목록이 갱신되지 않는 경우
 Error: Wildcards folder not found가 표시되는 경우
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 - 경로 철자와 드라이브 문자를 확인합니다.
-- 예: F:\models\wildcards
+- 예: models/wildcards
+- "모델 폴더 안의 와일드카드 폴더만 열 수 있습니다"가 표시되면,
+  그 폴더를 ComfyUI models 폴더나 extra_model_paths.yaml에 등록된 모델 루트 아래로 옮기세요.
 - 불필요한 따옴표나 오타가 없는지 확인합니다.
 - 네트워크 또는 외장 드라이브라면 ComfyUI 실행 계정에서 접근 가능한지 확인합니다.
 

@@ -686,14 +686,10 @@ function isKoreanLocale() {
 
 
   try {
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i) || "";
-      if (/locale|language/i.test(key)) {
-        const val = localStorage.getItem(key);
-        if (hasLocaleValue(val) && localeLooksKorean(val)) {
-          return true;
-        }
-      }
+    // Only ComfyUI's own locale keys are read (no scan of other storage).
+    for (const key of ["Comfy.Locale", "Comfy.Settings.Comfy.Locale", "comfy-locale"]) {
+      const val = localStorage.getItem(key);
+      if (hasLocaleValue(val) && localeLooksKorean(val)) return true;
     }
   } catch (_) {}
 

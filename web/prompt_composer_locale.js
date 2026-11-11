@@ -2074,12 +2074,10 @@ function isKoreanLocale() {
   // 공식 설정값 자체를 아직 못 찾았을 때만(설정 API가 아직 준비 전 등) 보조
   // 신호를 참고한다.
   try {
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i) || "";
-      if (/locale|language/i.test(key)) {
-        const val = localStorage.getItem(key);
-        if (hasLocaleValue(val) && localeLooksKorean(val)) return true;
-      }
+    // Only ComfyUI's own locale keys are read (no scan of other storage).
+    for (const key of ["Comfy.Locale", "Comfy.Settings.Comfy.Locale", "comfy-locale"]) {
+      const val = localStorage.getItem(key);
+      if (hasLocaleValue(val) && localeLooksKorean(val)) return true;
     }
   } catch (_) {}
 

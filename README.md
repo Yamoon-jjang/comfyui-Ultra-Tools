@@ -1,6 +1,6 @@
 # 🧰 comfyui-Ultra-Tools
 
-**ComfyUI를 더 편하게 쓰기 위한 12개 실용 커스텀 노드 모음 — v2.0.8.**
+**ComfyUI를 더 편하게 쓰기 위한 12개 실용 커스텀 노드 모음 — v2.0.9.**
 프롬프트 작성·스타일 조합, 이미지 탐색과 불러오기, 번역, 글자·이미지 워터마크, 모델 용량 확인, 워크플로우 실행 시간 기록, 오디오 페이드 등 자주 반복하는 작업을 간편하게 처리합니다. 기능은 노드별로 독립적이며 필요한 곳에 골라 연결할 수 있습니다.
 
 - ✅ **추가 pip 설치 없음** — ComfyUI에 기본 포함된 라이브러리만 사용합니다.
@@ -39,7 +39,7 @@ git clone https://github.com/Yamoon-jjang/comfyui-Ultra-Tools.git
 
 **② GitHub 릴리즈 ZIP 수동 설치**
 
-[**v2.0.8 설치용 ZIP**](https://github.com/Yamoon-jjang/comfyui-Ultra-Tools/releases/download/v2.0.8/comfyui-Ultra-Tools-v2.0.8.zip)을 받아 압축을 풀어 `ComfyUI/custom_nodes/comfyui-Ultra-Tools/` 형태로 설치합니다. 압축 내부 최상위 폴더는 `comfyui-Ultra-Tools`입니다.
+[**v2.0.9 설치용 ZIP**](https://github.com/Yamoon-jjang/comfyui-Ultra-Tools/releases/download/v2.0.9/comfyui-Ultra-Tools-v2.0.9.zip)을 받아 압축을 풀어 `ComfyUI/custom_nodes/comfyui-Ultra-Tools/` 형태로 설치합니다. 압축 내부 최상위 폴더는 `comfyui-Ultra-Tools`입니다.
 
 **중요:** 이전 버전 ZIP을 수동으로 설치했다면 기존 폴더를 백업 후 **삭제하고** 새 폴더를 넣어야 합니다. 기존 폴더에 덮어쓰기만 하면 분리된 PiD의 `ultra_image_pid.py` 또는 `web/ultra_image_pid.js`가 남을 수 있습니다.
 
@@ -51,7 +51,7 @@ git clone https://github.com/Yamoon-jjang/comfyui-Ultra-Tools.git
 
 **Image + PiD 분리 안내:** v2.0.0에는 이미지 생성·PiD 업스케일 노드가 포함되지 않습니다. 독립 `Ultra Image + PiD`는 나중에 별도로 공개합니다. 기존 `UltraImagePiD` 워크플로우는 `UltraStandaloneImagePiD`로 자동 변환되지 않습니다.
 
-**🇬🇧 English:** Install with `git clone https://github.com/Yamoon-jjang/comfyui-Ultra-Tools.git` into `ComfyUI/custom_nodes/`, or use the [v2.0.8 ZIP](https://github.com/Yamoon-jjang/comfyui-Ultra-Tools/releases/download/v2.0.8/comfyui-Ultra-Tools-v2.0.8.zip). For manual ZIP upgrades, remove the old folder before extracting. Manager/Registry installation depends on the version becoming `Active`. Restart ComfyUI afterward. Image + PiD has moved to a separately released package; legacy workflows are not automatically converted.
+**🇬🇧 English:** Install with `git clone https://github.com/Yamoon-jjang/comfyui-Ultra-Tools.git` into `ComfyUI/custom_nodes/`, or use the [v2.0.9 ZIP](https://github.com/Yamoon-jjang/comfyui-Ultra-Tools/releases/download/v2.0.9/comfyui-Ultra-Tools-v2.0.9.zip). For manual ZIP upgrades, remove the old folder before extracting. Manager/Registry installation depends on the version becoming `Active`. Restart ComfyUI afterward. Image + PiD has moved to a separately released package; legacy workflows are not automatically converted.
 
 ---
 
@@ -155,7 +155,7 @@ git clone https://github.com/Yamoon-jjang/comfyui-Ultra-Tools.git
 **주요 기능**
 - **API 키 없이도** MyMemory 공개 번역 API로 바로 쓸 수 있습니다. Google Cloud Translation API 키를 저장하면 `google` 서비스가 공식 Google API를 먼저 사용합니다(실패 시 MyMemory).
 - 무료 번역에서 `HTTP 429`(요청 과다) 제한이 걸리면, 공식 **Google Cloud Translation API Key**를 선택해서 등록할 수 있습니다. 이 키는 워크플로우 파일이 아니라 **이 PC의 ComfyUI 설정에만 저장**됩니다. 그래서 워크플로우를 공유해도 키가 따라가지 않습니다.
-- API Key가 있으면 공식 API를 먼저 쓰고, 실패하면 무료 Google을 거쳐 MyMemory까지 자동으로 넘어갑니다.
+- API Key가 있으면 공식 API를 먼저 쓰고, Key가 없거나 실패하면 MyMemory 공개 API로 번역합니다.
 - **줄바꿈 유지** 옵션이 있어, 줄 단위로 관리하는 프롬프트도 구조가 깨지지 않습니다.
 - **번역 실패 시 원문 그대로 출력** 옵션을 켜면 번역이 실패해도 워크플로우가 멈추지 않습니다.
 - 20개 언어를 지원합니다. 원문 언어는 자동 감지됩니다.
@@ -178,6 +178,7 @@ git clone https://github.com/Yamoon-jjang/comfyui-Ultra-Tools.git
 - `.txt` `.yaml` `.yml` `.json`만 표시합니다. 이름이 같고 확장자만 다른 파일은 하나로 묶습니다.
 - 심볼릭 링크와 Windows 정션을 지원하고, **순환 링크는 자동으로 차단**합니다.
 - 워크플로우를 다시 열면 마지막으로 보던 하위 폴더 위치를 기억해 둡니다.
+- 보안을 위해 **ComfyUI 모델 폴더(`extra_model_paths.yaml` 포함)와 ComfyUI 안의 `wildcards` 폴더(Impact Pack 등)** 안에서만 탐색합니다. 기본 경로는 `models/wildcards`입니다.
 - 생성 과정에는 참여하지 않는 노드라서, 와일드카드 드라이브가 빠져 있어도 **이미지 생성은 실패하지 않습니다.**
 
 ---
@@ -295,7 +296,7 @@ Copyright (C) 2026 Yamoon-jjang
 
 **comfyui-Ultra-Tools** is a collection of 12 carefully refined ComfyUI nodes. No extra pip packages are needed. The UI switches between Korean and English automatically.
 
-**Install:** Clone the [Git repository](https://github.com/Yamoon-jjang/comfyui-Ultra-Tools) or download the [v2.0.8 install ZIP](https://github.com/Yamoon-jjang/comfyui-Ultra-Tools/releases/download/v2.0.8/comfyui-Ultra-Tools-v2.0.8.zip). Registry publication does not guarantee Manager installation until a version becomes Active; Git and ZIP installation work independently of Registry review. When updating older manually extracted ZIPs, remove the old folder first.
+**Install:** Clone the [Git repository](https://github.com/Yamoon-jjang/comfyui-Ultra-Tools) or download the [v2.0.9 install ZIP](https://github.com/Yamoon-jjang/comfyui-Ultra-Tools/releases/download/v2.0.9/comfyui-Ultra-Tools-v2.0.9.zip). Registry publication does not guarantee Manager installation until a version becomes Active; Git and ZIP installation work independently of Registry review. When updating older manually extracted ZIPs, remove the old folder first.
 
 **Since v2.0.0:** Image + PiD has been separated as **Ultra Image + PiD** and is not included in this 12-node collection. Its public standalone release will follow separately. The included example is Image Load → Preview Image; select an existing image before running.
 
