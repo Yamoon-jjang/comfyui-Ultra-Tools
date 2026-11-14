@@ -313,7 +313,7 @@ def _load_external_roots():
             continue
         if _allowed_base_for(root_path) is None:
             continue  # registered before 2.0.2 outside input/output: no longer served
-        label = str(entry.get("label") or "").strip() or os.path.basename(root_path.rstrip("/\\")) or root_path
+        label = str(entry.get("label") or "").strip() or os.path.basename(root_path.rstrip("/\\")) or "folder"
         roots.append({"id": root_id, "path": root_path, "label": label})
     return roots
 
@@ -359,7 +359,7 @@ def _add_external_root(raw_path, label):
     entry = {
         "id": uuid.uuid4().hex[:10],
         "path": candidate,
-        "label": (label or "").strip() or os.path.basename(candidate.rstrip("/\\")) or candidate,
+        "label": (label or "").strip() or os.path.basename(candidate.rstrip("/\\")) or "folder",
     }
     roots.append(entry)
     if not _save_external_roots(roots):
@@ -819,6 +819,10 @@ def _list_base_folders():
     return [{"name": labels.get(key, key), "path": key} for key, _path in _allowed_base_dirs()]
 
 
+class _BrowseRefused(ValueError):
+    """A folder-browser request this module refuses; its text is safe to show."""
+
+
 _MAX_BROWSE_ENTRIES = 3000
 _MAX_BROWSE_IMAGES = 60
 
@@ -833,12 +837,12 @@ def _list_subdirectories(path):
     response."""
     resolved = _resolve_virtual_path(path)
     if resolved is None:
-        raise ValueError("ComfyUI input/output 폴더 안에서만 탐색할 수 있습니다.")
+        raise _BrowseRefused("ComfyUI input/output 폴더 안에서만 탐색할 수 있습니다.")
     abs_path = os.path.realpath(resolved)
     if _allowed_base_for(abs_path) is None:
-        raise ValueError("ComfyUI input/output 폴더 안에서만 탐색할 수 있습니다.")
+        raise _BrowseRefused("ComfyUI input/output 폴더 안에서만 탐색할 수 있습니다.")
     if not os.path.isdir(abs_path):
-        raise ValueError("폴더를 찾을 수 없습니다.")
+        raise _BrowseRefused("폴더를 찾을 수 없습니다.")
     parent = os.path.dirname(abs_path.rstrip("/\\"))
     if (
         not parent
@@ -911,7 +915,7 @@ def register_image_load_routes():
 
     @routes.get("/ultra_tools/image_load/list")
     async def _list_route(request):
-        denied = guard_request(request, web, require_token=False)
+        denied = guard_request(request, web)
         if denied is not None:
             return denied
         # Backs the sort feature (date modified needs mtime, which isn't
@@ -1015,9 +1019,9 @@ def register_image_load_routes():
             abs_path, parent, entries, images = await asyncio.get_running_loop().run_in_executor(
                 None, _list_subdirectories, path
             )
-        except ValueError as exc:
+        except _BrowseRefused as exc:
             return web.json_response({"error": str(exc)}, status=404)
-        except OSError:
+        except (OSError, ValueError):
             return web.json_response({"error": "폴더를 읽을 수 없습니다."}, status=400)
         return web.json_response({"path": abs_path, "parent": parent, "entries": entries, "images": images})
 

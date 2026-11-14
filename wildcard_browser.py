@@ -43,6 +43,22 @@ async def _run_filesystem_call(function, *args):
                 raise
 
 
+_MESSAGE_PREFIX = "[Ultra Tools Wildcard Browser]"
+
+
+def _public_error(exc) -> str:
+    """Text of a refusal raised by this module; a fixed text for anything else.
+
+    An error raised by the operating system (for example a folder that cannot
+    be opened) carries the full disk path in its text, so it is never sent to
+    the browser.
+    """
+    message = str(exc)
+    if message.startswith(_MESSAGE_PREFIX):
+        return message
+    return "폴더를 읽을 수 없습니다."
+
+
 class UltraWildcardBrowser:
     """ComfyUI helper node for browsing wildcard folders and copying wildcard calls."""
 
@@ -294,7 +310,7 @@ class UltraWildcardBrowser:
         try:
             base_path, defaulted = cls._resolve_wildcards_path(wildcards_path)
         except (PermissionError, ValueError) as exc:
-            result.update(ok=False, error=str(exc))
+            result.update(ok=False, error=_public_error(exc))
             return result
         result["path_defaulted"] = defaulted
 
@@ -467,7 +483,7 @@ class UltraWildcardBrowser:
             if not entries:
                 entries.append({"type": "status", "display": "No files or folders found"})
         except (PermissionError, ValueError) as exc:
-            entries.append({"type": "status", "display": f"Error: {str(exc)}"})
+            entries.append({"type": "status", "display": f"Error: {_public_error(exc)}"})
         except OSError:
             entries.append({"type": "status", "display": "Error: 폴더를 읽을 수 없습니다."})
 

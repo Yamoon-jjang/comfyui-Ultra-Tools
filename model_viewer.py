@@ -17,9 +17,9 @@ import folder_paths
 import server
 
 try:
-    from .request_guard import guard_request
+    from .request_guard import guard_request, register_token_route
 except ImportError:  # pragma: no cover - module loaded outside the package
-    from request_guard import guard_request
+    from request_guard import guard_request, register_token_route
 
 # ---- constants (no functional change) ----
 MODEL_EXTENSIONS = (
@@ -1660,9 +1660,13 @@ class ModelSizeViewerWorkflow:
         return ()
 
 
+# Per-process token handed to the Ultra Tools frontend (see request_guard).
+register_token_route()
+
+
 @server.PromptServer.instance.routes.get("/Ultra-model-viewer/scan/{category}")
 async def api_scan(request):
-    denied = guard_request(request, web, require_token=False)
+    denied = guard_request(request, web)
     if denied is not None:
         return denied
     try:
@@ -1676,7 +1680,7 @@ async def api_scan(request):
 
 @server.PromptServer.instance.routes.post("/Ultra-model-viewer/workflow-models")
 async def api_workflow(request):
-    denied = guard_request(request, web, require_token=False)
+    denied = guard_request(request, web)
     if denied is not None:
         return denied
     try:

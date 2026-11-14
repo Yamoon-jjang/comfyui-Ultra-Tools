@@ -1,5 +1,6 @@
 import { app } from "../../scripts/app.js";
 import { api } from "../../scripts/api.js";
+import { ultraFetchApi } from "./ultra_tools_security.js";
 
 // Current frontends expose a DOM widget's element as widget.element;
 // widget.inputEl is a deprecated alias (warns on access). Prefer element and
@@ -708,7 +709,7 @@ app.registerExtension({
 
           try {
             const url = `/Ultra-model-viewer/scan/${encodeURIComponent(category)}`;
-            const response = await api.fetchApi(url);
+            const response = await ultraFetchApi(url);
             if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
             const data = await response.json();
@@ -1025,7 +1026,7 @@ app.registerExtension({
               return;
             }
 
-            const response = await api.fetchApi("/Ultra-model-viewer/workflow-models", {
+            const response = await ultraFetchApi("/Ultra-model-viewer/workflow-models", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ workflow, frontend_candidates: frontendCandidates })
